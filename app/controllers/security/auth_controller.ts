@@ -1,7 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import AuthService from '../services/auth_service.js'
-import { loginValidator } from '../validators/auth.js';
-import User from '../models/user.js';
+import AuthService from '../../services/security/auth_service.js'
+import { loginValidator } from '../../validators/auth.js';
+import User from '../../models/security/user.js';
 
 
 /**
@@ -10,9 +10,8 @@ import User from '../models/user.js';
 export class AuthController {
 
   async login({ request }: HttpContext) {
-
     const { email, password } = await request.validateUsing(loginValidator);
-
+    //const { email, password } = request.only(['email', 'password'])
     return AuthService.authenticate(email, password);
   }
 

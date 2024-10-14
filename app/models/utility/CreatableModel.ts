@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 
 /*
-* Model que representa uma 'Aplicacao/sistema ou modulo'
+* Model abstracto que que representa um objecto criavel
 * Gautchi R. Chambe (chambegautchi@gmail.com)
 */
 export default class CreatableModel extends BaseModel {

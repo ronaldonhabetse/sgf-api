@@ -1,7 +1,7 @@
 import {  belongsTo, column } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Application from './application.js'
-import CodedCreatableModel from './utility/CodedCreatableModel.js'
+import CodedCreatableModel from '../utility/CodedCreatableModel.js'
 
 /*
 * Model que representa um 'Menu'

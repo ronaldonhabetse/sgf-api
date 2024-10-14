@@ -1,16 +1,16 @@
 import {hasOne } from '@adonisjs/lucid/orm'
 import type { HasOne } from '@adonisjs/lucid/types/relations'
-import CodedCreatableModel from './utility/CodedCreatableModel.js'
+import CodedCreatableModel from '../utility/CodedCreatableModel.js'
 import Menu from './menu.js'
 
 /*
-* Model que representa uma 'Transaction'
+* Model que representa uma 'Transação'
 * Gautchi R. Chambe (chambegautchi@gmail.com)
 */
 export default class Transaction extends CodedCreatableModel {
 
   @hasOne(() => Menu, {
-    foreignKey: 'menuItemId', // defaults to userId
+    foreignKey: 'menuItemId',
   })
   declare menuItem: HasOne<typeof Menu>
 }

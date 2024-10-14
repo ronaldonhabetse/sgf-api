@@ -1,5 +1,5 @@
-import User from "../models/user.js";
-import { UserDTO } from "./DTOS/dtosUtilits.js";
+import User from "../../models/security/user.js";
+import { UserDTO } from "../DTOS/dtosUtilits.js";
 
 export default class UserService {
 

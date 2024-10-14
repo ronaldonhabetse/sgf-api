@@ -54,7 +54,11 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @beforeSave()
   static async hashPassword(user: User) {
     if (user.$dirty.password) {
-      user.password = await hash.make(user.password)
+      /* O codco abaixo esta comentado por que ate este ponto o resultado é a password encriptada como Hash*/
+      //console.log('user1 create .password_plan', user.password);
+      //console.log('user1 create verified password_plan', await hash.verify(user.password, "sebadora123"))
+     // user.password = await hash.make(user.password)
+     // console.log('user1 create verified hash', await hash.verify(user.password, "sebadora123"))
     }
   }
 

@@ -1,22 +1,22 @@
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
-import User from '../../app/models/user.js'
+import User from '../../app/models/security/user.js'
 
 export default class extends BaseSeeder {
   async run() {
     User.accessTokens.create(await User.create(
       {
-        id: 1,
         fullName: 'Root',
+       // username: 'Root',
         email: 'root@gmail.com',
-        password: 'sabadora123',
+        password: 'sebadora123',
       }
     ))
     User.accessTokens.create(await User.create(
       {
-        id: 2,
         fullName: 'admin',
-        email: 'adimn@gmail.com',
-        password: 'sabadora123',
+      //  username: 'Root',
+        email: 'admin@gmail.com',
+        password: 'sebadora123',
       }
     ))
   }

@@ -1,6 +1,6 @@
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
-import Menu from '../../app/models/menu.js'
-import Transaction from '../../app/models/transaction.js'
+import Menu from '../../app/models/security/menu.js'
+import Transaction from '../../app/models/security/transaction.js'
 
 export default class extends BaseSeeder {
   async run() {

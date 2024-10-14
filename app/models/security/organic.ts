@@ -1,5 +1,5 @@
 import { column } from '@adonisjs/lucid/orm'
-import CodedCreatableModel from './utility/CodedCreatableModel.js'
+import CodedCreatableModel from '../utility/CodedCreatableModel.js'
 
 /*
 * Model que representa um 'Organico'

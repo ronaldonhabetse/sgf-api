@@ -1,5 +1,5 @@
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
-import Application from '../../app/models/application.js'
+import Application from '../../app/models/security/application.js'
 
 export default class extends BaseSeeder {
   async run() {

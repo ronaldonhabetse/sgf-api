@@ -1,9 +1,9 @@
-import User from "../models/user.js";
+import { Secret } from "@adonisjs/core/helpers";
+import User from "../../models/security/user.js";
 
 export default class AuthService {
 
     public static async authenticate(email: string, password: string) {
-
         /**
         * Verify the password using the hash service
         */
@@ -13,20 +13,19 @@ export default class AuthService {
          */
         const token = await User.accessTokens.create(user)
 
-        console.log(token);
-
-        return token;
-
-        /**
-         * return {
-               type: 'bearer',
-               value: token.value!.release(),
-           }
-         * 
-         *  */
+        return {
+            type: 'bearer',
+            value: token.value!.release(),
+        }
     }
 
-    public static async isAuthenticated(email: string, password: string) {
+    /**
+       * Verify the password using the hash service
+       */
+    public static async isAuthenticated(tokenValue: string) {
+
+
+        return User.accessTokens.verify(new Secret(tokenValue));
     }
 
     public static async resetPassword(email: string, password: string) {

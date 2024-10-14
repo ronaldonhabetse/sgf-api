@@ -2,7 +2,7 @@ import {column } from '@adonisjs/lucid/orm'
 import CreatableModel from './CreatableModel.js'
 
 /*
-* Model que representa uma 'Aplicacao/sistema ou modulo'
+* Model abstracto que com atributos 'code e description'
 * Gautchi R. Chambe (chambegautchi@gmail.com)
 */
 export default class CodedCreatableModel extends CreatableModel {

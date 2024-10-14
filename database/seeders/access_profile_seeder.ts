@@ -1,5 +1,5 @@
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
-import AccessProfile from '../../app/models/accessprofile.js'
+import AccessProfile from '../../app/models/security/accessprofile.js'
 
 export default class extends BaseSeeder {
   async run() {

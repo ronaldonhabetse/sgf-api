@@ -1,5 +1,5 @@
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
-import Organic from '../../app/models/organic.js'
+import Organic from '../../app/models/security/organic.js'
 
 export default class extends BaseSeeder {
   async run() {
