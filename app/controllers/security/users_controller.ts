@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import UserService from '../../services/security/user_service.js'
-import { createUserValidator } from '../../validators/user.js';
+import { createUserValidator } from '../../validators/security/user.js';
 import User from '../../models/security/user.js';
 
 export default class UsersController {

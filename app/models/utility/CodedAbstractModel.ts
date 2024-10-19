@@ -1,11 +1,11 @@
 import {column } from '@adonisjs/lucid/orm'
-import CreatableModel from './CreatableModel.js'
+import AbstractModel from './AbstractModel.js'
 
 /*
 * Model abstracto que com atributos 'code e description'
 * Gautchi R. Chambe (chambegautchi@gmail.com)
 */
-export default class CodedCreatableModel extends CreatableModel {
+export default class CodedAbstractModel extends AbstractModel {
 
   @column()
   declare code: string 

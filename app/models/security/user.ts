@@ -1,12 +1,12 @@
-import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
-import { BaseModel, column, beforeSave, belongsTo } from '@adonisjs/lucid/orm'
+import { column, beforeSave, belongsTo } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { AccessToken, DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import AccessProfile from './accessprofile.js'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Organic from './organic.js'
+import AbstractModel from '../utility/AbstractModel.js'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -17,7 +17,7 @@ const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
 * Model que representa um 'Utilizador'
 * Gautchi R. Chambe (chambegautchi@gmail.com)
 */
-export default class User extends compose(BaseModel, AuthFinder) {
+export default class User extends compose(AbstractModel, AuthFinder) {
 
   currentAccessToken?: AccessToken;
 
@@ -32,12 +32,6 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @column({ serializeAs: null })
   declare password: string
-
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
 
   @column()
   declare organicId: number

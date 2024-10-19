@@ -1,4 +1,5 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
+import { LifeclicleState } from '../../../app/models/utility/Enums.js'
 
 export default class extends BaseSchema {
   protected tableName = 'users'
@@ -12,13 +13,19 @@ export default class extends BaseSchema {
       table.string('password').notNullable()
 
       table.integer('organic_id').unsigned().references('organics.id')
-      table.integer('access_profile_id').unsigned().references('access_profiles.id')
-      table.timestamp('created_at').notNullable()
-      table.timestamp('updated_at').nullable()
+      table.integer('access_profile_id').notNullable().unsigned().references('access_profiles.id')
+
+      table.integer('state').notNullable().defaultTo(LifeclicleState.ACTIVE)
+      table.timestamp('created_by')
+      table.timestamp('created_at')
+      table.timestamp('updated_by')
+      table.timestamp('updated_at')
     })
   }
 
   async down() {
-    this.schema.dropTable(this.tableName)
-  }
+    const exists = await this.schema.hasTable(this.tableName)
+    if (exists) {
+      this.schema.dropTable(this.tableName)
+    }  }
 }

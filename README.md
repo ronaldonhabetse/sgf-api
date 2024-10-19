@@ -2,9 +2,10 @@
 #  Arquitectura do projecto da API
 # ******************************************************
 
-
-
-
+# Versão do node: v18.20.4
+# 
+# commando para matar todos os processos de node em execucao
+ps aux | grep '[n]ode' | awk '{print $2}'|xargs kill -9
 
 # ******************************************************
 # Configurar a base de dados - Mysql
@@ -16,7 +17,7 @@ Step 2: Create a New Database
 $ CREATE DATABASE SGF;
 
 Step 3: Create a New User
-$ CREATE USER 'sgfuser'@'localhost' IDENTIFIED BY 'password';
+$ CREATE USER 'sgfuser'@'localhost' IDENTIFIED BY 'sgf123';
 
 Step 4: Grant Privileges to the New User
 $ GRANT ALL PRIVILEGES ON SGF.* TO 'sgfuser'@'localhost';
@@ -46,6 +47,9 @@ iii. Formatar o codico via command line. Não é necessario se o editor estiver 
 ii. Correr no ambiente de desenvolvimento (a flag --hmr ou --watch permite monitorar os recursos)
 node ace serve --hmr
 node ace serve --watch
+
+iii.Ver os serviços disponibilizados 
+node ace list:routes
 
 # **********************************************************************************************************
 #  Modulos da API do Sistema de Gestão Financeira
@@ -78,20 +82,22 @@ Step 3: criação das entidades: Model => ( https://lucid.adonisjs.com/docs/mode
         criação de serviços: Services => ()
         criação de objectos da base de dados: migrations => (https://lucid.adonisjs.com/docs/migrations)
         criação inserção automatica objectos da base de dados: seeder => (https://lucid.adonisjs.com/docs/seeders)
-
+        criação de seederes para a insercao dos dados na BD seeder => (https://v5-docs.adonisjs.com/guides/database/seeders
+        ))
+       
 node ace make:model user
 node ace make:controller user
 node ace make:migreation user
+node ace make:seeder MainSeeder/index
 node ace make:seeder user
  
 Step 4: criar insercação automatica de obejctos na base de dados
 node ace migration:run
 
-Step 4.1: Efectuar um reset
+Step 4.1: Efectuar drop da BD
 node ace migration:reset
 
-Step 4.2: Efectuar um reset
-# Drop all tables, migrate, and run seeders
+Step 4.2: Efectuar um reset e executa o seeder
 node ace migration:fresh --seed
 
 
@@ -102,9 +108,14 @@ node ace make:model user --cm
 # *****************************************************
 # Como testar o modulo de segurança
 # *****************************************************
-Step1: Autenticação
+Step1: Autenticação com token
 
-curl --location --request POST 'http://localhost:3333/auth/login?email=admin%40gmail.com&password=sebadora123'
+curl --location 'http://localhost:3333/auth/login' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+"email":"root@gmail.com",
+"password":"sebadora123"
+}'
 
 Step2: chamada do serviço para a criacao do utilizador
 
@@ -122,3 +133,26 @@ Step2: chamada do serviço para a criacao do utilizador
 #      4.
 #      5.
 ##### *****************************************************
+
+node ace make:model account_plan_budject
+node ace make:model account_plan
+node ace make:model account_plan_budject_entry
+node ace make:model account_plan_budject_entry_entries
+--node ace make:model conformance
+
+node ace make:controller account_plan_budject
+node ace make:controller account_plan
+node ace make:controller account_plan_budject_entry
+node ace make:controller account_plan_budject_entry_entries
+
+node ace make:service account_plan_budject
+node ace make:service account_plan
+node ace make:service account_plan_budject_entry
+node ace make:service account_plan_budject_entry_entries
+
+node ace make:migration account_plan_budject
+node ace make:migration account_plan
+node ace make:migration account_plan_budject_entry
+node ace make:migration account_plan_budject_entry_entries
+
+

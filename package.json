@@ -1,6 +1,6 @@
 {
-  "name": "financial-api",
-  "version": "0.0.0",
+  "name": "sgf-api",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "license": "UNLICENSED",

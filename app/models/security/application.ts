@@ -1,12 +1,12 @@
 import { column } from "@adonisjs/lucid/orm";
-import CodedCreatableModel from "../utility/CodedCreatableModel.js";
+import CodedAbstractModel from "../utility/CodedAbstractModel.js";
 
 
 /*
 * Model que representa uma 'Aplicacao/sistema ou modulo'
 * Gautchi R. Chambe (chambegautchi@gmail.com)
 */
-export default class Application extends CodedCreatableModel {
+export default class Applications extends CodedAbstractModel {
 
   /*
   * Define o tipo (SYSTEM ou MODULE)

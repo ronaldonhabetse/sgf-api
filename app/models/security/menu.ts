@@ -1,22 +1,22 @@
 import {  belongsTo, column } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import Application from './application.js'
-import CodedCreatableModel from '../utility/CodedCreatableModel.js'
+import Applications from './application.js'
+import CodedAbstractModel from '../utility/CodedAbstractModel.js'
 
 /*
 * Model que representa um 'Menu'
 * Gautchi R. Chambe (chambegautchi@gmail.com)
 */
-export default class Menu extends CodedCreatableModel {
+export default class Menu extends CodedAbstractModel {
 
   @column()
   declare type: String
 
   @column()
-  declare applicationId: number | null
+  declare applicationId: number
 
-  @belongsTo(() => Application)
-  declare application: BelongsTo<typeof Application>
+  @belongsTo(() => Applications)
+  declare application: BelongsTo<typeof Applications>
 
   @column()
   declare parentId: number | null
