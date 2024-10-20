@@ -16,8 +16,8 @@ export default class AccountPlanBudjectEntryService {
         const currentDate = new Date();
         const trx = await db.transaction()  // Start transaction
         try {
-            const currentPlanbudject = await AccountPlanBudject.findByOrFail('year', currentDate.getFullYear);
-            const accountPlan = await AccountPlan.findByOrFail('accountPlanNumber', data.accountPlanNumber);
+            const currentPlanbudject = await AccountPlanBudject.findByOrFail('year', currentDate.getFullYear());
+            const accountPlan = await AccountPlan.findByOrFail('number', data.accountPlanNumber);
 
             const createdEntry = await new AccountPlanBudjectEntry().fill({
                 startPostingMonth: data.startPostingMonth,
@@ -73,7 +73,7 @@ export default class AccountPlanBudjectEntryService {
         const trx = await db.transaction()  // Start transaction
         try {
             const currentPlanbudject = await AccountPlanBudject.findByOrFail('year', currentDate.getFullYear);
-            const accountPlan = await AccountPlan.findByOrFail('accountPlanNumber', data.accountPlanNumber);
+            const accountPlan = await AccountPlan.findByOrFail('number', data.accountPlanNumber);
 
             const entry = await AccountPlanBudjectEntry.findOrFail({
                 'accountPlanBudjectId': currentPlanbudject.id,
@@ -131,8 +131,8 @@ export default class AccountPlanBudjectEntryService {
         const trx = await db.transaction()  // Start transaction
         try {
             const currentPlanbudject = await AccountPlanBudject.findByOrFail('year', currentDate.getFullYear);
-            const originAccountPlan = await AccountPlan.findByOrFail('accountPlanNumber', data.originAccountPlanNumber);
-            const targetAccountPlan = await AccountPlan.findByOrFail('accountPlanNumber', data.targetAccountPlanNumber);
+            const originAccountPlan = await AccountPlan.findByOrFail('number', data.originAccountPlanNumber);
+            const targetAccountPlan = await AccountPlan.findByOrFail('number', data.targetAccountPlanNumber);
 
             const originEntry = await AccountPlanBudjectEntry.findOrFail({
                 'accountPlanBudjectId': currentPlanbudject.id,

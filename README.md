@@ -159,12 +159,20 @@ curl -s --location 'http://localhost:3333/sgf-api/planbudject/findAllAccountPlan
 # Criar um orcamento
 
 
-# Criar um plano orçamental de uma conta especifica
+# Listar todos os planos orçamentais 
 curl -s --location 'http://localhost:3333/sgf-api/planbudject/createAccountPlanBudjectEntry' \
 --header 'Content-Type: application/json' \
 --data ' {
         "startPostingMonth": 1,
         "endPostingMonth": 12,
         "initialAllocation": 1200000,
-        "accountPlanNumber": "1.2.1.1.05"
+        "accountPlanNumber": "1.1.1.1.02"
     }' | jq
+
+# Listar todos os planos orçamentais  com as respectivas entradas
+curl -s --location 'http://localhost:3333/sgf-api/planbudject/fetchAllAccountPlanBudjectEntries' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+"email":"root@gmail.com",
+"password":"sebadora123"
+}' | jq
