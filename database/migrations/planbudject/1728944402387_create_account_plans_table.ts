@@ -1,5 +1,5 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
-import { AccoutPlanClassType, AccoutPlanType, LifeclicleState, AccountTypeWritableType as AccountPlanWritableType } from '../../../app/models/utility/Enums.js'
+import { AccoutPlanClassType, AccoutPlanType, LifeclicleState, AccountPlanTypeWritableType as AccountPlanWritableType } from '../../../app/models/utility/Enums.js'
 
 export default class extends BaseSchema {
   protected tableName = 'account_plans'

@@ -3,7 +3,7 @@
 # ******************************************************
 
 # Versão do node: v18.20.4
-# 
+
 # commando para matar todos os processos de node em execucao
 ps aux | grep '[n]ode' | awk '{print $2}'|xargs kill -9
 
@@ -48,7 +48,7 @@ ii. Correr no ambiente de desenvolvimento (a flag --hmr ou --watch permite monit
 node ace serve --hmr
 node ace serve --watch
 
-iii.Ver os serviços disponibilizados 
+iii. Ver os serviços disponibilizados 
 node ace list:routes
 
 # **********************************************************************************************************
@@ -134,25 +134,37 @@ Step2: chamada do serviço para a criacao do utilizador
 #      5.
 ##### *****************************************************
 
-node ace make:model account_plan_budject
-node ace make:model account_plan
-node ace make:model account_plan_budject_entry
-node ace make:model account_plan_budject_entry_entries
---node ace make:model conformance
+# Listar todos os planos de conta
+curl -s --location --request GET 'http://localhost:3333/sgf-api/planbudject/accountplan/findAllActiveAccountPlan' --header 'Content-Type: application/json' | jq
 
-node ace make:controller account_plan_budject
-node ace make:controller account_plan
-node ace make:controller account_plan_budject_entry
-node ace make:controller account_plan_budject_entry_entries
+# Cria um plano de conta
+curl -s --location 'http://localhost:3333/sgf-api/planbudject/accountplan/createAccountPlan' \
+--header 'Content-Type: application/json' \
+--data ' {
+        "number": "1.1.1.1.05",
+        "description": "Vencimento Base do Pessoal Civil Fora do Quadro11",
+        "writable": "moviment",
+        "type": "budject",
+        "class": "2"
+    }' | jq
 
-node ace make:service account_plan_budject
-node ace make:service account_plan
-node ace make:service account_plan_budject_entry
-node ace make:service account_plan_budject_entry_entries
+# Listar todos os planos orçamentais
+curl -s --location 'http://localhost:3333/sgf-api/planbudject/findAllAccountPlanBudjectEntries' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+"email":"root@gmail.com",
+"password":"sebadora123"
+}' | jq
 
-node ace make:migration account_plan_budject
-node ace make:migration account_plan
-node ace make:migration account_plan_budject_entry
-node ace make:migration account_plan_budject_entry_entries
+# Criar um orcamento
 
 
+# Criar um plano orçamental de uma conta especifica
+curl -s --location 'http://localhost:3333/sgf-api/planbudject/createAccountPlanBudjectEntry' \
+--header 'Content-Type: application/json' \
+--data ' {
+        "startPostingMonth": 1,
+        "endPostingMonth": 12,
+        "initialAllocation": 1200000,
+        "accountPlanNumber": "1.2.1.1.05"
+    }' | jq

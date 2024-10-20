@@ -20,7 +20,7 @@ export enum OperatorType {
   CREDTI = 'credit',
 }
 
-export enum AccountTypeWritableType {
+export enum AccountPlanTypeWritableType {
   MOVIMENT = 'moviment',
   CONTROLL = 'controll',
 }
@@ -36,4 +36,12 @@ export enum AccoutPlanClassType {
   C = 'C', //'X.X.X.0.00'
   D = 'D', //'X.X.X.X.00'
   E = 'E', //'X.X.X.X.XX'
+}
+
+export enum EntryEntryType {
+  INITIAL='initial',
+  REINFORCEMENT = 'reinforcement',
+  ANNULMENT = 'annulment',
+  REDISTRIBUTION_REINFORCEMENT = 'redistribuition_reinforcement',
+  REDISTRIBUTION_ANNULMENT = 'redistribuition_annulment',
 }

@@ -6,7 +6,7 @@ import { AccessToken, DbAccessTokensProvider } from '@adonisjs/auth/access_token
 import AccessProfile from './accessprofile.js'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Organic from './organic.js'
-import AbstractModel from '../utility/AbstractModel.js'
+import LifecycleAbstractModel from '../utility/LifeclycleAbstractModel.js'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -17,7 +17,7 @@ const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
 * Model que representa um 'Utilizador'
 * Gautchi R. Chambe (chambegautchi@gmail.com)
 */
-export default class User extends compose(AbstractModel, AuthFinder) {
+export default class User extends compose(LifecycleAbstractModel, AuthFinder) {
 
   currentAccessToken?: AccessToken;
 

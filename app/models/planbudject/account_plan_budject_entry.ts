@@ -1,10 +1,11 @@
-import { beforeSave, belongsTo, column } from '@adonisjs/lucid/orm'
+import { beforeSave, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
 import AccountPlanBudject from './account_plan_budject.js'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import AccountPlan from './account_plan.js'
-import AbstractModel from '../utility/AbstractModel.js'
+import CreatableAbstractModel from '../utility/CreatableAbstractModel.js'
+import AccountPlanBudjectEntryEntry from './account_plan_budject_entry_entry.js'
 
-export default class AccountPlanBudjectEntry extends AbstractModel {
+export default class AccountPlanBudjectEntry extends CreatableAbstractModel {
 
   @column()
   declare startPostingMonth: number
@@ -38,6 +39,11 @@ export default class AccountPlanBudjectEntry extends AbstractModel {
 
   @belongsTo(() => AccountPlanBudjectEntry)
   declare parent: BelongsTo<typeof AccountPlanBudjectEntry>
+
+  @hasMany(() => AccountPlanBudjectEntryEntry, {
+    foreignKey: 'entryId', // defaults to entryId
+  })
+  declare entriesEntry: HasMany<typeof AccountPlanBudjectEntryEntry>
 
   @beforeSave()
   static async setFinalAllocation(accountPlanBudjectEntry: AccountPlanBudjectEntry) {

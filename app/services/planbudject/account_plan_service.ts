@@ -1,14 +1,13 @@
-import vine from "@vinejs/vine";
 import AccountPlan from "../../models/planbudject/account_plan.js";
-import { AccountTypeWritableType, AccoutPlanClassType, AccoutPlanType } from "../../models/utility/Enums.js";
-import { AccountPlanDTO } from "./dtos/dtosUtilits.js";
-import { accountPlanValidatorCreate, accountPlanValidatorUpdate } from "../../validators/planbudject/accountPlanValidator.js";
+import { AccountPlanTypeWritableType, AccoutPlanClassType, AccoutPlanType } from "../../models/utility/Enums.js";
+import AccountPlanValidator from "../../validators/planbudject/accountPlanValidator.js";
+import { AccountPlanDTO } from "./utils/dtos.js";
 
 interface NewType {
     id: number;
     number: string;
     description: string;
-    writable: AccountTypeWritableType;
+    writable: AccountPlanTypeWritableType;
     type: AccoutPlanType;
     class: AccoutPlanClassType;
 }
@@ -20,15 +19,14 @@ interface NewType {
 export default class AccountPlanService {
 
     public async update(data: AccountPlanDTO) {
-        accountPlanValidatorUpdate(data);
-        const accountPlan = new AccountPlan();
-        accountPlan.fill(data);
-        return await accountPlan.save();
-
+        AccountPlanValidator.validateOnCreate(data);
+        const found = await AccountPlan.findByOrFail('id', data.id);
+        found.fill({ description: data.description, });
+        return await found.save();
     }
 
     public async create(data: AccountPlanDTO) {
-        accountPlanValidatorCreate(data);
+        await AccountPlanValidator.validateOnCreate(data);
         const accountPlan = new AccountPlan();
         accountPlan.fill({ number: data.number, description: data.description, })
         accountPlan.setClass(data.class);

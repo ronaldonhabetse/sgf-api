@@ -1,9 +1,7 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { column } from '@adonisjs/lucid/orm'
+import CreatableAbstractModel from '../utility/CreatableAbstractModel.js'
 
-export default class AccountPlanBudject extends BaseModel {
-  @column({ isPrimary: true })
-  declare id: number
+export default class AccountPlanBudject extends CreatableAbstractModel {
 
   @column()
   declare year: number
@@ -11,9 +9,4 @@ export default class AccountPlanBudject extends BaseModel {
   @column()
   declare description: string
 
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
 }

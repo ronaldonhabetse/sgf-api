@@ -1,15 +1,25 @@
 import { DateTime } from 'luxon'
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
+import { belongsTo, column } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import AccountPlanBudjectEntry from './account_plan_budject_entry.js'
-import { OperatorType } from '../utility/Enums.js'
+import { EntryEntryType, OperatorType } from '../utility/Enums.js'
+import AccountPlanBudject from './account_plan_budject.js'
+import CreatableAbstractModel from '../utility/CreatableAbstractModel.js'
 
-export default class AccountPlanBudjectEntryEntry extends BaseModel {
+export default class AccountPlanBudjectEntryEntry extends CreatableAbstractModel {
+  public static table = 'account_plan_budject_entries_entry' // Custom table name
+
   @column({ isPrimary: true })
   declare id: number
 
   @column()
-  declare type: string
+  declare accountPlanBudjectId: number
+
+  @belongsTo(() => AccountPlanBudject)
+  declare accountPlanBudject: BelongsTo<typeof AccountPlanBudject>
+
+  @column()
+  declare type: EntryEntryType
 
   @column()
   declare operator: OperatorType
@@ -17,8 +27,8 @@ export default class AccountPlanBudjectEntryEntry extends BaseModel {
   @column()
   declare postingMonth: number
 
-  @column()
-  declare postingDate: number
+  @column.dateTime({ autoCreate: true })
+  declare postingDate: DateTime
 
   @column()
   declare allocation: number
@@ -27,20 +37,14 @@ export default class AccountPlanBudjectEntryEntry extends BaseModel {
   declare lastFinalAllocation: number
 
   @column()
-  declare entryId: number //accountPlanBudjectEntry
+  declare entryId: number //accountPlanBudjectEntry.id
 
   @belongsTo(() => AccountPlanBudjectEntry)
-  declare accountPlanBudjectEntry: BelongsTo<typeof AccountPlanBudjectEntry>
+  declare entry: BelongsTo<typeof AccountPlanBudjectEntry>
 
   @column()
-  declare entrieEntryId: number // accountPlanBudjectEntryEntry.id
+  declare targetEntrieEntryId: number // accountPlanBudjectEntryEntry.id
 
   @belongsTo(() => AccountPlanBudjectEntryEntry)
-  declare accountPlanBudjectEntryEntry: BelongsTo<typeof AccountPlanBudjectEntryEntry>
-
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  declare targetEntrieEntry: BelongsTo<typeof AccountPlanBudjectEntryEntry>
 }

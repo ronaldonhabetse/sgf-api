@@ -1,8 +1,8 @@
 import { column } from '@adonisjs/lucid/orm'
-import { AccoutPlanClassType, AccoutPlanType, AccountTypeWritableType as AccountPlanWritableType } from '../utility/Enums.js'
-import CreatableModel from '../utility/AbstractModel.js'
+import { AccoutPlanClassType, AccoutPlanType, AccountPlanTypeWritableType as AccountPlanWritableType } from '../utility/Enums.js'
+import LifecycleAbstractModel from '../utility/LifeclycleAbstractModel.js'
 
-export default class AccountPlan extends CreatableModel {
+export default class AccountPlan extends LifecycleAbstractModel {
 
   @column()
   declare number: string

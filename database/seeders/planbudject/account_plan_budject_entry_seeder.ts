@@ -7,14 +7,15 @@ export default class extends BaseSeeder {
   async run() {
 
     const currentYear = new Date().getFullYear()
-
+    const currentAccountPlanBudject = await AccountPlanBudject.findBy('year', currentYear);
+  
     await AccountPlanBudjectEntry.createMany([
       {
         startPostingMonth: 1,
         endPostingMonth: 12,
         reservePercent:0,
         initialAllocation:1000000,
-        accountPlanBudjectId: (await AccountPlanBudject.findBy('year', currentYear))?.id,
+        accountPlanBudjectId: currentAccountPlanBudject?.id,
         accountPlanId: (await AccountPlan.findBy('number', '1.0.0.0.00'))?.id,
       },
       {
@@ -22,7 +23,7 @@ export default class extends BaseSeeder {
         endPostingMonth: 12,
         reservePercent:0,
         initialAllocation:1000000,
-        accountPlanBudjectId: (await AccountPlanBudject.findBy('year', currentYear))?.id,
+        accountPlanBudjectId: currentAccountPlanBudject?.id,
         accountPlanId: (await AccountPlan.findBy('number', '1.1.0.0.00'))?.id,
       },
     ])
