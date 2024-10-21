@@ -43,18 +43,19 @@ router.group(() => {
     router.post('findAllAccountPlanBudject', [AccountPlanBudjectsController, 'findAllAccountPlanBudject']);
     router.post('findAccountPlanBudjectByYear/:year', [AccountPlanBudjectsController, 'findAccountPlanBudjectByYear']);
 
-      // Entradas do orcamento do ano especifico
+    // Entradas do orcamento do ano especifico - dotação
     router.post('createAccountPlanBudjectEntry', [AccountPlanBudjectsController, 'createAccountPlanBudjectEntry']);
     router.post('findAccountPlanBudjectEntriesByYear/:year', [AccountPlanBudjectsController, 'findAccountPlanBudjectEntriesByYear']);
     router.post('fetchAccountPlanBudjectEntriesByYear/:year', [AccountPlanBudjectsController, 'fetchAccountPlanBudjectEntriesByYear']);
+    router.post('fetchAccountPlanBudjectEntriesByYearAndNumber/:year/:accountPlanNumber', [AccountPlanBudjectsController, 'fetchAccountPlanBudjectEntriesByYearAndNumber']);
 
-   // router.post('update/reforcePlanBudjectEntry', [AccountPlansController, 'reforcePlanBudjectEntry']);
-   // router.post('update/anullPlanBudjectEntry', [AccountPlansController, 'anullPlanBudjectEntry']);
-   // router.post('update/redistribueteReforcePlanBudjectEntry', [AccountPlansController, 'redistribueteReforcePlanBudjectEntry']);
-   // router.post('update/redistribueteAnullPlanBudjectEntry', [AccountPlansController, 'redistribueteAnullPlanBudjectEntry']);
-  
-    //router.get('findAllActiveAccountPlanBujectEntry', [AccountPlansController, 'create']);
-    
+    // Actualização a dotação do plano de contas (reforço, anulação, redistribuição reforço, redistribuição anulação)
+    router.post('reinforceAccountPlanBudjectEntry', [AccountPlanBudjectsController, 'reinforceAccountPlanBudjectEntry']);
+    router.post('annulAccountPlanBudjectEntry', [AccountPlanBudjectsController, 'annulAccountPlanBudjectEntry']);
+
+    router.post('redistribuitioReinforcimentAccountPlanBudjectEntry', [AccountPlanBudjectsController, 'redistribuitioReinforcimentAccountPlanBudjectEntry']);
+    router.post('redistributeAnnulmentAccountPlanBudjectEntry', [AccountPlanBudjectsController, 'redistributeAnnulmentAccountPlanBudjectEntry']);
+
   }).prefix("planbudject");
 
   /*------------------------------------------------------------------------------------------*/

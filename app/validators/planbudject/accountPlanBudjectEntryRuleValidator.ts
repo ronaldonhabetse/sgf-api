@@ -5,13 +5,16 @@ import { AccountPlanBudjectEntryDTO } from '../../services/planbudject/utils/dto
 
 export default class AccountPlanBudjectEntryValidator {
 
-    static validateOnReinForciment(data: { accountPlanNumber: string; year: number; value: number }) {
-        vine.object({
-            accountPlanNumber: vine.string(),
-            year: vine.number(),
-            value: vine.number(),
-        })
-    }
+    private static schemaFieldsReinforceOrAnnul = vine.object({
+        accountPlanNumber: vine.string(),
+        value: vine.number(),
+    });
+
+    private static schemaFieldsRedistributeReinforcementOrAnnulment = vine.object({
+        originAccountPlanNumber: vine.string(),
+        targetAccountPlanNumber: vine.string(),
+        value: vine.number(),
+    });
 
     private static schemaFields = vine.object({
         id: vine.number().optional(),
@@ -49,6 +52,16 @@ export default class AccountPlanBudjectEntryValidator {
     public static validateFields = (() => {
         this.setMessages();
         return vine.compile(this.schemaFields)
+    });
+
+    public static validateFieldsReinforceOrAnnul = (() => {
+        this.setMessages();
+        return vine.compile(this.schemaFieldsReinforceOrAnnul)
+    });
+
+    public static validateFieldsRedistributeReinforcementOrAnnulment = (() => {
+        this.setMessages();
+        return vine.compile(this.schemaFieldsRedistributeReinforcementOrAnnulment)
     });
 
     public static async validateOnCreate(data: AccountPlanBudjectEntryDTO) {

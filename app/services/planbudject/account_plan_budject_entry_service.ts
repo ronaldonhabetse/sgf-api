@@ -41,7 +41,6 @@ export default class AccountPlanBudjectEntryService {
                         accountPlanBudjectId: currentPlanbudject.id,
                     }).useTransaction(trx).save();
 
-            console.log(createdCreditEntryEntry);
             await trx.commit();
             return createdCreditEntryEntry;
         } catch (error) {
@@ -50,41 +49,42 @@ export default class AccountPlanBudjectEntryService {
         }
     }
 
-    public async reinforcimentAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
-        return this.reinforcimentOrAnnulmentAccountPlanBudjectEntry(data, true);
+    public async reinforceAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
+        return this.reinforceOrAnnulmentAccountPlanBudjectEntry(data, true);
     }
 
-    public async annulmentAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
-        return this.reinforcimentOrAnnulmentAccountPlanBudjectEntry(data, false);
+    public async annulAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
+        return this.reinforceOrAnnulmentAccountPlanBudjectEntry(data, false);
     }
 
     public async redistribuitioReinforcimentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string }) {
 
-        return this.redistribuitioReinforcimentOrAnnulmentAccountPlanBudjectEntry(data, true);
+        return this.redistributeReinforeOrAnnulmentAccountPlanBudjectEntry(data, true);
     }
 
-    public async redistribuitioAnnulmentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string }) {
-        return this.redistribuitioReinforcimentOrAnnulmentAccountPlanBudjectEntry(data, false);
+    public async redistributeAnnulmentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string }) {
+        return this.redistributeReinforeOrAnnulmentAccountPlanBudjectEntry(data, false);
     }
 
-    private async reinforcimentOrAnnulmentAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }, isReiforciment: boolean) {
+    private async reinforceOrAnnulmentAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }, isReinforce: boolean) {
 
         const currentDate = new Date();
         const trx = await db.transaction()  // Start transaction
         try {
-            const currentPlanbudject = await AccountPlanBudject.findByOrFail('year', currentDate.getFullYear);
-            const accountPlan = await AccountPlan.findByOrFail('number', data.accountPlanNumber);
 
-            const entry = await AccountPlanBudjectEntry.findOrFail({
-                'accountPlanBudjectId': currentPlanbudject.id,
-                'accountPlanId': accountPlan.id
-            });
+            const currentPlanbudject = await AccountPlanBudject.findByOrFail('year', currentDate.getFullYear());
+
+            let entry = await this.findAccountPlanBudjectEntriesByYearAndNumber(currentDate.getFullYear(), data.accountPlanNumber);
+
+            if (!entry) {
+                throw Error("Plano de conta não encontrado no sistema com a conta " + data.accountPlanNumber);
+            }
 
             let entryEntryType;
             let entryEntryOperator;
             let entryfinalAllocation;
 
-            if (isReiforciment) {
+            if (isReinforce) {
                 entryEntryType = EntryEntryType.REINFORCEMENT;
                 entryEntryOperator = OperatorType.CREDTI;
                 entryfinalAllocation = entry.finalAllocation + data.value;
@@ -94,11 +94,13 @@ export default class AccountPlanBudjectEntryService {
                 entryfinalAllocation = entry.finalAllocation - data.value;
 
                 if (entryfinalAllocation < 0) {
-                    throw Error(" Não pode efectuar a anulação, o valor da conta ${data.accountPlanNumber} é insuficiente para anular  ${data.value} ")
+                    throw Error(" Não pode efectuar a anulação, o valor da conta "
+                        + data.accountPlanNumber + " é insuficiente para anular " + data.value
+                        + ". O valor actual é " + entry.finalAllocation)
                 }
             }
 
-            const createdEntryEntry = await new AccountPlanBudjectEntryEntry()
+            await new AccountPlanBudjectEntryEntry()
                 .fill(
                     {
                         type: entryEntryType,
@@ -110,14 +112,10 @@ export default class AccountPlanBudjectEntryService {
                         accountPlanBudjectId: currentPlanbudject.id,
                     }).useTransaction(trx).save();
 
-            console.log(createdEntryEntry);
-
-            const updatedEntry = await entry
-                .fill({ finalAllocation: entryfinalAllocation })
-                .useTransaction(trx)
+            entry.finalAllocation = entryfinalAllocation
+            const updatedEntry = await entry.useTransaction(trx)
                 .save();
-
-            await trx.commit();
+            trx.commit();
             return updatedEntry;
         } catch (error) {
             await trx.rollback();
@@ -125,29 +123,33 @@ export default class AccountPlanBudjectEntryService {
         }
     }
 
-    private async redistribuitioReinforcimentOrAnnulmentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string }, isReiforcimentRedistribuition: boolean) {
+    private async redistributeReinforeOrAnnulmentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string }, isRedistributeReinforcement: boolean) {
 
         const currentDate = new Date();
         const trx = await db.transaction()  // Start transaction
         try {
-            const currentPlanbudject = await AccountPlanBudject.findByOrFail('year', currentDate.getFullYear);
-            const originAccountPlan = await AccountPlan.findByOrFail('number', data.originAccountPlanNumber);
-            const targetAccountPlan = await AccountPlan.findByOrFail('number', data.targetAccountPlanNumber);
 
-            const originEntry = await AccountPlanBudjectEntry.findOrFail({
-                'accountPlanBudjectId': currentPlanbudject.id,
-                'accountPlanId': originAccountPlan.id
-            });
+            if (data.originAccountPlanNumber === data.targetAccountPlanNumber) {
+                throw Error("O Plano de conta origem deve ser difernte do plano de conta destino ");
+            }
+            const currentPlanbudject = await AccountPlanBudject.findByOrFail('year', currentDate.getFullYear());
 
-            const targetEntry = await AccountPlanBudjectEntry.findOrFail({
-                'accountPlanBudjectId': currentPlanbudject.id,
-                'accountPlanId': targetAccountPlan.id
-            });
+            let originEntry = await this.findAccountPlanBudjectEntriesByYearAndNumber(currentDate.getFullYear(), data.originAccountPlanNumber);
+
+            if (!originEntry) {
+                throw Error("Plano de conta não encontrado no sistema com a conta " + data.originAccountPlanNumber);
+            }
+
+            let targetEntry = await this.findAccountPlanBudjectEntriesByYearAndNumber(currentDate.getFullYear(), data.targetAccountPlanNumber);
+
+            if (!targetEntry) {
+                throw Error("Plano de conta não encontrado no sistema com a conta " + data.targetAccountPlanNumber);
+            }
 
             let originEntryEntryType, originEntryEntryOperator, originEntryfinalAllocation;
             let targetEntryEntryType, targetEntryEntryOperator, targetEntryfinalAllocation;
 
-            if (isReiforcimentRedistribuition) {
+            if (isRedistributeReinforcement) {
                 originEntryEntryType = EntryEntryType.REDISTRIBUTION_REINFORCEMENT;
                 originEntryEntryOperator = OperatorType.CREDTI;
                 originEntryfinalAllocation = originEntry.finalAllocation + data.value;
@@ -157,7 +159,9 @@ export default class AccountPlanBudjectEntryService {
                 targetEntryfinalAllocation = targetEntry.finalAllocation - data.value;
 
                 if (targetEntryfinalAllocation < 0) {
-                    throw Error(" Não pode efectuar o reforço, o valor da conta ${data.targetAccountPlanNumber} é insuficiente para anular  ${data.value} ")
+                    throw Error(" Não pode efectuar a redistribuição do reforço para a conta " + data.originAccountPlanNumber + ", o valor da conta destino "
+                        + data.targetAccountPlanNumber + " é insuficiente para anular " + data.value
+                        + ". O valor actual é " + targetEntry.finalAllocation)
                 }
 
             } else {
@@ -170,12 +174,13 @@ export default class AccountPlanBudjectEntryService {
                 targetEntryfinalAllocation = targetEntry.finalAllocation + data.value;
 
                 if (originEntryfinalAllocation < 0) {
-                    throw Error(" Não pode efectuar a redistribuição do reforço, o valor da conta ${data.originEntryfinalAllocation} é insuficiente para anular  ${data.value} ")
+                    throw Error(" Não pode efectuar a redistribuição da anulação para a conta " + data.originAccountPlanNumber + ", no valor de "
+                        + data.value + ". O valor actual é " + originEntry.finalAllocation)
                 }
             }
 
-            const createdOriginEntryEntry = await new AccountPlanBudjectEntryEntry()
-                .fill(
+            const createdOriginEntryEntry = await new AccountPlanBudjectEntryEntry().fill
+                (
                     {
                         type: originEntryEntryType,
                         operator: originEntryEntryOperator,
@@ -185,33 +190,38 @@ export default class AccountPlanBudjectEntryService {
                         entryId: originEntry.id,
                         accountPlanBudjectId: currentPlanbudject.id,
                     }).useTransaction(trx).save();
+            /**
+            * The relationship will implicitly reference the
+            * targetEntrieEntry from the OriginEntryEntry instance
+            */
+            const createdTargetEntryEntry = await createdOriginEntryEntry.related('targetEntrieEntry').create(
+                {
+                    type: targetEntryEntryType,
+                    operator: targetEntryEntryOperator,
+                    postingMonth: currentDate.getMonth(),
+                    allocation: data.value,
+                    lastFinalAllocation: originEntry.finalAllocation,
+                    entryId: targetEntry.id,
+                    accountPlanBudjectId: currentPlanbudject.id,
+                    targetEntrieEntryId: createdOriginEntryEntry.id
+                }
+            )
 
-            const createdTargetEntryEntry = await new AccountPlanBudjectEntryEntry()
-                .fill(
-                    {
-                        type: targetEntryEntryType,
-                        operator: targetEntryEntryOperator,
-                        postingMonth: currentDate.getMonth(),
-                        allocation: data.value,
-                        lastFinalAllocation: originEntry.finalAllocation,
-                        entryId: targetEntry.id,
-                        accountPlanBudjectId: currentPlanbudject.id,
-                        targetEntrieEntryId: createdOriginEntryEntry.id,
+            //Actualizamos o targetEntrieEntryId na entrada origem
+            createdOriginEntryEntry.targetEntrieEntryId = createdTargetEntryEntry.id;
+            createdOriginEntryEntry.useTransaction(trx).save();
 
-                    }).useTransaction(trx).save();
-
-            console.log(createdTargetEntryEntry);
-
+            originEntry.finalAllocation = originEntryfinalAllocation;
+            targetEntry.finalAllocation = targetEntryfinalAllocation;
             const updatedOriginEntry = await originEntry
-                .fill({ finalAllocation: originEntryfinalAllocation })
                 .useTransaction(trx)
                 .save();
 
             const updatedTargetEntry = await targetEntry
-                .fill({ finalAllocation: targetEntryfinalAllocation })
                 .useTransaction(trx)
                 .save();
 
+            // Commit the transaction if everything is successful
             await trx.commit();
             return updatedOriginEntry;
         } catch (error) {
@@ -220,6 +230,12 @@ export default class AccountPlanBudjectEntryService {
         }
     }
 
-
-
+    public async findAccountPlanBudjectEntriesByYearAndNumber(year: number, accountPlanNumber: string) {
+        return await AccountPlanBudjectEntry.query()
+            .whereHas('accountPlanBudject', (accountPlanBudjectBuilder) => {
+                accountPlanBudjectBuilder.where('year', year);
+            }).whereHas('accountPlan', (accountPlanBuilder) => {
+                accountPlanBuilder.where('number', accountPlanNumber);
+            }).first()
+    }
 }

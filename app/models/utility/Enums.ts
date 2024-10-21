@@ -42,6 +42,6 @@ export enum EntryEntryType {
   INITIAL='initial',
   REINFORCEMENT = 'reinforcement',
   ANNULMENT = 'annulment',
-  REDISTRIBUTION_REINFORCEMENT = 'redistribuition_reinforcement',
-  REDISTRIBUTION_ANNULMENT = 'redistribuition_annulment',
+  REDISTRIBUTION_REINFORCEMENT = 'redistribution_reinforcement',
+  REDISTRIBUTION_ANNULMENT = 'redistribution_annulment',
 }
