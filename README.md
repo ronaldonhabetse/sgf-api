@@ -25,6 +25,7 @@
     i. Drop das tabelas: node ace migration:reset 
     ii. Criar as tableas e inserir na base: node ace migration:fresh --seed
     iii. Alterar o ficheiro .env e configurar a base de dados, hostname e porta do servidor
+3. npm install
 4. Deploy da aplicação: node ace serve --watch
 5. Listar todos os seriços disponibilizados: node ace list:routes
 6. Build da API para a entrega em produção: node ace build
