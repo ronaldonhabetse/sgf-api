@@ -2,10 +2,10 @@ import { beforeSave, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
 import AccountPlanBudject from './account_plan_budject.js'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import AccountPlan from './account_plan.js'
-import CreatableAbstractModel from '../utility/CreatableAbstractModel.js'
 import AccountPlanBudjectEntryEntry from './account_plan_budject_entry_entry.js'
+import MutableAbstractModel from '../utility/MutableAbstractModel.js'
 
-export default class AccountPlanBudjectEntry extends CreatableAbstractModel {
+export default class AccountPlanBudjectEntry extends MutableAbstractModel {
 
   @column()
   declare startPostingMonth: number
