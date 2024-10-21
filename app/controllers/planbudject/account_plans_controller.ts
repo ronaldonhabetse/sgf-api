@@ -40,11 +40,23 @@ export default class AccountPlansController {
     }
   }
 
-  async findAllActiveAccountPlan({ request, response }: HttpContext) {
-    return response.ok(await this.accountPlanService.findAllActive());
-  }
-
   async findAllAccountPlan({ request, response }: HttpContext) {
     return response.ok(await this.accountPlanService.findAll());
   }
+
+  async findAnyAccountPlan({ request, response }: HttpContext) {
+    return response.ok(await this.accountPlanService.findAny());
+  }
+
+  async findAccountPlanByNumber({ request, response }: HttpContext) {
+    const number = request.param('number');
+    return response.ok(await this.accountPlanService.findByNumber(number));
+  }
+
+  async findAnyAccountPlanByNumber({ request, response }: HttpContext) {
+    const number = request.param('number');
+    return response.ok(await this.accountPlanService.findByNumber(number));
+  }
+
+
 }

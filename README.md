@@ -20,12 +20,12 @@
 6. VineJs para a validação das request HTTP: https://vinejs.dev/docs/introduction
 
 # 1.3 Como configurar e subir a aplicação
-1. Criar a base de dados SGF
+1. Criar a base de dados SGF: veja a secção: [1.5 Configurar a base de dados - Mysql]
 2. Criar as tabelas e executar a carga inicial dos dados:
     i. Drop das tabelas: node ace migration:reset 
     ii. Criar as tableas e inserir na base: node ace migration:fresh --seed
     iii. Alterar o ficheiro .env e configurar a base de dados, hostname e porta do servidor
-3. npm install
+3. Instação das dependencias: npm install
 4. Deploy da aplicação: node ace serve --watch
 5. Listar todos os seriços disponibilizados: node ace list:routes
 6. Build da API para a entrega em produção: node ace build
@@ -142,7 +142,7 @@ curl --location 'http://localhost:3333/auth/login' \
 4. Recuperar senha
 
 ##### *****************************************************
-# 2 - Modulo de Plano e Orçamento
+# 2.2. - Modulo de Plano e Orçamento
 #    i. Descricao:
 #       É o primeiro modulo desenvolvido no projecto e define a estrutura e logica dos requisitos não        #       funcional segurnçà e acessos dos utilizadores.
 #    ii. Modelo de dados
@@ -157,17 +157,18 @@ curl --location 'http://localhost:3333/auth/login' \
 #      
 ##### *****************************************************
 
-v. Serviços disponibilizados pela API para o Modulo de plano de contas
+# 2.v. Serviços disponibilizados pela API para o Modulo de plano de contas
 
-# v.1 Criar plano de contas (createAccountPlan)
-# O atributo "writable" diz se a conta é de movimento ou controle [ moviment, controll ]
-# O atributo "type" diz se a conta é de orcamento ou financeira [ budject, financial ]
-# O atributo "class" diz se a classe da conta:
-#        [A = 'A'] //'X.0.0.0.00'
-#        [B = 'B'], //'X.X.0.0.00'
-#        [C = 'C'], //'X.X.X.0.00'
-#        [D = 'D'], //'X.X.X.X.00'
-#        [E = 'E'], //'X.X.X.X.XX'
+# 2.v.1 - Planos de conta
+ # i. Criar plano de contas (createAccountPlan)
+ O atributo "writable" diz se a conta é de movimento ou controle [ moviment, controll ]
+ O atributo "type" diz se a conta é de orcamento ou financeira [ budject, financial ]
+ O atributo "class" diz se a classe da conta:
+        [A = 'A'] //'X.0.0.0.00'
+        [B = 'B'], //'X.X.0.0.00'
+        [C = 'C'], //'X.X.X.0.00'
+        [D = 'D'], //'X.X.X.X.00'
+        [E = 'E'], //'X.X.X.X.XX'
 
 curl -s --location 'http://localhost:3333/sgf-api/planbudject/accountplan/createAccountPlan' \
 --header 'Content-Type: application/json' \
@@ -179,26 +180,40 @@ curl -s --location 'http://localhost:3333/sgf-api/planbudject/accountplan/create
         "class": "2"
     }' | jq
 
-# v.2 Listar todos os planos de conta (findAllActiveAccountPlan)
-# Lista todos os planos de contas activos no sistema
-curl -s --location --request GET 'http://localhost:3333/sgf-api/planbudject/accountplan/findAllActiveAccountPlan' --header 'Content-Type: application/json' | jq
+# ii. Listar todos os planos de conta activos (findAllAccountPlan)
+curl -s --location --request GET 'http://localhost:3333/sgf-api/planbudject/accountplan/findAllAccountPlan' --header 'Content-Type: application/json' | jq
 
-# v.3 Buscar plano de conta pelo numero da conta (findAccountPlanByNumber)
-# Busca o plano de conta activo atraves do numero da conta
-curl -s --location --request GET 'http://localhost:3333/sgf-api/planbudject/accountplan/findAccountPlanByNumber' --header 'Content-Type: application/json' | jq
+# ii. Listar todos os planos de conta, tantos activos como inactivos (findAnyAccountPlan)
+curl -s --location --request GET 'http://localhost:3333/sgf-api/planbudject/accountplan/findAnyAccountPlan' --header 'Content-Type: application/json' | jq
 
-# v.4. Listar todos os planos orçamentais
-curl -s --location 'http://localhost:3333/sgf-api/planbudject/findAllAccountPlanBudjectEntries' \
+# iv. Buscar plano de conta activo pelo numero da conta (findAccountPlanByNumber/:number)
+curl -s --location --request GET 'http://localhost:3333/sgf-api/planbudject/accountplan/findAccountPlanByNumber/1.1.1.1.02' --header 'Content-Type: application/json' | jq
+
+# iv. Buscar qualquer (activo ou inactivo) plano de conta pelo numero da conta (findAnyAccountPlanByNumber/:number)
+curl -s --location --request GET 'http://localhost:3333/sgf-api/planbudject/accountplan/findAccountPlanByNumber/1.1.1.1.02' --header 'Content-Type: application/json' | jq
+
+# 2.v.1 - Orçamento do plano de conta
+# i. Criar o plano do orcamento de um ano especifico (createAccountPlanBudject)
+curl -s --location 'http://localhost:3333/sgf-api/planbudject/createAccountPlanBudject' \
 --header 'Content-Type: application/json' \
---data-raw '{
-"email":"root@gmail.com",
-"password":"sebadora123"
-}' | jq
+--data ' {
+        "year": "2025",
+        "description": "Plano de orçamento do ano 2025"
+    }' | jq
 
-# Criar um orcamento
+# ii. Lista o plano do orcamento de um ano especifico (findAllAccountPlanBudject)
+curl --location --request POST 'http://localhost:3333/sgf-api/planbudject/findAllAccountPlanBudject' | jq 
+
+# iii. Lista o plano do orcamento de um ano especifico (findAccountPlanBudjectByYear/year)
+curl --location --request POST 'http://localhost:3333/sgf-api/planbudject/findAccountPlanBudjectByYear/2024' | jq 
 
 
-# Listar todos os planos orçamentais 
+
+# iii. Criar a entrada do orçamento do plano de conta especifico (createAccountPlanBudjectEntry)
+  O atributo "startPostingMonth" representa o mês inicial esperado para o inicio dos lançamentos
+  O atributo "endPostingMonth" representa o mês fim esperado para o inicio dos lançamentos
+  O atributo "initialAllocation" representa a dotação inicial
+
 curl -s --location 'http://localhost:3333/sgf-api/planbudject/createAccountPlanBudjectEntry' \
 --header 'Content-Type: application/json' \
 --data ' {
@@ -206,12 +221,10 @@ curl -s --location 'http://localhost:3333/sgf-api/planbudject/createAccountPlanB
         "endPostingMonth": 12,
         "initialAllocation": 1200000,
         "accountPlanNumber": "1.1.1.1.02"
-    }' | jq
+    }' |jq
 
-# Listar todos os planos orçamentais  com as respectivas entradas
-curl -s --location 'http://localhost:3333/sgf-api/planbudject/fetchAllAccountPlanBudjectEntries' \
---header 'Content-Type: application/json' \
---data-raw '{
-"email":"root@gmail.com",
-"password":"sebadora123"
-}' | jq
+# iv. Listar todos as entradas do plano orçamental do ano corrente (findAccountPlanBudjectEntriesByYear/year)
+curl -s --location --request POST 'http://localhost:3333/sgf-api/planbudject/findAccountPlanBudjectEntriesByYear/2024' | jq
+
+# v. Listar todos as entradas do plano orçamental com as operções (fetchAccountPlanBudjectEntriesByYear/year)
+curl -s --location --request POST 'http://localhost:3333/sgf-api/planbudject/fetchAccountPlanBudjectEntriesByYear/2024' | jq

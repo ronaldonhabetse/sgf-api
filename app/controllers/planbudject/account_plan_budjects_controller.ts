@@ -47,19 +47,25 @@ export default class AccountPlanBudjectsController {
     return response.ok(await this.accountPlanBudjectService.findAllAccountPlanBudject());
   }
 
-  async fetchAllAccountPlanBudjectEntries({ request, response }: HttpContext) {
-    //const newLocal = request.param('year');
-    return response.ok(await this.accountPlanBudjectService.fetchAllAccountPlanBudjectEntries((new Date).getFullYear()));
+  async findAccountPlanBudjectByYear({ request, response }: HttpContext) {
+    const year = request.param('year');
+    return response.ok(await this.accountPlanBudjectService.findAccountPlanBudjectByYear(year));
   }
 
-  async findAllAccountPlanBudjectEntries({ request, response }: HttpContext) {
-    //const newLocal_1 = request.param('year');
-    return response.ok(await this.accountPlanBudjectService.findAllAccountPlanBudjectEntries((new Date).getFullYear()));
+  async findAccountPlanBudjectEntriesByYear({ request, response }: HttpContext) {
+    const year = request.param('year');
+    return response.ok(await this.accountPlanBudjectService.findAllAccountPlanBudjectEntries(year));
   }
 
-  async findAllAccountPlanBudjectEntriesEntry({ request, response }: HttpContext) {
-    //const newLocal = request.param('year');
-    return response.ok(await this.accountPlanBudjectService.findAllAccountPlanBudjectEntriesEntry((new Date).getFullYear()));
+  async fetchAccountPlanBudjectEntriesByYear({ request, response }: HttpContext) {
+    const year = request.param('year');
+    return response.ok(await this.accountPlanBudjectService.fetchAllAccountPlanBudjectEntries(year));
+  }
+
+ 
+  async findAccountPlanBudjectEntriesEntryByYear({ request, response }: HttpContext) {
+    const year = request.param('year');
+    return response.ok(await this.accountPlanBudjectService.findAllAccountPlanBudjectEntriesEntry(year));
   }
 
 
