@@ -44,9 +44,4 @@ export default class AccountPlanBudjectEntry extends MutableAbstractModel {
     foreignKey: 'entryId', // defaults to entryId
   })
   declare entriesEntry: HasMany<typeof AccountPlanBudjectEntryEntry>
-
-  @beforeSave()
-  static async setFinalAllocation(accountPlanBudjectEntry: AccountPlanBudjectEntry) {
-    accountPlanBudjectEntry.finalAllocation = accountPlanBudjectEntry.initialAllocation;
-  }
 }

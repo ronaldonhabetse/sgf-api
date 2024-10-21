@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
-import { belongsTo, column } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { belongsTo, column, hasOne } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasOne } from '@adonisjs/lucid/types/relations'
 import AccountPlanBudjectEntry from './account_plan_budject_entry.js'
 import { EntryEntryType, OperatorType } from '../utility/Enums.js'
 import AccountPlanBudject from './account_plan_budject.js'
@@ -45,6 +45,9 @@ export default class AccountPlanBudjectEntryEntry extends CreatableAbstractModel
   @column()
   declare targetEntrieEntryId: number // accountPlanBudjectEntryEntry.id
 
-  @belongsTo(() => AccountPlanBudjectEntryEntry)
-  declare targetEntrieEntry: BelongsTo<typeof AccountPlanBudjectEntryEntry>
+  @hasOne(() => AccountPlanBudjectEntryEntry, {
+    foreignKey: 'targetEntrieEntryId', // defaults to userId
+  })
+  declare targetEntrieEntry: HasOne<typeof AccountPlanBudjectEntryEntry>
 }
+

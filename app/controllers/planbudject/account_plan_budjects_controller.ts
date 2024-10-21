@@ -43,6 +43,73 @@ export default class AccountPlanBudjectsController {
     }
   }
 
+  async reinforceAccountPlanBudjectEntry({ request, response }: HttpContext) {
+
+    const data = await request.validateUsing(AccountPlanBudjectEntryValidator.validateFieldsReinforceOrAnnul());
+
+    try {
+      return response.created(await this.accountPlanBudjectService.reinforceAccountPlanBudjectEntry(data));
+    } catch (error) {
+
+      console.log(error);
+      return response.status(500).json({
+        message: 'Ocorreu um erro ao executar o reforço do plano e orçamento na conta ' + data.accountPlanNumber,
+        error: error.message,
+      });
+    }
+  }
+
+  async annulAccountPlanBudjectEntry({ request, response }: HttpContext) {
+
+    const data = await request.validateUsing(AccountPlanBudjectEntryValidator.validateFieldsReinforceOrAnnul());
+
+    try {
+      return response.created(await this.accountPlanBudjectService.annulAccountPlanBudjectEntry(data));
+    } catch (error) {
+
+      console.log(error);
+      return response.status(500).json({
+        message: 'Ocorreu um erro ao executar a anulação do plano e orçamento na conta ' + data.accountPlanNumber,
+        error: error.message,
+      });
+    }
+  }
+
+  async redistribuitioReinforcimentAccountPlanBudjectEntry({ request, response }: HttpContext) {
+
+    const data = await request.validateUsing(AccountPlanBudjectEntryValidator.validateFieldsRedistributeReinforcementOrAnnulment());
+
+    try {
+      return response.created(await this.accountPlanBudjectService.redistribuitioReinforcimentAccountPlanBudjectEntry(data));
+    } catch (error) {
+
+      console.log(error);
+      return response.status(500).json({
+        message: 'Ocorreu um erro ao executar a redistribuicao do reforço do plano e orçamento na conta ' + data.originAccountPlanNumber,
+        error: error.message,
+      });
+    }
+  }
+
+  async redistributeAnnulmentAccountPlanBudjectEntry({ request, response }: HttpContext) {
+
+    const data = await request.validateUsing(AccountPlanBudjectEntryValidator.validateFieldsRedistributeReinforcementOrAnnulment());
+
+    try {
+      return response.created(await this.accountPlanBudjectService.redistributeAnnulmentAccountPlanBudjectEntry(data));
+    } catch (error) {
+
+      console.log(error);
+      return response.status(500).json({
+        message: 'Ocorreu um erro ao executar a redistribuicao da anulação do plano e orçamento na conta ' + data.originAccountPlanNumber,
+        error: error.message,
+      });
+    }
+  }
+
+  
+
+
   async findAllAccountPlanBudject({ request, response }: HttpContext) {
     return response.ok(await this.accountPlanBudjectService.findAllAccountPlanBudject());
   }
@@ -57,16 +124,27 @@ export default class AccountPlanBudjectsController {
     return response.ok(await this.accountPlanBudjectService.findAllAccountPlanBudjectEntries(year));
   }
 
+  async findAccountPlanBudjectEntriesEntryByYear({ request, response }: HttpContext) {
+    const year = request.param('year');
+    return response.ok(await this.accountPlanBudjectService.findAllAccountPlanBudjectEntriesEntry(year));
+  }
+
   async fetchAccountPlanBudjectEntriesByYear({ request, response }: HttpContext) {
     const year = request.param('year');
     return response.ok(await this.accountPlanBudjectService.fetchAllAccountPlanBudjectEntries(year));
   }
 
- 
-  async findAccountPlanBudjectEntriesEntryByYear({ request, response }: HttpContext) {
+  async fetchAccountPlanBudjectEntriesByYearAndNumber({ request, response }: HttpContext) {
     const year = request.param('year');
-    return response.ok(await this.accountPlanBudjectService.findAllAccountPlanBudjectEntriesEntry(year));
+    const accountPlanNumber = request.param('accountPlanNumber');
+    return response.ok(await this.accountPlanBudjectService.fetchAccountPlanBudjectEntriesByYearAndNumber(year, accountPlanNumber));
   }
+
+
+
+
+
+
 
 
 }
