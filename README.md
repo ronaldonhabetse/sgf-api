@@ -157,11 +157,17 @@ curl --location 'http://localhost:3333/auth/login' \
 ##### *****************************************************
 
 v. Serviços disponibilizados pela API para o Modulo de plano de contas
-# Link do postman com os serviços:
 
-
-# 1. Criar plano de contas (createAccountPlan)
+# v.1 Criar plano de contas (createAccountPlan)
 # O atributo "writable" diz se a conta é de movimento ou controle [ moviment, controll ]
+# O atributo "type" diz se a conta é de orcamento ou financeira [ budject, financial ]
+# O atributo "class" diz se a classe da conta:
+#        [A = 'A'] //'X.0.0.0.00'
+#        [B = 'B'], //'X.X.0.0.00'
+#        [C = 'C'], //'X.X.X.0.00'
+#        [D = 'D'], //'X.X.X.X.00'
+#        [E = 'E'], //'X.X.X.X.XX'
+
 curl -s --location 'http://localhost:3333/sgf-api/planbudject/accountplan/createAccountPlan' \
 --header 'Content-Type: application/json' \
 --data ' {
@@ -172,15 +178,15 @@ curl -s --location 'http://localhost:3333/sgf-api/planbudject/accountplan/create
         "class": "2"
     }' | jq
 
-# 2. Listar todos os planos de conta (findAllActiveAccountPlan)
+# v.2 Listar todos os planos de conta (findAllActiveAccountPlan)
 # Lista todos os planos de contas activos no sistema
 curl -s --location --request GET 'http://localhost:3333/sgf-api/planbudject/accountplan/findAllActiveAccountPlan' --header 'Content-Type: application/json' | jq
 
-# 2. Buscar plano de conta pelo numero da conta (findAccountPlanByNumber)
+# v.3 Buscar plano de conta pelo numero da conta (findAccountPlanByNumber)
 # Busca o plano de conta activo atraves do numero da conta
 curl -s --location --request GET 'http://localhost:3333/sgf-api/planbudject/accountplan/findAccountPlanByNumber' --header 'Content-Type: application/json' | jq
 
-# Listar todos os planos orçamentais
+# v.4. Listar todos os planos orçamentais
 curl -s --location 'http://localhost:3333/sgf-api/planbudject/findAllAccountPlanBudjectEntries' \
 --header 'Content-Type: application/json' \
 --data-raw '{
