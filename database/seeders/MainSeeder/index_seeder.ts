@@ -37,8 +37,8 @@ export default class extends BaseSeeder {
 
     //Modulo de plano e orcamento
     await this.runSeeder(await import('../planbudject/account_plan_budject_seeder.js'))
-    await this.runSeeder(await import('../planbudject/account_plan_seeder.js'))
-    await this.runSeeder(await import('../planbudject/account_plan_budject_entry_seeder.js'))
+    //await this.runSeeder(await import('../planbudject/account_plan_seeder.js'))
+    //await this.runSeeder(await import('../planbudject/account_plan_budject_entry_seeder.js'))
   }
 
 }
