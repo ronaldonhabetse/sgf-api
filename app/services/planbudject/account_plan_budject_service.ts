@@ -49,7 +49,7 @@ export default class AccountPlanBudjectService {
     return await AccountPlanBudject.all();
   }
 
-  public async findAllAccountPlanBudjectByYear(year: number) {
+  public async findAccountPlanBudjectByYear(year: number) {
     return await AccountPlanBudject.findByOrFail('year', year);
   }
 

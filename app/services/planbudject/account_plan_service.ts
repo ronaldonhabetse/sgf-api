@@ -38,20 +38,26 @@ export default class AccountPlanService {
     /**------------------------------------------------------------------------*/
     /** Servicos de pesquisa de informacao relativa ao plano de contas */
     /**------------------------------------------------------------------------*/
-    public async findAll() {
+    public async findAny() {
         return await AccountPlan.all();
     }
 
-    public async findAllActive() {
-        return (await AccountPlan.query().withScopes((scopes) => scopes.active()))
+    public async findAll() {
+        return (await AccountPlan.query()
+            .withScopes((scopes) => scopes.active()))
     }
 
     public async findById(id: number) {
         return await AccountPlan.findOrFail(id);
     }
 
-    public async findActiveBy() {
-        return (await AccountPlan.query().withScopes((scopes) => scopes.active()))
+    public async findByNumber(accountNumber: string) {
+        return await AccountPlan.query().where("number", accountNumber)
+            .withScopes((scopes) => scopes.active()).firstOrFail();
+    }
+
+    public async findAnyByNumber(accountNumber: string) {
+        return await AccountPlan.findByOrFail("number", accountNumber);
     }
     /**------------------------------------------------------------------------*/
 }
