@@ -1,13 +1,17 @@
 import { DateTime } from 'luxon'
 import { belongsTo, column, hasOne } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasOne } from '@adonisjs/lucid/types/relations'
-import AccountPlanBudjectEntry from './account_plan_budject_entry.js'
 import { EntryEntryType, OperatorType } from '../utility/Enums.js'
-import AccountPlanBudject from './account_plan_budject.js'
 import CreatableAbstractModel from '../utility/CreatableAbstractModel.js'
+import AccountPlanBudject from '../planbudject/account_plan_budject.js'
+import AccountPlanFinancialEntry from './account_plan_financial_entry.js'
 
-export default class AccountPlanBudjectEntryEntry extends CreatableAbstractModel {
-  public static table = 'account_plan_budject_entries_entry' // Custom table name
+/*
+* Model que representa a operacao de entrada do objecto no plano financeiro'
+* Gautchi R. Chambe (chambegautchi@gmail.com)
+*/
+export default class AccountPlanFinancialEntryEntry extends CreatableAbstractModel {
+  public static table = 'account_plan_financial_entries_entry' // table name
 
   @column()
   declare accountPlanBudjectId: number
@@ -34,17 +38,17 @@ export default class AccountPlanBudjectEntryEntry extends CreatableAbstractModel
   declare lastFinalAllocation: number
 
   @column()
-  declare entryId: number //accountPlanBudjectEntry.id
+  declare entryId: number //accountPlanFinancialEntry.id
 
-  @belongsTo(() => AccountPlanBudjectEntry)
-  declare entry: BelongsTo<typeof AccountPlanBudjectEntry>
+  @belongsTo(() => AccountPlanFinancialEntry)
+  declare entry: BelongsTo<typeof AccountPlanFinancialEntry>
 
   @column()
-  declare targetEntrieEntryId: number // accountPlanBudjectEntryEntry.id
+  declare targetEntrieEntryId: number // accountPlanFinancialEntryEntry.id
 
-  @hasOne(() => AccountPlanBudjectEntryEntry, {
+  @hasOne(() => AccountPlanFinancialEntryEntry, {
     foreignKey: 'targetEntrieEntryId', // defaults to userId
   })
-  declare targetEntrieEntry: HasOne<typeof AccountPlanBudjectEntryEntry>
+  declare targetEntrieEntry: HasOne<typeof AccountPlanFinancialEntryEntry>
 }
 

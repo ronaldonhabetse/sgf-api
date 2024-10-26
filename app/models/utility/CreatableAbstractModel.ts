@@ -3,7 +3,7 @@ import DomainAbstractModel from './DomainAbstractModel.js'
 import { DateTime } from 'luxon'
 
 /*
-* Model abstracto que com atributos 'code e description'
+* Model abstracto que representa uma entidade criavel
 * Gautchi R. Chambe (chambegautchi@gmail.com)
 */
 export default class CreatableAbstractModel extends DomainAbstractModel {

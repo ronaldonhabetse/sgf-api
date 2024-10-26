@@ -1,8 +1,9 @@
 import AccountPlanBudject from "../../models/planbudject/account_plan_budject.js";
 import AccountPlanBudjectEntry from "../../models/planbudject/account_plan_budject_entry.js";
 import AccountPlanBudjectEntryEntry from "../../models/planbudject/account_plan_budject_entry_entry.js";
+import AccountPlanBudjectValidator from "../../validators/planbudject/accountPlanBudjectValidator.js";
 import AccountPlanBudjectEntryService from "./account_plan_budject_entry_service.js";
-import { AccountPlanBudjectDTO, AccountPlanBudjectEntryDTO } from "./utils/dtos.js";
+import { AccountPlanBudjectDTO } from "./utils/dtos.js";
 import { inject } from "@adonisjs/core";
 
 /*
@@ -17,29 +18,30 @@ export default class AccountPlanBudjectService {
   ) { }
 
   public async createAccountPlanBudject(data: AccountPlanBudjectDTO) {
+    await AccountPlanBudjectValidator.validateOnCreate(data);
     const accountPlanBudject = new AccountPlanBudject();
     accountPlanBudject.fill({ year: data.year, description: data.description, })
     return await AccountPlanBudject.create(accountPlanBudject);
   }
 
-  public async createAccountPlanBudjectEntry(data: AccountPlanBudjectEntryDTO) {
-    return await this.accountPlanBudjectEntryService.createAccountPlanBudjectEntry(data);
+  public async initialAllocationAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
+    return await this.accountPlanBudjectEntryService.initialAllocationAccountPlanBudjectEntry(data);
   }
 
-  public async reinforcimentAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
-    return this.accountPlanBudjectEntryService.reinforcimentAccountPlanBudjectEntry(data);
+  public async reinforceAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
+    return this.accountPlanBudjectEntryService.reinforceAccountPlanBudjectEntry(data);
   }
 
-  public async annulmentAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
-    return this.accountPlanBudjectEntryService.annulmentAccountPlanBudjectEntry(data);
+  public async annulAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
+    return this.accountPlanBudjectEntryService.annulAccountPlanBudjectEntry(data);
   }
 
   public async redistribuitioReinforcimentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string }) {
     return this.accountPlanBudjectEntryService.redistribuitioReinforcimentAccountPlanBudjectEntry(data);
   }
 
-  public async redistribuitioAnnulmentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string }) {
-    return this.accountPlanBudjectEntryService.redistribuitioAnnulmentAccountPlanBudjectEntry(data);
+  public async redistributeAnnulmentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string }) {
+    return this.accountPlanBudjectEntryService.redistributeAnnulmentAccountPlanBudjectEntry(data);
   }
 
   /**------------------------------------------------------------------------*/
@@ -49,7 +51,7 @@ export default class AccountPlanBudjectService {
     return await AccountPlanBudject.all();
   }
 
-  public async findAllAccountPlanBudjectByYear(year: number) {
+  public async findAccountPlanBudjectByYear(year: number) {
     return await AccountPlanBudject.findByOrFail('year', year);
   }
 
@@ -75,6 +77,18 @@ export default class AccountPlanBudjectService {
     return await AccountPlanBudjectEntry.query()
       .whereHas('accountPlanBudject', (builder) => {
         builder.where('year', year);
+      })
+      .preload('accountPlan')
+      .preload('accountPlanBudject')
+      .preload('entriesEntry')
+  }
+
+  public async fetchAccountPlanBudjectEntriesByYearAndNumber(year: number, accountPlanNumber: number) {
+    return await AccountPlanBudjectEntry.query()
+      .whereHas('accountPlanBudject', (builder) => {
+        builder.where('year', year);
+      }).whereHas('accountPlan', (builder) => {
+        builder.where('number', accountPlanNumber);
       })
       .preload('accountPlan')
       .preload('accountPlanBudject')

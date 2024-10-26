@@ -20,11 +20,12 @@
 6. VineJs para a validação das request HTTP: https://vinejs.dev/docs/introduction
 
 # 1.3 Como configurar e subir a aplicação
-1. Criar a base de dados SGF
+1. Criar a base de dados SGF: veja a secção: [1.5 Configurar a base de dados - Mysql]
 2. Criar as tabelas e executar a carga inicial dos dados:
     i. Drop das tabelas: node ace migration:reset 
     ii. Criar as tableas e inserir na base: node ace migration:fresh --seed
     iii. Alterar o ficheiro .env e configurar a base de dados, hostname e porta do servidor
+3. Instação das dependencias: npm install
 4. Deploy da aplicação: node ace serve --watch
 5. Listar todos os seriços disponibilizados: node ace list:routes
 6. Build da API para a entrega em produção: node ace build
@@ -90,127 +91,3 @@ viii. Step 8: List tables
 
 # 1.6 Como testar a API no Postman
 No postman: File -> import -> https://winter-firefly-631772.postman.co/workspace/Sebadora~ce3a5692-37f9-49a8-92d4-9b04f8413c88/   collection/7769307-449d78d4-cb3f-455c-80d7-30d9198fe4a6?action=share&creator=7769307
-
-# **********************************************************************************************************
-#  2. Modulos da API do Sistema de Gestão Finançeira
-#   2.1 - Modulo de Segurança
-#   2.2 - Modulo de Plano e Orcamento
-#   2.3 - Modulo de Inscricao e Requisições
-# **********************************************************************************************************
-
-## *********************************************************************************************************
-# 2.1 - Modulo de Segurança
-#    i. Descrição:
-#       É o primeiro modulo desenvolvido no projecto e define a estrutura e logica dos 
-#        requisitos não funcionais segurnçà e acessos dos utilizadores.
-#    ii. Modelo de dados
-#        ![O modelo de dados e relacionamento pode ser encontrado na imagem](resources/modulo_seguranca.png)
-#    iii. Funçionalidades:
-#         1. Login e Logout
-#         2. Registrar utilizador
-#         3. Recuperar senha
-#         4. Altarar senha
-#    iv.  Configurar o modulo
-#    v.   Serviços disponibilizados: 
-## ********************************************************************************************************
-
-# iv - Configurar o modulo de segurança
-1. Step 1: Criação do projecto API com auth tipo tokens
-npm init adonisjs@latest sgf-api -- --kit=api --auth-guard=access_tokens --db=mysql
-
-2. Step 2: Commitar o projecto no repositorio gitlab
-cd sgf-api
-git remote add origin https://gitlab.com/sebadora/sgf/sgf-api.git
-git branch -M developer
-git push -uf origin developer
-
-# v. Serviços
-1. Step1: Autenticação com token
-
-curl --location 'http://localhost:3333/auth/login' \
---header 'Content-Type: application/json' \
---data-raw '{
-"email":"root@gmail.com",
-"password":"sebadora123"
-}'
-
-2. Logout
-2. Criação do utilizador
-3. Listar utilizadores
-4. Altarar senha
-4. Recuperar senha
-
-##### *****************************************************
-# 2 - Modulo de Plano e Orçamento
-#    i. Descricao:
-#       É o primeiro modulo desenvolvido no projecto e define a estrutura e logica dos requisitos não        #       funcional segurnçà e acessos dos utilizadores.
-#    ii. Modelo de dados
-#       ![O modelo de dados e relacionamento pode ser encontrado na imagem](resources/modolo_seguranca.png)
-#   iii. Funcionalidades esperadas neste modulo
-#      1.
-#      2.
-#      3.
-#      4.
-#      5.
-#   v. Serviços:
-#      
-##### *****************************************************
-
-v. Serviços disponibilizados pela API para o Modulo de plano de contas
-
-# v.1 Criar plano de contas (createAccountPlan)
-# O atributo "writable" diz se a conta é de movimento ou controle [ moviment, controll ]
-# O atributo "type" diz se a conta é de orcamento ou financeira [ budject, financial ]
-# O atributo "class" diz se a classe da conta:
-#        [A = 'A'] //'X.0.0.0.00'
-#        [B = 'B'], //'X.X.0.0.00'
-#        [C = 'C'], //'X.X.X.0.00'
-#        [D = 'D'], //'X.X.X.X.00'
-#        [E = 'E'], //'X.X.X.X.XX'
-
-curl -s --location 'http://localhost:3333/sgf-api/planbudject/accountplan/createAccountPlan' \
---header 'Content-Type: application/json' \
---data ' {
-        "number": "1.1.1.1.05",
-        "description": "Vencimento Base do Pessoal Civil Fora do Quadro11",
-        "writable": "moviment",
-        "type": "budject",
-        "class": "2"
-    }' | jq
-
-# v.2 Listar todos os planos de conta (findAllActiveAccountPlan)
-# Lista todos os planos de contas activos no sistema
-curl -s --location --request GET 'http://localhost:3333/sgf-api/planbudject/accountplan/findAllActiveAccountPlan' --header 'Content-Type: application/json' | jq
-
-# v.3 Buscar plano de conta pelo numero da conta (findAccountPlanByNumber)
-# Busca o plano de conta activo atraves do numero da conta
-curl -s --location --request GET 'http://localhost:3333/sgf-api/planbudject/accountplan/findAccountPlanByNumber' --header 'Content-Type: application/json' | jq
-
-# v.4. Listar todos os planos orçamentais
-curl -s --location 'http://localhost:3333/sgf-api/planbudject/findAllAccountPlanBudjectEntries' \
---header 'Content-Type: application/json' \
---data-raw '{
-"email":"root@gmail.com",
-"password":"sebadora123"
-}' | jq
-
-# Criar um orcamento
-
-
-# Listar todos os planos orçamentais 
-curl -s --location 'http://localhost:3333/sgf-api/planbudject/createAccountPlanBudjectEntry' \
---header 'Content-Type: application/json' \
---data ' {
-        "startPostingMonth": 1,
-        "endPostingMonth": 12,
-        "initialAllocation": 1200000,
-        "accountPlanNumber": "1.1.1.1.02"
-    }' | jq
-
-# Listar todos os planos orçamentais  com as respectivas entradas
-curl -s --location 'http://localhost:3333/sgf-api/planbudject/fetchAllAccountPlanBudjectEntries' \
---header 'Content-Type: application/json' \
---data-raw '{
-"email":"root@gmail.com",
-"password":"sebadora123"
-}' | jq

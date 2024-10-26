@@ -27,12 +27,12 @@ export default class AccountPlanBudjectsController {
     }
   }
 
-  async createAccountPlanBudjectEntry({ request, response }: HttpContext) {
+  async initialAllocationAccountPlanBudjectEntry({ request, response }: HttpContext) {
 
-    const data = await request.validateUsing(AccountPlanBudjectEntryValidator.validateFields());
+    const data = await request.validateUsing(AccountPlanBudjectEntryValidator.validateFieldsReinforceOrAnnul());
 
     try {
-      return response.created(await this.accountPlanBudjectService.createAccountPlanBudjectEntry(data));
+      return response.created(await this.accountPlanBudjectService.initialAllocationAccountPlanBudjectEntry(data));
     } catch (error) {
 
       console.log(error);
@@ -43,24 +43,108 @@ export default class AccountPlanBudjectsController {
     }
   }
 
+  async reinforceAccountPlanBudjectEntry({ request, response }: HttpContext) {
+
+    const data = await request.validateUsing(AccountPlanBudjectEntryValidator.validateFieldsReinforceOrAnnul());
+
+    try {
+      return response.created(await this.accountPlanBudjectService.reinforceAccountPlanBudjectEntry(data));
+    } catch (error) {
+
+      console.log(error);
+      return response.status(500).json({
+        message: 'Ocorreu um erro ao executar o reforço do plano e orçamento na conta ' + data.accountPlanNumber,
+        error: error.message,
+      });
+    }
+  }
+
+  async annulAccountPlanBudjectEntry({ request, response }: HttpContext) {
+
+    const data = await request.validateUsing(AccountPlanBudjectEntryValidator.validateFieldsReinforceOrAnnul());
+
+    try {
+      return response.created(await this.accountPlanBudjectService.annulAccountPlanBudjectEntry(data));
+    } catch (error) {
+
+      console.log(error);
+      return response.status(500).json({
+        message: 'Ocorreu um erro ao executar a anulação do plano e orçamento na conta ' + data.accountPlanNumber,
+        error: error.message,
+      });
+    }
+  }
+
+  async redistribuitioReinforcimentAccountPlanBudjectEntry({ request, response }: HttpContext) {
+
+    const data = await request.validateUsing(AccountPlanBudjectEntryValidator.validateFieldsRedistributeReinforcementOrAnnulment());
+
+    try {
+      return response.created(await this.accountPlanBudjectService.redistribuitioReinforcimentAccountPlanBudjectEntry(data));
+    } catch (error) {
+
+      console.log(error);
+      return response.status(500).json({
+        message: 'Ocorreu um erro ao executar a redistribuicao do reforço do plano e orçamento na conta ' + data.originAccountPlanNumber,
+        error: error.message,
+      });
+    }
+  }
+
+  async redistributeAnnulmentAccountPlanBudjectEntry({ request, response }: HttpContext) {
+
+    const data = await request.validateUsing(AccountPlanBudjectEntryValidator.validateFieldsRedistributeReinforcementOrAnnulment());
+
+    try {
+      return response.created(await this.accountPlanBudjectService.redistributeAnnulmentAccountPlanBudjectEntry(data));
+    } catch (error) {
+
+      console.log(error);
+      return response.status(500).json({
+        message: 'Ocorreu um erro ao executar a redistribuicao da anulação do plano e orçamento na conta ' + data.originAccountPlanNumber,
+        error: error.message,
+      });
+    }
+  }
+
+  
+
+
   async findAllAccountPlanBudject({ request, response }: HttpContext) {
     return response.ok(await this.accountPlanBudjectService.findAllAccountPlanBudject());
   }
 
-  async fetchAllAccountPlanBudjectEntries({ request, response }: HttpContext) {
-    //const newLocal = request.param('year');
-    return response.ok(await this.accountPlanBudjectService.fetchAllAccountPlanBudjectEntries((new Date).getFullYear()));
+  async findAccountPlanBudjectByYear({ request, response }: HttpContext) {
+    const year = request.param('year');
+    return response.ok(await this.accountPlanBudjectService.findAccountPlanBudjectByYear(year));
   }
 
-  async findAllAccountPlanBudjectEntries({ request, response }: HttpContext) {
-    //const newLocal_1 = request.param('year');
-    return response.ok(await this.accountPlanBudjectService.findAllAccountPlanBudjectEntries((new Date).getFullYear()));
+  async findAccountPlanBudjectEntriesByYear({ request, response }: HttpContext) {
+    const year = request.param('year');
+    return response.ok(await this.accountPlanBudjectService.findAllAccountPlanBudjectEntries(year));
   }
 
-  async findAllAccountPlanBudjectEntriesEntry({ request, response }: HttpContext) {
-    //const newLocal = request.param('year');
-    return response.ok(await this.accountPlanBudjectService.findAllAccountPlanBudjectEntriesEntry((new Date).getFullYear()));
+  async findAccountPlanBudjectEntriesEntryByYear({ request, response }: HttpContext) {
+    const year = request.param('year');
+    return response.ok(await this.accountPlanBudjectService.findAllAccountPlanBudjectEntriesEntry(year));
   }
+
+  async fetchAccountPlanBudjectEntriesByYear({ request, response }: HttpContext) {
+    const year = request.param('year');
+    return response.ok(await this.accountPlanBudjectService.fetchAllAccountPlanBudjectEntries(year));
+  }
+
+  async fetchAccountPlanBudjectEntriesByYearAndNumber({ request, response }: HttpContext) {
+    const year = request.param('year');
+    const accountPlanNumber = request.param('accountPlanNumber');
+    return response.ok(await this.accountPlanBudjectService.fetchAccountPlanBudjectEntriesByYearAndNumber(year, accountPlanNumber));
+  }
+
+
+
+
+
+
 
 
 }

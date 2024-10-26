@@ -1,4 +1,3 @@
-import { DateTime } from "luxon";
 import { AccountPlanTypeWritableType, AccoutPlanType, AccoutPlanClassType } from "../../../models/utility/Enums.js";
 
 /*
@@ -20,6 +19,8 @@ export interface AccountPlanDTO extends DomainDTO {
   writable: AccountPlanTypeWritableType;
   type: AccoutPlanType;
   class: AccoutPlanClassType;
+  parentId: number | null | undefined
+  parentAccountPlanNumber: string
 }
 
 export interface AccountPlanBudjectDTO extends DomainDTO {
@@ -28,6 +29,7 @@ export interface AccountPlanBudjectDTO extends DomainDTO {
 }
 
 export interface AccountPlanBudjectEntryDTO extends DomainDTO {
+  accountPlanNumber: string,
   startPostingMonth: number,
   endPostingMonth: number,
   reservePercent: number | undefined,
@@ -35,9 +37,6 @@ export interface AccountPlanBudjectEntryDTO extends DomainDTO {
   finalAllocation: number | undefined,
   accountPlanBudjectId: number | undefined
   accountPlanId: number | undefined,
-  accountPlanNumber: string,
-
-}
-
-export interface AccountPlanBudjectEntrieEntryDTO extends DomainDTO {
+  parentId: number | undefined,
+  parentAccountPlanNumber: string,
 }

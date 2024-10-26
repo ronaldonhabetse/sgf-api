@@ -1,4 +1,4 @@
-import { beforeSave, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import { belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
 import AccountPlanBudject from './account_plan_budject.js'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import AccountPlan from './account_plan.js'
@@ -29,6 +29,9 @@ export default class AccountPlanBudjectEntry extends MutableAbstractModel {
   declare accountPlanBudject: BelongsTo<typeof AccountPlanBudject>
 
   @column()
+  declare accountPlanNumber: string
+
+  @column()
   declare accountPlanId: number
 
   @belongsTo(() => AccountPlan)
@@ -44,9 +47,4 @@ export default class AccountPlanBudjectEntry extends MutableAbstractModel {
     foreignKey: 'entryId', // defaults to entryId
   })
   declare entriesEntry: HasMany<typeof AccountPlanBudjectEntryEntry>
-
-  @beforeSave()
-  static async setFinalAllocation(accountPlanBudjectEntry: AccountPlanBudjectEntry) {
-    accountPlanBudjectEntry.finalAllocation = accountPlanBudjectEntry.initialAllocation;
-  }
 }
