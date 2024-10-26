@@ -2,6 +2,7 @@ import vine, { SimpleMessagesProvider } from '@vinejs/vine'
 import AccountPlan from '../../models/planbudject/account_plan.js'
 import AccountPlanBudjectEntry from '../../models/planbudject/account_plan_budject_entry.js';
 import { AccountPlanBudjectEntryDTO } from '../../services/planbudject/utils/dtos.js';
+import { AccountPlanTypeWritableType } from '../../models/utility/Enums.js';
 
 export default class AccountPlanBudjectEntryValidator {
 
@@ -26,6 +27,7 @@ export default class AccountPlanBudjectEntryValidator {
         accountPlanBudjectId: vine.number().optional(),
         accountPlanNumber: vine.string(),
         accountPlanId: vine.number().optional(),
+        
 
         createtBy: vine.number().optional(),
         updatedBy: vine.number().optional().nullable(),
@@ -43,6 +45,7 @@ export default class AccountPlanBudjectEntryValidator {
         'id.database.existe': 'O id [{{ value }}] não existe no sistema',
         'accountPlanNumber.database.notexists': 'O numero da conta [{{ value }}] não existe no sistema',
         'accountPlanBudjectEntry.database.exists': 'O plano orçamental com o numero da conta [{{ value }}] já existe no sistema',
+        'only.moviment.valid': ' Operacoes permitidas somente em contas de movimento [{{ value }}]',
     }
 
     private static setMessages = (() => {
@@ -65,13 +68,17 @@ export default class AccountPlanBudjectEntryValidator {
     });
 
     public static async validateOnCreate(data: AccountPlanBudjectEntryDTO) {
-
+/*
         const existAccount = await AccountPlan.findBy("number", data.accountPlanNumber);
 
         if (!existAccount) {
             throw new Error(this.messagesLabels['accountPlanNumber.database.notexists'].replace('value', data.accountPlanNumber))
         }
 
+        if (AccountPlanTypeWritableType.MOVIMENT != data.) { 
+            throw new Error(this.messagesLabels['only.moviment.valid'].replace('value', data.accountPlanNumber))
+         }
+*/
         const exist = await AccountPlanBudjectEntry.query()
             .whereHas('accountPlan', (builder) => {
                 builder.where('number', data.accountPlanNumber);
@@ -80,5 +87,16 @@ export default class AccountPlanBudjectEntryValidator {
         if (exist) {
             throw new Error(this.messagesLabels['accountPlanBudjectEntry.database.exists'].replace('value', data.accountPlanNumber))
         }
+
+            const existParent = await AccountPlanBudjectEntry.query()
+                .whereHas('accountPlan', (builder) => {
+                    builder.where('number', data.parentAccountPlanNumber);
+                }).first();
+
+            if (!existParent) {
+                throw new Error(this.messagesLabels['accountPlanBudjectEntry.database.exists'].replace('value', data.accountPlanNumber))
+            }
+
+
     }
 }

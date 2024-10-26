@@ -27,12 +27,12 @@ export default class AccountPlanBudjectsController {
     }
   }
 
-  async createAccountPlanBudjectEntry({ request, response }: HttpContext) {
+  async initialAllocationAccountPlanBudjectEntry({ request, response }: HttpContext) {
 
-    const data = await request.validateUsing(AccountPlanBudjectEntryValidator.validateFields());
+    const data = await request.validateUsing(AccountPlanBudjectEntryValidator.validateFieldsReinforceOrAnnul());
 
     try {
-      return response.created(await this.accountPlanBudjectService.createAccountPlanBudjectEntry(data));
+      return response.created(await this.accountPlanBudjectService.initialAllocationAccountPlanBudjectEntry(data));
     } catch (error) {
 
       console.log(error);

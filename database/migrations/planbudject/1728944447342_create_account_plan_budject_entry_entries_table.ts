@@ -9,7 +9,7 @@ export default class extends BaseSchema {
       table.increments('id')
       table.enum('type', Object.values(EntryEntryType))
         .notNullable()
-        .checkIn([EntryEntryType.INITIAL, EntryEntryType.REINFORCEMENT, EntryEntryType.ANNULMENT, EntryEntryType.REDISTRIBUTION_REINFORCEMENT, EntryEntryType.REDISTRIBUTION_ANNULMENT,])
+        .checkIn([EntryEntryType.INITIAL, EntryEntryType.INITIAL_ALLOCATION, EntryEntryType.REINFORCEMENT, EntryEntryType.ANNULMENT, EntryEntryType.REDISTRIBUTION_REINFORCEMENT, EntryEntryType.REDISTRIBUTION_ANNULMENT,])
       table.enum('operator', Object.values(OperatorType))
         .notNullable()
         .checkIn([OperatorType.DEBIT, OperatorType.CREDTI])

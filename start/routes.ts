@@ -44,12 +44,12 @@ router.group(() => {
     router.post('findAccountPlanBudjectByYear/:year', [AccountPlanBudjectsController, 'findAccountPlanBudjectByYear']);
 
     // Entradas do orcamento do ano especifico - dotação
-    router.post('createAccountPlanBudjectEntry', [AccountPlanBudjectsController, 'createAccountPlanBudjectEntry']);
     router.post('findAccountPlanBudjectEntriesByYear/:year', [AccountPlanBudjectsController, 'findAccountPlanBudjectEntriesByYear']);
     router.post('fetchAccountPlanBudjectEntriesByYear/:year', [AccountPlanBudjectsController, 'fetchAccountPlanBudjectEntriesByYear']);
     router.post('fetchAccountPlanBudjectEntriesByYearAndNumber/:year/:accountPlanNumber', [AccountPlanBudjectsController, 'fetchAccountPlanBudjectEntriesByYearAndNumber']);
 
     // Actualização a dotação do plano de contas (reforço, anulação, redistribuição reforço, redistribuição anulação)
+    router.post('initialAllocationAccountPlanBudjectEntry', [AccountPlanBudjectsController, 'initialAllocationAccountPlanBudjectEntry']);
     router.post('reinforceAccountPlanBudjectEntry', [AccountPlanBudjectsController, 'reinforceAccountPlanBudjectEntry']);
     router.post('annulAccountPlanBudjectEntry', [AccountPlanBudjectsController, 'annulAccountPlanBudjectEntry']);
 
