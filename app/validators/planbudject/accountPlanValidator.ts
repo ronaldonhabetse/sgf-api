@@ -12,6 +12,7 @@ export default class AccountPlanValidator {
         writable: vine.enum(Object.values(AccountPlanTypeWritableType)),
         type: vine.enum(Object.values(AccoutPlanType)),
         class: vine.enum(Object.values(AccoutPlanClassType)),
+        parentAccountPlanNumber: vine.string().minLength(1),
         createtBy: vine.number().optional(),
         updatedBy: vine.number().optional().nullable(),
         createdAt: vine.date().optional(),
@@ -27,6 +28,10 @@ export default class AccountPlanValidator {
         'number.database.unique': 'O numero da conta [{{ value }}] já existe no sistema',
         'id.database.unique': 'O id [{{ value }}] não existe no sistema',
         'number.database.exists': 'O numero da conta [{{ value }}] já existe no sistema',
+        'class.not.valid': 'A conta de movimento so deve ser da classe E. Classe informada [{{ value }}]',
+        'only.moviment.valid': ' Operacoes permitidas somente em contas de movimento [{{ value }}]',
+
+
     }
 
     private static schemaCreate = vine.object({
@@ -49,12 +54,37 @@ export default class AccountPlanValidator {
 
     public static async validateOnCreate(data: AccountPlanDTO) {
         //valida o tipo de dados e enums
-         vine.compile(this.schemaFields).validate(data);
+        vine.compile(this.schemaFields).validate(data);
+
+        if (AccountPlanTypeWritableType.MOVIMENT != data.writable) { 
+            throw new Error(this.messagesLabels['only.moviment.valid'].replace('value', data.number))
+         }
 
         const exist = await AccountPlan.findBy("number", data.number);
-
+        
         if (exist) {
             throw new Error(this.messagesLabels['number.database.exists'].replace('value', data.number))
         }
+
+        if (AccoutPlanType.BUDJECT) {
+            if (AccountPlanTypeWritableType.MOVIMENT === data.writable)
+                
+          if(AccoutPlanClassType.E !== data.class) {
+                console.log(AccoutPlanClassType.E.valueOf())
+                throw new Error(this.messagesLabels['class.not.valid'].replace('value', data.class))
+            }
+        }
+
+        /*
+        if (AccoutPlanType.FINANCIAL) {
+            if ((AccountPlanTypeWritableType.MOVIMENT == data.writable)
+                && AccoutPlanClassType.D != data.class) {
+                throw new Error(this.messagesLabels['class.not.valid'].replace('value', data.class))
+            }
+        }
+        */
     }
+
+
+
 }

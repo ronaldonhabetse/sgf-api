@@ -6,55 +6,65 @@ import AccountPlanBudjectEntryEntry from "../../models/planbudject/account_plan_
 import { EntryEntryType, OperatorType } from "../../models/utility/Enums.js";
 import AccountPlanBudjectEntryValidator from "../../validators/planbudject/accountPlanBudjectEntryRuleValidator.js";
 import { AccountPlanBudjectEntryDTO } from "./utils/dtos.js";
+import { TransactionClientContract } from "@adonisjs/lucid/types/database";
 
 export default class AccountPlanBudjectEntryService {
 
-    public async createAccountPlanBudjectEntry(data: AccountPlanBudjectEntryDTO) {
+    public async createAccountPlanBudjectEntry(data: AccountPlanBudjectEntryDTO, accountPlan: AccountPlan, trx: TransactionClientContract) {
 
         await AccountPlanBudjectEntryValidator.validateOnCreate(data);
-
         const currentDate = new Date();
-        const trx = await db.transaction()  // Start transaction
-        try {
-            const currentPlanbudject = await AccountPlanBudject.findByOrFail('year', currentDate.getFullYear());
-            const accountPlan = await AccountPlan.findByOrFail('number', data.accountPlanNumber);
+        const currentPlanbudject = await AccountPlanBudject.findByOrFail('year', currentDate.getFullYear());
+        const parentEntry = await AccountPlanBudjectEntry.findBy('accountPlanNumber', data.parentAccountPlanNumber);
 
-            const createdEntry = await new AccountPlanBudjectEntry().fill({
-                startPostingMonth: data.startPostingMonth,
-                endPostingMonth: data.endPostingMonth,
-                reservePercent: 0,
-                initialAllocation: data.initialAllocation,
-                finalAllocation: data.initialAllocation,
-                accountPlanBudjectId: currentPlanbudject.id,
-                accountPlanId: accountPlan.id
-            }).useTransaction(trx).save();
-
-            const createdCreditEntryEntry = await new AccountPlanBudjectEntryEntry()
-                .fill(
-                    {
-                        type: EntryEntryType.INITIAL,
-                        operator: OperatorType.CREDTI,
-                        postingMonth: currentDate.getMonth(),
-                        allocation: data.initialAllocation,
-                        lastFinalAllocation: 0,
-                        entryId: createdEntry.id,
-                        accountPlanBudjectId: currentPlanbudject.id,
-                    }).useTransaction(trx).save();
-
-            await trx.commit();
-            return createdCreditEntryEntry;
-        } catch (error) {
-            await trx.rollback();
-            throw error;
+        if (!parentEntry) {
+            throw Error("Entrada do Plano de conta de controle não encontrado no sistema para a conta " + data.accountPlanNumber);
         }
+
+        const createdEntry = await new AccountPlanBudjectEntry().fill({
+            accountPlanNumber: data.accountPlanNumber,
+            startPostingMonth: data.startPostingMonth,
+            endPostingMonth: data.endPostingMonth,
+            reservePercent: 0,
+            initialAllocation: data.initialAllocation,
+            finalAllocation: data.initialAllocation,
+            accountPlanBudjectId: currentPlanbudject.id,
+            accountPlanId: accountPlan.id,
+            parentId: parentEntry.id,
+        }).useTransaction(trx).save();
+
+        const createdCreditEntryEntry = await new AccountPlanBudjectEntryEntry()
+            .fill(
+                {
+                    type: EntryEntryType.INITIAL,
+                    operator: OperatorType.CREDTI,
+                    postingMonth: currentDate.getMonth(),
+                    allocation: data.initialAllocation,
+                    lastFinalAllocation: 0,
+                    entryId: createdEntry.id,
+                    accountPlanBudjectId: currentPlanbudject.id,
+                }).useTransaction(trx).save();
+
+        return createdCreditEntryEntry;
+    }
+
+    public async initialAllocationAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
+
+        const entry = await AccountPlanBudjectEntry.findBy('accountPlanNumber', data.accountPlanNumber);
+
+        if (entry && entry.finalAllocation !== 0) {
+            throw Error("A dotacao inicial ja foi carregada para o plano de conta " + entry.finalAllocation);
+        }
+
+        return this.reinforceOrAnnulmentAccountPlanBudjectEntry(data, true, true);
     }
 
     public async reinforceAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
-        return this.reinforceOrAnnulmentAccountPlanBudjectEntry(data, true);
+        return this.reinforceOrAnnulmentAccountPlanBudjectEntry(data, true, false);
     }
 
     public async annulAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
-        return this.reinforceOrAnnulmentAccountPlanBudjectEntry(data, false);
+        return this.reinforceOrAnnulmentAccountPlanBudjectEntry(data, false, false);
     }
 
     public async redistribuitioReinforcimentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string }) {
@@ -66,7 +76,7 @@ export default class AccountPlanBudjectEntryService {
         return this.redistributeReinforeOrAnnulmentAccountPlanBudjectEntry(data, false);
     }
 
-    private async reinforceOrAnnulmentAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }, isReinforce: boolean) {
+    private async reinforceOrAnnulmentAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }, isReinforce: boolean, isInitialAlocation: boolean) {
 
         const currentDate = new Date();
         const trx = await db.transaction()  // Start transaction
@@ -85,7 +95,7 @@ export default class AccountPlanBudjectEntryService {
             let entryfinalAllocation;
 
             if (isReinforce) {
-                entryEntryType = EntryEntryType.REINFORCEMENT;
+                entryEntryType = isInitialAlocation ? EntryEntryType.INITIAL_ALLOCATION : EntryEntryType.REINFORCEMENT;
                 entryEntryOperator = OperatorType.CREDTI;
                 entryfinalAllocation = entry.finalAllocation + data.value;
             } else {
@@ -115,7 +125,10 @@ export default class AccountPlanBudjectEntryService {
             entry.finalAllocation = entryfinalAllocation
             const updatedEntry = await entry.useTransaction(trx)
                 .save();
-            trx.commit();
+
+            await this.updateParentsAccountPlanBudjectEntriesByChild(updatedEntry, data.value, isReinforce, trx);
+
+            await trx.commit();
             return updatedEntry;
         } catch (error) {
             await trx.rollback();
@@ -209,7 +222,7 @@ export default class AccountPlanBudjectEntryService {
 
             //Actualizamos o targetEntrieEntryId na entrada origem
             createdOriginEntryEntry.targetEntrieEntryId = createdTargetEntryEntry.id;
-            createdOriginEntryEntry.useTransaction(trx).save();
+            await createdOriginEntryEntry.useTransaction(trx).save();
 
             originEntry.finalAllocation = originEntryfinalAllocation;
             targetEntry.finalAllocation = targetEntryfinalAllocation;
@@ -217,9 +230,12 @@ export default class AccountPlanBudjectEntryService {
                 .useTransaction(trx)
                 .save();
 
-            const updatedTargetEntry = await targetEntry
+            await targetEntry
                 .useTransaction(trx)
                 .save();
+
+            await this.updateParentsAccountPlanBudjectEntriesByChild(updatedOriginEntry, data.value, isRedistributeReinforcement, trx);
+            await this.updateParentsAccountPlanBudjectEntriesByChild(targetEntry, data.value, !isRedistributeReinforcement, trx);
 
             // Commit the transaction if everything is successful
             await trx.commit();
@@ -228,6 +244,35 @@ export default class AccountPlanBudjectEntryService {
             await trx.rollback();
             throw error;
         }
+    }
+
+    public async updateParentsAccountPlanBudjectEntriesByChild(child: AccountPlanBudjectEntry, value: number, isReinforce: boolean, trx: TransactionClientContract) {
+        const parentId = child.parentId;
+        if (parentId) {
+            const parent = await AccountPlanBudjectEntry.query().where('id', child.parentId).first();
+            if (parent) {
+                parent.finalAllocation = isReinforce ? parent.finalAllocation + value : parent.finalAllocation - value;
+                console.log(parent.finalAllocation);
+                await parent.useTransaction(trx).save();
+                await this.updateParentsAccountPlanBudjectEntriesByChild(parent, value, isReinforce, trx);
+            } else return;
+        }
+    }
+
+    public async findParentsAccountPlanBudjectEntriesByChild(child: AccountPlanBudjectEntry, parents: AccountPlanBudjectEntry[]) {
+        const parentId = child.parentId;
+        if (parentId) {
+            const parent = await AccountPlanBudjectEntry.query().where('id', parentId).first();
+            if (parent) {
+                console.log('com parent', parent.accountPlanNumber)
+                parents.fill(parent);
+                await this.findParentsAccountPlanBudjectEntriesByChild(parent, parents)
+            } else {
+                console.log('sem parente')
+                return
+            };
+        }
+        return parents;
     }
 
     public async findAccountPlanBudjectEntriesByYearAndNumber(year: number, accountPlanNumber: string) {
