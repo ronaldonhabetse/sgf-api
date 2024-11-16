@@ -86,6 +86,8 @@ iii. Entrar no container e executar os scripts de criacao do utilizaro ou usar u
 
   ii. Build do pacote
     $ cd sgf-api
+    $ npm install 
+    $ node ace build
     $ docker build --tag sgf-api .  
 
   ii. Limpar imagens sem tags
@@ -102,17 +104,15 @@ iii. Entrar no container e executar os scripts de criacao do utilizaro ou usar u
       -p 3333:3333 \
       sgf-api:latest
 
-  iv. Execucao do container e entrar na imagem
+  iii.a. Execucao do container e entrar na imagem
     $ docker run -it --net dev-network --name sgf-api-conatiner-1 --entrypoint sh sgf-api:latest
 
   iv. Validacao da aplicacao
     #Verifica containeres na mesma rede
-    $ docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Networks}}\t{{.State}}\t{{.CreatedAt}}"    
+    $ docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Networks}}\t{{.Ports}}\t{{.State}}\t{{.CreatedAt}}"    
   
     #Verifica saude da aplicacao
-
-
-
+     
 
 # 1.6 Como testar a API no Postman
 No postman: File -> import -> https://winter-firefly-631772.postman.co/workspace/Sebadora~ce3a5692-37f9-49a8-92d4-9b04f8413c88/   collection/7769307-449d78d4-cb3f-455c-80d7-30d9198fe4a6?action=share&creator=7769307
