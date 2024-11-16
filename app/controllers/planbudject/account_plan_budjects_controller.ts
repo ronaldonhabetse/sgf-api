@@ -110,7 +110,7 @@ export default class AccountPlanBudjectsController {
   
 
 
-  async findAllAccountPlanBudject({ request, response }: HttpContext) {
+  async findAllAccountPlanBudject({response }: HttpContext) {
     return response.ok(await this.accountPlanBudjectService.findAllAccountPlanBudject());
   }
 

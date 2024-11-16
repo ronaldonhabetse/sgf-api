@@ -79,5 +79,40 @@ iii. Entrar no container e executar os scripts de criacao do utilizaro ou usar u
        $ use sgf;
        $ show tables sgf;
 
+# 1.2 Configurar o deploy do pacote no docker
+  i. Puxar a imagem do node versao 18
+    $ docker pull node:18.20.4-alpine
+    $ docker images
+
+  ii. Build do pacote
+    $ cd sgf-api
+    $ docker build --tag sgf-api .  
+
+  ii. Limpar imagens sem tags
+    $ docker rmi -f $(docker images --filter dangling=true -q 2>/dev/null) 2>/dev/null
+
+
+  iii. Execucao do container
+     $ docker stop sgf-api-conatiner-1
+     $ docker rm sgf-api-conatiner-1
+     $ docker run  -d \
+      --name sgf-api-conatiner-1 \
+      --hostname WORKSTATION \
+      --net dev-network \
+      -p 3333:3333 \
+      sgf-api:latest
+
+  iv. Execucao do container e entrar na imagem
+    $ docker run -it --net dev-network --name sgf-api-conatiner-1 --entrypoint sh sgf-api:latest
+
+  iv. Validacao da aplicacao
+    #Verifica containeres na mesma rede
+    $ docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Networks}}\t{{.State}}\t{{.CreatedAt}}"    
+  
+    #Verifica saude da aplicacao
+
+
+
+
 # 1.6 Como testar a API no Postman
 No postman: File -> import -> https://winter-firefly-631772.postman.co/workspace/Sebadora~ce3a5692-37f9-49a8-92d4-9b04f8413c88/   collection/7769307-449d78d4-cb3f-455c-80d7-30d9198fe4a6?action=share&creator=7769307

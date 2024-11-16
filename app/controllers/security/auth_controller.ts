@@ -34,8 +34,10 @@ export class AuthController {
     return { user: auth.user }
   }
 
+  /*
   async resetPassword({ request, response }: HttpContext) {
     const { email, password } = request.only(['email', 'password'])
-    response.accepted(AuthService.resetPassword(email, password));
+   // response.accepted(AuthService.resetPassword(email, password));
   }
+  */
 }

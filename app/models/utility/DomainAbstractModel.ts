@@ -1,6 +1,4 @@
-import { DateTime } from 'luxon'
-import { BaseModel, beforeSave, column, scope } from '@adonisjs/lucid/orm'
-import { LifeclicleState } from './Enums.js'
+import { BaseModel, column } from '@adonisjs/lucid/orm'
 
 /*
 * Model abstracto que que representa um objecto com ID, chave primaria

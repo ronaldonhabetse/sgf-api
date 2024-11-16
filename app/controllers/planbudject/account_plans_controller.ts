@@ -40,11 +40,11 @@ export default class AccountPlansController {
     }
   }
 
-  async findAllAccountPlan({ request, response }: HttpContext) {
+  async findAllAccountPlan({ response }: HttpContext) {
     return response.ok(await this.accountPlanService.findAll());
   }
 
-  async findAnyAccountPlan({ request, response }: HttpContext) {
+  async findAnyAccountPlan({ response }: HttpContext) {
     return response.ok(await this.accountPlanService.findAny());
   }
 

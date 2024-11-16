@@ -12,6 +12,7 @@ export default class AccountPlanValidator {
         writable: vine.enum(Object.values(AccountPlanTypeWritableType)),
         type: vine.enum(Object.values(AccoutPlanType)),
         class: vine.enum(Object.values(AccoutPlanClassType)),
+        parentId: vine.number().optional(),
         parentAccountPlanNumber: vine.string().minLength(1),
         createtBy: vine.number().optional(),
         updatedBy: vine.number().optional().nullable(),
@@ -34,6 +35,7 @@ export default class AccountPlanValidator {
 
     }
 
+    /*
     private static schemaCreate = vine.object({
         //O numero da conta deve ser unico e não deve existir na base
         number: vine.string().fixedLength(10).exists(async (db, value) => {
@@ -42,7 +44,7 @@ export default class AccountPlanValidator {
             return false
         }),
     })
-
+*/
     private static setMessages = (() => {
         vine.messagesProvider = new SimpleMessagesProvider(this.messagesLabels)
     })
