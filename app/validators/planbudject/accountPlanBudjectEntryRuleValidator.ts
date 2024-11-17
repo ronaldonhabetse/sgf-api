@@ -44,7 +44,8 @@ export default class AccountPlanBudjectEntryValidator {
         'number.database.unique': 'O numero da conta [{{ value }}] já existe no sistema',
         'id.database.existe': 'O id [{{ value }}] não existe no sistema',
         'accountPlanNumber.database.notexists': 'O numero da conta [{{ value }}] não existe no sistema',
-        'accountPlanBudjectEntry.database.exists': 'O plano orçamental com o numero da conta [{{ value }}] já existe no sistema',
+        'accountPlanBudjectEntry.database.exists': 'O plano de conta com o numero da conta [{{ value }}] já existe no sistema',
+        'accountPlanBudjectEntry.database.not.exists': 'O plano conta com o numero da conta [{{ value }}] já existe no sistema',
         'only.moviment.valid': ' Operacoes permitidas somente em contas de movimento [{{ value }}]',
     }
 
@@ -84,17 +85,22 @@ export default class AccountPlanBudjectEntryValidator {
                 builder.where('number', data.accountPlanNumber);
             }).first();
 
-        if (exist) {
-            throw new Error(this.messagesLabels['accountPlanBudjectEntry.database.exists'].replace('value', data.accountPlanNumber))
-        }
-
-            const existParent = await AccountPlanBudjectEntry.query()
+            if (exist) {
+                throw new Error(this.messagesLabels['accountPlanBudjectEntry.database.exists'].replace('value', data.accountPlanNumber));
+            }
+            
+            const query = AccountPlanBudjectEntry.query()
                 .whereHas('accountPlan', (builder) => {
                     builder.where('number', data.parentAccountPlanNumber);
-                }).first();
-
+                });
+            
+            // Imprimir a consulta SQL gerada
+            console.log(query.toSQL().sql); // Adicione esta linha para imprimir a consulta
+            
+            const existParent = await query.first();
+            
             if (!existParent) {
-                throw new Error(this.messagesLabels['accountPlanBudjectEntry.database.exists'].replace('value', data.accountPlanNumber))
+                throw new Error(this.messagesLabels['accountPlanBudjectEntry.database.not.exists'].replace('value', data.parentAccountPlanNumber));
             }
 
 

@@ -40,6 +40,19 @@ export default class AccountPlansController {
     }
   }
 
+  async removeAccountPlan({ request, response }: HttpContext) {
+    const data = await request.validateUsing(AccountPlanValidator.validateFields())
+    try {
+      return response.created((await this.accountPlanService.remove(data)).serialize());
+
+    } catch (error) {
+      return response.status(500).json({
+        message: 'Ocorrer erro ao remover o plano de contas',
+        error: error.message,
+      });
+    }
+  }
+
   async findAllAccountPlan({ request, response }: HttpContext) {
     return response.ok(await this.accountPlanService.findAll());
   }
