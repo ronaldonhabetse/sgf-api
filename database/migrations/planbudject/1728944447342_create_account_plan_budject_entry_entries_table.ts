@@ -17,7 +17,7 @@ export default class extends BaseSchema {
       table.double('last_final_allocation').notNullable()
       table.integer('posting_month').notNullable()
       table.timestamp('posting_date').notNullable()
-
+      table.timestamp('operation_date').notNullable()
       table.integer('entry_id').notNullable().unsigned()
         .references('account_plan_budject_entries.id')
         .withKeyName('fk_entry_id')

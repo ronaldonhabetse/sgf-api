@@ -1,12 +1,3 @@
-INSERT INTO account_plan_budjects (
-    year,
-    description,
-    state,
-    created_at,
-    updated_at
-) VALUES
-(2024, 'Ano fiscal 2024',1, NOW(), NOW());
-
 INSERT INTO account_plans (
     number,
     description,
@@ -50,13 +41,13 @@ INSERT INTO account_plan_budject_entries  (
     created_at,
     updated_at
 ) VALUES
-('1.0.0.0.00'.MONTH(NOW()),MONTH(NOW()),0,0, (select id from account_plan_budjects where year=2024), (select acc.id from account_plans acc where acc.number='1.0.0.0.00'),null, 1, NOW(), NOW()),
+('1.0.0.0.00',MONTH(NOW()),MONTH(NOW()),0,0, (select id from account_plan_budjects where year=2024), (select acc.id from account_plans acc where acc.number='1.0.0.0.00'),null, 1, NOW(), NOW()),
 ('1.1.0.0.00',MONTH(NOW()),MONTH(NOW()),0,0, (select id from account_plan_budjects where year=2024), (select acc.id from account_plans acc where acc.number='1.1.0.0.00'),(select parent.id from account_plan_budject_entries parent where parent.account_plan_number='1.0.0.0.00'), 1, NOW(), NOW()),
 ('1.1.1.0.00',MONTH(NOW()),MONTH(NOW()),0,0, (select id from account_plan_budjects where year=2024), (select acc.id from account_plans acc where acc.number='1.1.1.0.00'),(select parent.id from account_plan_budject_entries parent where parent.account_plan_number='1.1.0.0.00'), 1, NOW(), NOW()),
 ('1.1.1.1.00',MONTH(NOW()),MONTH(NOW()),0,0, (select id from account_plan_budjects where year=2024), (select acc.id from account_plans acc where acc.number='1.1.1.1.00'),(select parent.id from account_plan_budject_entries parent where parent.account_plan_number='1.1.1.0.00'), 1, NOW(), NOW()),
 ('1.1.2.0.00',MONTH(NOW()),MONTH(NOW()),0,0, (select id from account_plan_budjects where year=2024), (select acc.id from account_plans acc where acc.number='1.1.2.0.00'),(select parent.id from account_plan_budject_entries parent where parent.account_plan_number='1.1.0.0.00'), 1, NOW(), NOW()),
 ('1.1.2.1.00',MONTH(NOW()),MONTH(NOW()),0,0, (select id from account_plan_budjects where year=2024), (select acc.id from account_plans acc where acc.number='1.1.2.1.00'),(select parent.id from account_plan_budject_entries parent where parent.account_plan_number='1.1.2.0.00'), 1, NOW(), NOW()),
-('1.2.0.0.00',MONTH(NOW()),MONTH(NOW()),0,0, (select id from account_plan_budjects where year=2024), (select acc.id from account_plans acc where acc.number='1.2.0.0.00'),(select parent.id from account_plan_budject_entries parent where parent.account_plan_number='1.0.0.0.00'), 1, NOW(), NOW()),
+('1.2.0.0.00',MONTH(NOW()),MONTH(NOW()),0,0, (select id from account_plan_budjects where year=2024), (select acc.id from account_plans acc where acc.number='1.2.0.0.00'),(select parent.id from account_plan_budject_entries parent where parent.account_plan_number='1.0.0.0.00'), 1, NOW(), NOW());
 
 /*
 ('1.2.1.0.00', 'Bens', 'controll', 'budject', 'A', 1, NOW(), NOW()),

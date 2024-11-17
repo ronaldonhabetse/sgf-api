@@ -69,6 +69,7 @@ export default class AccountPlanService {
             const createdAccountPlan = await accountPlan.useTransaction(trx).save();
 
             const currentPlanbudject = await AccountPlanBudject.findByOrFail('year', currentDate.getFullYear());
+           
             const entry: AccountPlanBudjectEntryDTO = {
                 accountPlanNumber: createdAccountPlan.number,
                 startPostingMonth: currentDate.getMonth(),

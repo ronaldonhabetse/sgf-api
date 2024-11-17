@@ -7,12 +7,14 @@ export default class AccountPlanBudjectEntryValidator {
     private static schemaFieldsReinforceOrAnnul = vine.object({
         accountPlanNumber: vine.string(),
         value: vine.number(),
+        operationDate: vine.date(),
     });
 
     private static schemaFieldsRedistributeReinforcementOrAnnulment = vine.object({
         originAccountPlanNumber: vine.string(),
         targetAccountPlanNumber: vine.string(),
         value: vine.number(),
+        operationDate: vine.date(),
     });
 
     private static schemaFields = vine.object({
@@ -25,8 +27,8 @@ export default class AccountPlanBudjectEntryValidator {
         accountPlanBudjectId: vine.number().optional(),
         accountPlanNumber: vine.string(),
         accountPlanId: vine.number().optional(),
-        
-
+        parentId: vine.number().optional(),
+        parentAccountPlanNumber: vine.string(),
         createtBy: vine.number().optional(),
         updatedBy: vine.number().optional().nullable(),
         createdAt: vine.date().optional(),
@@ -43,7 +45,7 @@ export default class AccountPlanBudjectEntryValidator {
         'id.database.existe': 'O id [{{ value }}] não existe no sistema',
         'accountPlanNumber.database.notexists': 'O numero da conta [{{ value }}] não existe no sistema',
         'accountPlanBudjectEntry.database.exists': 'O plano de conta com o numero da conta [{{ value }}] já existe no sistema',
-        'accountPlanBudjectEntry.database.not.exists': 'O plano conta com o numero da conta [{{ value }}] já existe no sistema',
+        'accountPlanBudjectEntry.database.not.exists': 'A entrada do plano conta pai o numero da conta [{{ value }}] não existe no sistema',
         'only.moviment.valid': ' Operacoes permitidas somente em contas de movimento [{{ value }}]',
     }
 
