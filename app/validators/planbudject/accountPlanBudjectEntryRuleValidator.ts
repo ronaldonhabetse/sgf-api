@@ -1,8 +1,6 @@
 import vine, { SimpleMessagesProvider } from '@vinejs/vine'
-import AccountPlan from '../../models/planbudject/account_plan.js'
 import AccountPlanBudjectEntry from '../../models/planbudject/account_plan_budject_entry.js';
 import { AccountPlanBudjectEntryDTO } from '../../services/planbudject/utils/dtos.js';
-import { AccountPlanTypeWritableType } from '../../models/utility/Enums.js';
 
 export default class AccountPlanBudjectEntryValidator {
 

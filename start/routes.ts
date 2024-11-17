@@ -22,7 +22,7 @@ router.group(() => {
       router.post('login', [AuthController, 'login']);
       router.post('logout', [AuthController, 'logout']).use(middleware.auth());
       router.post('isAuthenticated', [AuthController, 'isAuthenticated']);
-      router.post('resetPassword', [AuthController, 'resetPassword']).use(middleware.auth());
+    //  router.post('resetPassword', [AuthController, 'resetPassword']).use(middleware.auth());
     }).prefix("auth");
   }).prefix("security");
   /*------------------------------------------------------------------------------------------*/

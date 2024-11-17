@@ -28,6 +28,6 @@ export default class AuthService {
         return User.accessTokens.verify(new Secret(tokenValue));
     }
 
-    public static async resetPassword(email: string, password: string) {
-    }
+   // public static async resetPassword(email: string, password: string) {
+    //}
 }

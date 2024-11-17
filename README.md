@@ -68,14 +68,19 @@ node ace make:model user --cm
 i. Step 1: Log in to MySQL
  $ mysql -u root -p
 
+ii. Step1.1 list database users
+$ SELECT User FROM mysql.user;
+
 ii. Step 2: Create a New Database
- $ CREATE DATABASE SGF;
+ $ CREATE DATABASE sgf;
 
 iii. Step 3: Create a New User
- $ CREATE USER 'sgfuser'@'localhost' IDENTIFIED BY 'sgf123';
+$ DROP USER IF EXISTS sgfuser;
+
+$ CREATE USER 'sgfuser'@'%' IDENTIFIED BY 'sgf123';
 
 iv. Step 4: Grant Privileges to the New User
- $ GRANT ALL PRIVILEGES ON SGF.* TO 'sgfuser'@'localhost';
+ $ GRANT ALL PRIVILEGES ON sgf.* TO 'sgfuser'@'%';
 
 v. Step 5: Apply Privileges
  $ FLUSH PRIVILEGES;
