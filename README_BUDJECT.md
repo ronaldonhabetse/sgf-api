@@ -75,7 +75,8 @@ curl -s --location 'http://localhost:3333/sgf-api/planbudject/initialAllocationA
 --header 'Content-Type: application/json' \
 --data ' {
         "accountPlanNumber": "1.1.1.1.05",
-        "value": 10000
+        "value": 10000,
+        "operationDate": "2024-10-10"
     }' 
     |jq
 
@@ -92,13 +93,15 @@ curl -s --location --request POST 'http://localhost:3333/sgf-api/planbudject/fet
  # i. reforço da dotação (reinforceAccountPlanBudjectEntry)
   Parametros do body: 
         "accountPlanNumber" O numero/codigo da conta do plano de conta
-        "value" O valor do reforço
+        "value" O valor do reforço,
+        "operationDate": "2024-10-10"
 
 curl --location 'http://localhost:3333/sgf-api/planbudject/reinforceAccountPlanBudjectEntry' \
 --header 'Content-Type: application/json' \
 --data ' {
         "accountPlanNumber": "1.0.0.0.00",
-        "value": 100
+        "value": 100,
+        "operationDate": "2024-10-10"
     }'
 
  # ii. Anulação da dotação (annulAccountPlanBudjectEntry)
@@ -110,7 +113,8 @@ curl --location 'http://localhost:3333/sgf-api/planbudject/annulAccountPlanBudje
 --header 'Content-Type: application/json' \
 --data ' {
         "accountPlanNumber": "1.0.0.0.00",
-        "value": 100
+        "value": 100,
+        "operationDate": "2024-10-10"
     }'
 
  # iii. redistribuição reforço (redistribuitioReinforcimentAccountPlanBudjectEntry)
@@ -124,7 +128,8 @@ curl --location 'http://localhost:3333/sgf-api/planbudject/annulAccountPlanBudje
 --data ' {
         "originAccountPlanNumber": "1.0.0.0.00",
         "targetAccountPlanNumber": "1.0.0.0.00",
-        "value": 100
+        "value": 100,
+        "operationDate": "2024-10-10"
     }'
 
  # v. redistribuição anulação (redistributeAnnulmentAccountPlanBudjectEntry)
@@ -138,5 +143,6 @@ curl --location 'http://localhost:3333/sgf-api/planbudject/redistributeAnnulment
 --data ' {
         "originAccountPlanNumber": "1.1.1.1.01",
         "targetAccountPlanNumber": "1.1.1.1.02",
-        "value": 6000
+        "value": 6000,
+        "operationDate": "2024-10-10"
     }'
