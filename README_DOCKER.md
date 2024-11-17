@@ -46,6 +46,11 @@ iii. Entrar no container e executar os scripts de criacao do utilizaro ou usar u
        $ docker exec -it <container_name_or_id> sh
        EX: docker exec -it mysql-instance sh
        EX2: docker exec -it mysql-container mysql -u root -p
+
+     ii. Se estiver usando o Docker use o seguinte comando para importar;
+       cd /resources/mysql/script/sgf_ddl
+       $ docker exec -i meu_conteiner_mysql mysql -u usuario_destino -p nome_da_base < sgf.sql
+       $ docker exec -i mysql-container-1 mysql -u sgfuser -p sgf < sgf_ddl.sql
     
     ii. Step 2: Log in to MySQL
       $ mysql -u root -p

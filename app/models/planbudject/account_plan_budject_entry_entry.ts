@@ -27,6 +27,11 @@ export default class AccountPlanBudjectEntryEntry extends CreatableAbstractModel
   @column.dateTime({ autoCreate: true })
   declare postingDate: DateTime
 
+  @column.date({
+    serialize: (value) => value?.toFormat('dd-MM-yyyy'), // Custom format
+  })
+  declare operationDate: DateTime
+
   @column()
   declare allocation: number
 

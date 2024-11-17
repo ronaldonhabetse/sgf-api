@@ -7,6 +7,7 @@ import { EntryEntryType, OperatorType } from "../../models/utility/Enums.js";
 import AccountPlanBudjectEntryValidator from "../../validators/planbudject/accountPlanBudjectEntryRuleValidator.js";
 import { AccountPlanBudjectEntryDTO } from "./utils/dtos.js";
 import { TransactionClientContract } from "@adonisjs/lucid/types/database";
+import { DateTime } from "luxon";
 
 export default class AccountPlanBudjectEntryService {
 
@@ -14,6 +15,8 @@ export default class AccountPlanBudjectEntryService {
 
         await AccountPlanBudjectEntryValidator.validateOnCreate(data);
         const currentDate = new Date();
+        const operationDate= DateTime.local(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())
+
         const currentPlanbudject = await AccountPlanBudject.findByOrFail('year', currentDate.getFullYear());
         const parentEntry = await AccountPlanBudjectEntry.findBy('accountPlanNumber', data.parentAccountPlanNumber);
 
@@ -39,6 +42,7 @@ export default class AccountPlanBudjectEntryService {
                     type: EntryEntryType.INITIAL,
                     operator: OperatorType.CREDTI,
                     postingMonth: currentDate.getMonth(),
+                    operationDate: operationDate,
                     allocation: data.initialAllocation,
                     lastFinalAllocation: 0,
                     entryId: createdEntry.id,
@@ -53,6 +57,7 @@ export default class AccountPlanBudjectEntryService {
         await AccountPlanBudjectEntryValidator.validateOnCreate(data);
 
         const currentDate = new Date();
+        const operationDate= DateTime.local(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())
         const trx = await db.transaction()  // Start transaction
         try {
             const currentPlanbudject = await AccountPlanBudject.findByOrFail('year', currentDate.getFullYear());
@@ -74,6 +79,7 @@ export default class AccountPlanBudjectEntryService {
                         type: EntryEntryType.INITIAL,
                         operator: OperatorType.CREDTI,
                         postingMonth: currentDate.getMonth(),
+                        operationDate: operationDate,
                         allocation: data.initialAllocation,
                         lastFinalAllocation: 0,
                         entryId: createdEntry.id,
@@ -90,7 +96,7 @@ export default class AccountPlanBudjectEntryService {
     }
 
 
-    public async initialAllocationAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
+    public async initialAllocationAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number, operationDate: Date }) {
 
         const entry = await AccountPlanBudjectEntry.findBy('accountPlanNumber', data.accountPlanNumber);
 
@@ -101,26 +107,28 @@ export default class AccountPlanBudjectEntryService {
         return this.reinforceOrAnnulmentAccountPlanBudjectEntry(data, true, true);
     }
 
-    public async reinforceAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
+    public async reinforceAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number, operationDate: Date }) {
         return this.reinforceOrAnnulmentAccountPlanBudjectEntry(data, true, false);
     }
 
-    public async annulAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
+    public async annulAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number, operationDate: Date }) {
         return this.reinforceOrAnnulmentAccountPlanBudjectEntry(data, false, false);
     }
 
-    public async redistribuitioReinforcimentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string }) {
+    public async redistribuitioReinforcimentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string, operationDate: Date }) {
 
         return this.redistributeReinforeOrAnnulmentAccountPlanBudjectEntry(data, true);
     }
 
-    public async redistributeAnnulmentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string }) {
+    public async redistributeAnnulmentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string, operationDate: Date }) {
         return this.redistributeReinforeOrAnnulmentAccountPlanBudjectEntry(data, false);
     }
 
-    private async reinforceOrAnnulmentAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }, isReinforce: boolean, isInitialAlocation: boolean) {
+    private async reinforceOrAnnulmentAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number, operationDate: Date }, isReinforce: boolean, isInitialAlocation: boolean) {
 
         const currentDate = new Date();
+        const operationDate= DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth(), data.operationDate.getDate())
+
         const trx = await db.transaction()  // Start transaction
         try {
 
@@ -158,6 +166,7 @@ export default class AccountPlanBudjectEntryService {
                         type: entryEntryType,
                         operator: entryEntryOperator,
                         postingMonth: currentDate.getMonth(),
+                        operationDate: operationDate,
                         allocation: data.value,
                         lastFinalAllocation: entry.finalAllocation,
                         entryId: entry.id,
@@ -178,9 +187,10 @@ export default class AccountPlanBudjectEntryService {
         }
     }
 
-    private async redistributeReinforeOrAnnulmentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string }, isRedistributeReinforcement: boolean) {
+    private async redistributeReinforeOrAnnulmentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string, operationDate: Date }, isRedistributeReinforcement: boolean) {
 
         const currentDate = new Date();
+        const operationDate= DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth(), data.operationDate.getDate())
         const trx = await db.transaction()  // Start transaction
         try {
 
@@ -240,6 +250,7 @@ export default class AccountPlanBudjectEntryService {
                         type: originEntryEntryType,
                         operator: originEntryEntryOperator,
                         postingMonth: currentDate.getMonth(),
+                        operationDate: operationDate,
                         allocation: data.value,
                         lastFinalAllocation: originEntry.finalAllocation,
                         entryId: originEntry.id,
@@ -254,6 +265,7 @@ export default class AccountPlanBudjectEntryService {
                     type: targetEntryEntryType,
                     operator: targetEntryEntryOperator,
                     postingMonth: currentDate.getMonth(),
+                    operationDate: operationDate,
                     allocation: data.value,
                     lastFinalAllocation: originEntry.finalAllocation,
                     entryId: targetEntry.id,
