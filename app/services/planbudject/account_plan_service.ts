@@ -31,28 +31,64 @@ export default class AccountPlanService {
         // Salvar a conta atualizada
         return await found.save();
     }
-
     public async remove(data: AccountPlanDTO) {
-        // Encontrar a conta existente pelo ID
-        const foundAccountPlan = await AccountPlan.findByOrFail('id', data.id);
-    
-        // Encontrar o registro em AccountPlanBudjectEntry associado à conta
-        const foundAccountPlanBudjectEntry = await AccountPlanBudjectEntry.findByOrFail('accountPlanId', data.id);
-    
-        // Encontrar o registro em AccountPlanBudjectEntriesEntry associado ao BudjectEntry
-        const foundAccountPlanBudjectEntriesEntry = await AccountPlanBudjectEntryEntry.findByOrFail('entryId', foundAccountPlanBudjectEntry.id);
-    
-        // Remover primeiro o AccountPlanBudjectEntriesEntry
-        await foundAccountPlanBudjectEntriesEntry.delete();
-        
-        // Remover segundo o AccountPlanBudjectEntry
-        await foundAccountPlanBudjectEntry.delete();
-    
-        // E por fim AccountPlan
-        return await foundAccountPlan.delete();
+        const trx = await db.transaction();  // Iniciar a transação
+
+        try {
+            // Encontrar a conta existente pelo ID
+            const foundAccountPlan = await AccountPlan.findBy('id', data.id);
+            if (!foundAccountPlan) {
+                throw new Error('Plano de contas não encontrado.');
+            }
+
+            // Encontrar o registro em AccountPlanBudjectEntry associado à conta
+            const foundAccountPlanBudjectEntry = await AccountPlanBudjectEntry.findBy('accountPlanId', data.id);
+            if (!foundAccountPlanBudjectEntry) {
+                throw new Error('Registro em AccountPlanBudjectEntry não encontrado.');
+            }
+
+            // Encontrar o registro em AccountPlanBudjectEntriesEntry associado ao BudjectEntry
+            const foundAccountPlanBudjectEntriesEntry = await AccountPlanBudjectEntryEntry.findBy('entryId', foundAccountPlanBudjectEntry.id);
+            if (!foundAccountPlanBudjectEntriesEntry) {
+                throw new Error('Registro em AccountPlanBudjectEntriesEntry não encontrado.');
+            }
+
+            // Logs para depuração
+            console.log('Found AccountPlan:', foundAccountPlan);
+            console.log('Found AccountPlanBudjectEntry:', foundAccountPlanBudjectEntry);
+            console.log('Found AccountPlanBudjectEntriesEntry:', foundAccountPlanBudjectEntriesEntry);
+
+            // Remover os registros na ordem correta
+            if (typeof foundAccountPlanBudjectEntriesEntry.delete === 'function') {
+                await foundAccountPlanBudjectEntriesEntry.useTransaction(trx).delete();
+            } else {
+                console.warn('Não foi possível remover AccountPlanBudjectEntriesEntry, método delete não encontrado.');
+            }
+
+            if (typeof foundAccountPlanBudjectEntry.delete === 'function') {
+                await foundAccountPlanBudjectEntry.useTransaction(trx).delete();
+            } else {
+                console.warn('Não foi possível remover AccountPlanBudjectEntry, método delete não encontrado.');
+            }
+
+            if (typeof foundAccountPlan.delete === 'function') {
+                await foundAccountPlan.useTransaction(trx).delete();
+            } else {
+                console.warn('Não foi possível remover AccountPlan, método delete não encontrado.');
+            }
+
+            // Commit da transação se tudo correr bem
+            await trx.commit();
+
+            // Retorno do status de sucesso
+            return { status: 200, code: 'SUCCESS' };
+        } catch (error) {
+            // Rollback da transação em caso de erro
+            await trx.rollback();
+            console.error('Erro ao remover o plano de contas:', error);
+            return { status: 500, code: 'ERROR', message: error.message };
+        }
     }
-    
-    
     
 
     public async create(data: AccountPlanDTO) {
