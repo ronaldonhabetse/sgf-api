@@ -48,6 +48,48 @@ export default class AccountPlanBudjectEntryService {
         return createdCreditEntryEntry;
     }
 
+    public async createAccountPlanBudjectEntryTest(data: AccountPlanBudjectEntryDTO) {
+
+        await AccountPlanBudjectEntryValidator.validateOnCreate(data);
+
+        const currentDate = new Date();
+        const trx = await db.transaction()  // Start transaction
+        try {
+            const currentPlanbudject = await AccountPlanBudject.findByOrFail('year', currentDate.getFullYear());
+            const accountPlan = await AccountPlan.findByOrFail('number', data.accountPlanNumber);
+
+            const createdEntry = await new AccountPlanBudjectEntry().fill({
+                startPostingMonth: data.startPostingMonth,
+                endPostingMonth: data.endPostingMonth,
+                reservePercent: 0,
+                initialAllocation: data.initialAllocation,
+                finalAllocation: data.initialAllocation,
+                accountPlanBudjectId: currentPlanbudject.id,
+                accountPlanId: accountPlan.id
+            }).useTransaction(trx).save();
+
+            const createdCreditEntryEntry = await new AccountPlanBudjectEntryEntry()
+                .fill(
+                    {
+                        type: EntryEntryType.INITIAL,
+                        operator: OperatorType.CREDTI,
+                        postingMonth: currentDate.getMonth(),
+                        allocation: data.initialAllocation,
+                        lastFinalAllocation: 0,
+                        entryId: createdEntry.id,
+                        accountPlanBudjectId: currentPlanbudject.id,
+                    }).useTransaction(trx).save();
+
+            console.log(createdCreditEntryEntry);
+            await trx.commit();
+            return createdCreditEntryEntry;
+        } catch (error) {
+            await trx.rollback();
+            throw error;
+        }
+    }
+
+
     public async initialAllocationAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
 
         const entry = await AccountPlanBudjectEntry.findBy('accountPlanNumber', data.accountPlanNumber);

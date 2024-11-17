@@ -3,7 +3,7 @@ import AccountPlanBudjectEntry from "../../models/planbudject/account_plan_budje
 import AccountPlanBudjectEntryEntry from "../../models/planbudject/account_plan_budject_entry_entry.js";
 import AccountPlanBudjectValidator from "../../validators/planbudject/accountPlanBudjectValidator.js";
 import AccountPlanBudjectEntryService from "./account_plan_budject_entry_service.js";
-import { AccountPlanBudjectDTO } from "./utils/dtos.js";
+import { AccountPlanBudjectDTO, AccountPlanBudjectEntryDTO } from "./utils/dtos.js";
 import { inject } from "@adonisjs/core";
 
 /*
@@ -22,6 +22,10 @@ export default class AccountPlanBudjectService {
     const accountPlanBudject = new AccountPlanBudject();
     accountPlanBudject.fill({ year: data.year, description: data.description, })
     return await AccountPlanBudject.create(accountPlanBudject);
+  }
+
+  public async createAccountPlanBudjectEntry(data: AccountPlanBudjectEntryDTO) {
+    return await this.accountPlanBudjectEntryService.createAccountPlanBudjectEntryTest(data);
   }
 
   public async initialAllocationAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
