@@ -12,6 +12,7 @@ import { AuthController } from '../app/controllers/security/auth_controller.js';
 import AccountPlansController from '../app/controllers/planbudject/account_plans_controller.js';
 import AccountPlanBudjectsController from '../app/controllers/planbudject/account_plan_budjects_controller.js';
 
+
 router.group(() => {
   /*------------------------------------------------------------------------------------------*/
   /** Modulo de segurança **/
@@ -21,7 +22,7 @@ router.group(() => {
       router.post('login', [AuthController, 'login']);
       router.post('logout', [AuthController, 'logout']).use(middleware.auth());
       router.post('isAuthenticated', [AuthController, 'isAuthenticated']);
-      router.post('resetPassword', [AuthController, 'resetPassword']).use(middleware.auth());
+    //  router.post('resetPassword', [AuthController, 'resetPassword']).use(middleware.auth());
     }).prefix("auth");
   }).prefix("security");
   /*------------------------------------------------------------------------------------------*/
@@ -35,8 +36,13 @@ router.group(() => {
       router.get('findAccountPlanByNumber/:number', [AccountPlansController, 'findAccountPlanByNumber']);
       router.get('findAnyAccountPlanByNumber', [AccountPlansController, 'findAnyAccountPlanByNumber']);
       router.post('createAccountPlan', [AccountPlansController, 'createAccountPlan']);
+      router.post('removeAccountPlan', [AccountPlansController, 'removeAccountPlan']);
       router.post('updateAccountPlan', [AccountPlansController, 'updateAccountPlan']);
     }).prefix("accountplan");
+
+
+    //Novo EndPoint
+    router.post('createAccountPlanBudjectEntry', [AccountPlanBudjectsController, 'createAccountPlanBudjectEntry']);
 
     //Orcamento do ano especifico
     router.post('createAccountPlanBudject', [AccountPlanBudjectsController, 'createAccountPlanBudject']);

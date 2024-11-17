@@ -1,9 +1,10 @@
+import { DateTime } from "luxon";
 import AccountPlanBudject from "../../models/planbudject/account_plan_budject.js";
 import AccountPlanBudjectEntry from "../../models/planbudject/account_plan_budject_entry.js";
 import AccountPlanBudjectEntryEntry from "../../models/planbudject/account_plan_budject_entry_entry.js";
 import AccountPlanBudjectValidator from "../../validators/planbudject/accountPlanBudjectValidator.js";
 import AccountPlanBudjectEntryService from "./account_plan_budject_entry_service.js";
-import { AccountPlanBudjectDTO } from "./utils/dtos.js";
+import { AccountPlanBudjectDTO, AccountPlanBudjectEntryDTO } from "./utils/dtos.js";
 import { inject } from "@adonisjs/core";
 
 /*
@@ -24,23 +25,27 @@ export default class AccountPlanBudjectService {
     return await AccountPlanBudject.create(accountPlanBudject);
   }
 
-  public async initialAllocationAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
+  public async createAccountPlanBudjectEntry(data: AccountPlanBudjectEntryDTO) {
+    return await this.accountPlanBudjectEntryService.createAccountPlanBudjectEntryTest(data);
+  }
+
+  public async initialAllocationAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number, operationDate: Date }) {
     return await this.accountPlanBudjectEntryService.initialAllocationAccountPlanBudjectEntry(data);
   }
 
-  public async reinforceAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
+  public async reinforceAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number, operationDate: Date }) {
     return this.accountPlanBudjectEntryService.reinforceAccountPlanBudjectEntry(data);
   }
 
-  public async annulAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number }) {
+  public async annulAccountPlanBudjectEntry(data: { accountPlanNumber: string, value: number, operationDate: Date }) {
     return this.accountPlanBudjectEntryService.annulAccountPlanBudjectEntry(data);
   }
 
-  public async redistribuitioReinforcimentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string }) {
+  public async redistribuitioReinforcimentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string, operationDate: Date }) {
     return this.accountPlanBudjectEntryService.redistribuitioReinforcimentAccountPlanBudjectEntry(data);
   }
 
-  public async redistributeAnnulmentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string }) {
+  public async redistributeAnnulmentAccountPlanBudjectEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string, operationDate: Date }) {
     return this.accountPlanBudjectEntryService.redistributeAnnulmentAccountPlanBudjectEntry(data);
   }
 

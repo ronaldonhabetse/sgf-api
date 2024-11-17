@@ -7,7 +7,7 @@ import AccountPlanBudjectValidator from "../../validators/planbudject/accountPla
 import { inject } from "@adonisjs/core";
 
 @inject()
-export default class AccountPlanBudjectsController {
+export default class  AccountPlanBudjectsController {
 
   constructor(
     private accountPlanBudjectService: AccountPlanBudjectService
@@ -22,6 +22,22 @@ export default class AccountPlanBudjectsController {
     } catch (error) {
       return response.status(500).json({
         message: 'Ocorreu um erro ao criar o plano orçamento',
+        error: error.message,
+      });
+    }
+  }
+
+  async createAccountPlanBudjectEntry({ request, response }: HttpContext) {
+
+    const data = await request.validateUsing(AccountPlanBudjectEntryValidator.validateFields());
+
+    try {
+      return response.created(await this.accountPlanBudjectService.createAccountPlanBudjectEntry(data));
+    } catch (error) {
+
+      console.log(error);
+      return response.status(500).json({
+        message: 'Ocorreu um erro ao criar o plano e orçamento',
         error: error.message,
       });
     }
@@ -110,7 +126,7 @@ export default class AccountPlanBudjectsController {
   
 
 
-  async findAllAccountPlanBudject({ request, response }: HttpContext) {
+  async findAllAccountPlanBudject({response }: HttpContext) {
     return response.ok(await this.accountPlanBudjectService.findAllAccountPlanBudject());
   }
 

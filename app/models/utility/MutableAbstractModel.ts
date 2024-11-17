@@ -1,7 +1,5 @@
-import {beforeSave, column, scope } from '@adonisjs/lucid/orm'
+import {column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
-import { LifeclicleState } from './Enums.js'
-import AbstractModel from './DomainAbstractModel.js'
 import CreatableAbstractModel from './CreatableAbstractModel.js'
 
 /*

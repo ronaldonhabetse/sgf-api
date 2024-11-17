@@ -1,5 +1,7 @@
 import db from "@adonisjs/lucid/services/db";
 import AccountPlan from "../../models/planbudject/account_plan.js";
+import AccountPlanBudjectEntry from "#models/planbudject/account_plan_budject_entry";
+import AccountPlanBudjectEntryEntry from "#models/planbudject/account_plan_budject_entry_entry";
 import AccountPlanValidator from "../../validators/planbudject/accountPlanValidator.js";
 import AccountPlanBudjectEntryService from "./account_plan_budject_entry_service.js";
 import { AccountPlanBudjectEntryDTO, AccountPlanDTO } from "./utils/dtos.js";
@@ -19,11 +21,39 @@ export default class AccountPlanService {
     ) { }
 
     public async update(data: AccountPlanDTO) {
-        AccountPlanValidator.validateOnCreate(data);
+        // Encontrar a conta existente pelo ID
         const found = await AccountPlan.findByOrFail('id', data.id);
+        
+        // Atualizar os campos necessários
         found.description = data.description;
+        // Você pode adicionar mais campos para atualizar conforme necessário
+        
+        // Salvar a conta atualizada
         return await found.save();
     }
+
+    public async remove(data: AccountPlanDTO) {
+        // Encontrar a conta existente pelo ID
+        const foundAccountPlan = await AccountPlan.findByOrFail('id', data.id);
+    
+        // Encontrar o registro em AccountPlanBudjectEntry associado à conta
+        const foundAccountPlanBudjectEntry = await AccountPlanBudjectEntry.findByOrFail('accountPlanId', data.id);
+    
+        // Encontrar o registro em AccountPlanBudjectEntriesEntry associado ao BudjectEntry
+        const foundAccountPlanBudjectEntriesEntry = await AccountPlanBudjectEntryEntry.findByOrFail('entryId', foundAccountPlanBudjectEntry.id);
+    
+        // Remover primeiro o AccountPlanBudjectEntriesEntry
+        await foundAccountPlanBudjectEntriesEntry.delete();
+        
+        // Remover segundo o AccountPlanBudjectEntry
+        await foundAccountPlanBudjectEntry.delete();
+    
+        // E por fim AccountPlan
+        return await foundAccountPlan.delete();
+    }
+    
+    
+    
 
     public async create(data: AccountPlanDTO) {
         await AccountPlanValidator.validateOnCreate(data);
@@ -39,6 +69,7 @@ export default class AccountPlanService {
             const createdAccountPlan = await accountPlan.useTransaction(trx).save();
 
             const currentPlanbudject = await AccountPlanBudject.findByOrFail('year', currentDate.getFullYear());
+           
             const entry: AccountPlanBudjectEntryDTO = {
                 accountPlanNumber: createdAccountPlan.number,
                 startPostingMonth: currentDate.getMonth(),

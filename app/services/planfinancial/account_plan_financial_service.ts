@@ -1,10 +1,9 @@
 import db from "@adonisjs/lucid/services/db";
 import AccountPlan from "../../models/planbudject/account_plan.js";
 import AccountPlanBudject from "../../models/planbudject/account_plan_budject.js";
-import AccountPlanBudjectEntry from "../../models/planbudject/account_plan_budject_entry.js";
 import AccountPlanBudjectEntryEntry from "../../models/planbudject/account_plan_budject_entry_entry.js";
 import { AccoutPlanType, EntryEntryType, OperatorType } from "../../models/utility/Enums.js";
-import { FinancialEntryDTO, FinancialObjectDTO } from "./utils/dtos.js";
+import { FinancialEntryDTO } from "./utils/dtos.js";
 import { inject } from "@adonisjs/core";
 import AccountPlanFinancialEntry from "../../models/planfinancial/account_plan_financial_entry.js";
 
@@ -15,10 +14,6 @@ import AccountPlanFinancialEntry from "../../models/planfinancial/account_plan_f
 @inject()
 export default class AccountPlanFinancialService {
 
-  public async createFinancialObject(data: FinancialObjectDTO) {
-
-
-  }
 
   public async createInitialFinancialEntry(data: FinancialEntryDTO) {
 
