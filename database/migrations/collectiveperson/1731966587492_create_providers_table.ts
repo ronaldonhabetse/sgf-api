@@ -8,12 +8,20 @@ export default class extends BaseSchema {
       table.increments('id')
       table.string('name').notNullable()
       table.string('accountPlanFinancialNumber').notNullable()
+
+
+      table.timestamp('created_by')
       table.timestamp('created_at')
+      table.timestamp('updated_by')
       table.timestamp('updated_at')
+
     })
   }
 
   async down() {
-    this.schema.dropTable(this.tableName)
+    const exists = await this.schema.hasTable(this.tableName)
+    if (exists) {
+      this.schema.dropTable(this.tableName)
+    }
   }
 }
