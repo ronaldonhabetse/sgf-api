@@ -2,6 +2,10 @@ import { column } from '@adonisjs/lucid/orm'
 import { AccoutPlanClassType, AccoutPlanType, AccountPlanTypeWritableType as AccountPlanWritableType } from '../utility/Enums.js'
 import LifecycleAbstractModel from '../utility/LifeclycleAbstractModel.js'
 
+/*
+* Model que representa um plano de contas
+* Gautchi R. Chambe (chambegautchi@gmail.com)
+*/
 export default class AccountPlan extends LifecycleAbstractModel {
 
   @column()

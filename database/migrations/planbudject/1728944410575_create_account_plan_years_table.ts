@@ -2,7 +2,7 @@ import { BaseSchema } from '@adonisjs/lucid/schema'
 import { LifeclicleState } from '../../../app/models/utility/Enums.js'
 
 export default class extends BaseSchema {
-  protected tableName = 'account_plan_budjects'
+  protected tableName = 'account_plan_years'
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {

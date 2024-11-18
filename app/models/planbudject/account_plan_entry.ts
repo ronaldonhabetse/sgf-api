@@ -1,11 +1,16 @@
 import { belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
-import AccountPlanBudject from './account_plan_budject.js'
+import AccountPlanYear from './account_plan_year.js'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import AccountPlan from './account_plan.js'
-import AccountPlanBudjectEntryEntry from './account_plan_budject_entry_entry.js'
+import AccountPlanEntryEntry from './account_plan_entry_entry.js'
 import MutableAbstractModel from '../utility/MutableAbstractModel.js'
 
-export default class AccountPlanBudjectEntry extends MutableAbstractModel {
+
+/*
+* Model que representa  saldos de planos de conta para um ano especifico
+* Gautchi R. Chambe (chambegautchi@gmail.com)
+*/
+export default class AccountPlanEntry extends MutableAbstractModel {
 
   @column()
   declare startPostingMonth: number
@@ -23,10 +28,10 @@ export default class AccountPlanBudjectEntry extends MutableAbstractModel {
   declare finalAllocation: number
 
   @column()
-  declare accountPlanBudjectId: number
+  declare accountPlanYearId: number
 
-  @belongsTo(() => AccountPlanBudject)
-  declare accountPlanBudject: BelongsTo<typeof AccountPlanBudject>
+  @belongsTo(() => AccountPlanYear)
+  declare accountPlanYear: BelongsTo<typeof AccountPlanYear>
 
   @column()
   declare accountPlanNumber: string
@@ -40,11 +45,11 @@ export default class AccountPlanBudjectEntry extends MutableAbstractModel {
   @column()
   declare parentId: number
 
-  @belongsTo(() => AccountPlanBudjectEntry)
-  declare parent: BelongsTo<typeof AccountPlanBudjectEntry>
+  @belongsTo(() => AccountPlanEntry)
+  declare parent: BelongsTo<typeof AccountPlanEntry>
 
-  @hasMany(() => AccountPlanBudjectEntryEntry, {
+  @hasMany(() => AccountPlanEntryEntry, {
     foreignKey: 'entryId', // defaults to entryId
   })
-  declare entriesEntry: HasMany<typeof AccountPlanBudjectEntryEntry>
+  declare entriesEntry: HasMany<typeof AccountPlanEntryEntry>
 }

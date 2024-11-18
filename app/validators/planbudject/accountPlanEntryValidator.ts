@@ -1,8 +1,8 @@
 import vine, { SimpleMessagesProvider } from '@vinejs/vine'
-import AccountPlanBudjectEntry from '../../models/planbudject/account_plan_budject_entry.js';
-import { AccountPlanBudjectEntryDTO } from '../../services/planbudject/utils/dtos.js';
+import { AccountPlanEntryDTO } from '../../services/planbudject/utils/dtos.js';
+import AccountPlanEntry from '../../models/planbudject/account_plan_entry.js';
 
-export default class AccountPlanBudjectEntryValidator {
+export default class accountPlanEntryValidator {
 
     private static schemaFieldsReinforceOrAnnul = vine.object({
         accountPlanNumber: vine.string(),
@@ -24,7 +24,7 @@ export default class AccountPlanBudjectEntryValidator {
         reservePercent: vine.number().optional(),
         initialAllocation: vine.number(),
         finalAllocation: vine.number().optional(),
-        accountPlanBudjectId: vine.number().optional(),
+        accountPlanYearId: vine.number().optional(),
         accountPlanNumber: vine.string(),
         accountPlanId: vine.number().optional(),
         parentId: vine.number().optional(),
@@ -44,8 +44,8 @@ export default class AccountPlanBudjectEntryValidator {
         'number.database.unique': 'O numero da conta [{{ value }}] já existe no sistema',
         'id.database.existe': 'O id [{{ value }}] não existe no sistema',
         'accountPlanNumber.database.notexists': 'O numero da conta [{{ value }}] não existe no sistema',
-        'accountPlanBudjectEntry.database.exists': 'O plano de conta com o numero da conta [{{ value }}] já existe no sistema',
-        'accountPlanBudjectEntry.database.not.exists': 'A entrada do plano conta pai o numero da conta [{{ value }}] não existe no sistema',
+        'accountPlanEntry.database.exists': 'O plano de conta com o numero da conta [{{ value }}] já existe no sistema',
+        'accountPlanEntry.database.not.exists': 'A entrada do plano conta pai o numero da conta [{{ value }}] não existe no sistema',
         'only.moviment.valid': ' Operacoes permitidas somente em contas de movimento [{{ value }}]',
     }
 
@@ -68,7 +68,7 @@ export default class AccountPlanBudjectEntryValidator {
         return vine.compile(this.schemaFieldsRedistributeReinforcementOrAnnulment)
     });
 
-    public static async validateOnCreate(data: AccountPlanBudjectEntryDTO) {
+    public static async validateOnCreate(data: AccountPlanEntryDTO) {
 /*
         const existAccount = await AccountPlan.findBy("number", data.accountPlanNumber);
 
@@ -80,16 +80,16 @@ export default class AccountPlanBudjectEntryValidator {
             throw new Error(this.messagesLabels['only.moviment.valid'].replace('value', data.accountPlanNumber))
          }
 */
-        const exist = await AccountPlanBudjectEntry.query()
+        const exist = await AccountPlanEntry.query()
             .whereHas('accountPlan', (builder) => {
                 builder.where('number', data.accountPlanNumber);
             }).first();
 
             if (exist) {
-                throw new Error(this.messagesLabels['accountPlanBudjectEntry.database.exists'].replace('value', data.accountPlanNumber));
+                throw new Error(this.messagesLabels['accountPlanEntry.database.exists'].replace('value', data.accountPlanNumber));
             }
             
-            const query = AccountPlanBudjectEntry.query()
+            const query = AccountPlanEntry.query()
                 .whereHas('accountPlan', (builder) => {
                     builder.where('number', data.parentAccountPlanNumber);
                 });
@@ -100,7 +100,7 @@ export default class AccountPlanBudjectEntryValidator {
             const existParent = await query.first();
             
             if (!existParent) {
-                throw new Error(this.messagesLabels['accountPlanBudjectEntry.database.not.exists'].replace('value', data.parentAccountPlanNumber));
+                throw new Error(this.messagesLabels['accountPlanEntry.database.not.exists'].replace('value', data.parentAccountPlanNumber));
             }
 
 
