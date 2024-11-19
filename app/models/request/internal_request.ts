@@ -64,7 +64,7 @@ export default class InternalRequest extends LifecycleAbstractModel {
   declare accountPlanYear: BelongsTo<typeof AccountPlanYear>
 
   @column()
-  declare provideId: number
+  declare providerId: number
 
   @belongsTo(() => Provider)
   declare provider: BelongsTo<typeof Provider>

@@ -52,26 +52,26 @@ curl -s --location --request GET 'http://localhost:3333/sgf-api/planbudject/acco
 curl -s --location --request GET 'http://localhost:3333/sgf-api/planbudject/accountplan/findAccountPlanByNumber/1.1.1.1.02' --header 'Content-Type: application/json' | jq
 
 # 2.v.1 - Orçamento do plano de contas
-# i. Criar o plano do orcamento de um ano especifico (createAccountPlanBudject)
-curl -s --location 'http://localhost:3333/sgf-api/planbudject/createAccountPlanBudject' \
+# i. Criar o plano do orcamento de um ano especifico (createAccountPlanYear)
+curl -s --location 'http://localhost:3333/sgf-api/planbudject/createAccountPlanYear' \
 --header 'Content-Type: application/json' \
 --data ' {
         "year": "2024",
         "description": "Plano de orçamento do ano 2024"
     }' | jq
 
-# ii. Lista o plano do orcamento de um ano especifico (findAllAccountPlanBudject)
-curl --location --request POST 'http://localhost:3333/sgf-api/planbudject/findAllAccountPlanBudject' | jq 
+# ii. Lista o plano do orcamento de um ano especifico (findAllAccountPlanYear)
+curl --location --request POST 'http://localhost:3333/sgf-api/planbudject/findAllAccountPlanYear' | jq 
 
-# iii. Lista o plano do orcamento de um ano especifico (findAccountPlanBudjectByYear/year)
-curl --location --request POST 'http://localhost:3333/sgf-api/planbudject/findAccountPlanBudjectByYear/2024' | jq 
+# iii. Lista o plano do orcamento de um ano especifico (findAccountPlanYearByYear/year)
+curl --location --request POST 'http://localhost:3333/sgf-api/planbudject/findAccountPlanYearByYear/2024' | jq 
 
-# iii. Criar a entrada do orçamento do plano de conta especifico (createAccountPlanBudjectEntry)
+# iii. Criar a entrada do orçamento do plano de conta especifico (createAccountPlanEntry)
   O atributo "startPostingMonth" representa o mês inicial esperado para o inicio dos lançamentos
   O atributo "endPostingMonth" representa o mês fim esperado para o inicio dos lançamentos
   O atributo "initialAllocation" representa a dotação inicial
 
-curl -s --location 'http://localhost:3333/sgf-api/planbudject/initialAllocationAccountPlanBudjectEntry' \
+curl -s --location 'http://localhost:3333/sgf-api/planbudject/initialAllocationAccountPlanEntry' \
 --header 'Content-Type: application/json' \
 --data ' {
         "accountPlanNumber": "1.1.1.1.05",
@@ -80,23 +80,23 @@ curl -s --location 'http://localhost:3333/sgf-api/planbudject/initialAllocationA
     }' 
     |jq
 
-# iv. Listar todos as entradas do plano orçamental do ano corrente (findAccountPlanBudjectEntriesByYear/year)
+# iv. Listar todos as entradas do plano orçamental do ano corrente (findAccountPlanEntriesByYear/year)
 curl -s --location --request POST 'http://localhost:3333/sgf-api/planbudject/findAccountPlanBudjectEntriesByYear/2024' | jq
 
-# v. Listar todos as entradas do plano orçamental com as respectivas operções (fetchAccountPlanBudjectEntriesByYear/year)
-curl -s --location --request POST 'http://localhost:3333/sgf-api/planbudject/fetchAccountPlanBudjectEntriesByYear/2024' | jq
+# v. Listar todos as entradas do plano orçamental com as respectivas operções (fetchAccountPlanEntriesByYear/year)
+curl -s --location --request POST 'http://localhost:3333/sgf-api/planbudject/fetchAccountPlanEntriesByYear/2024' | jq
 
-# vi. Busca a entrada do plano orçamental com as respectivas operções pelo ano e numero da conta (fetchAccountPlanBudjectEntriesByYearAndNumber/year/accountPlanNumber)
-curl -s --location --request POST 'http://localhost:3333/sgf-api/planbudject/fetchAccountPlanBudjectEntriesByYearAndNumber/2024/1.0.0.0.00' |jq
+# vi. Busca a entrada do plano orçamental com as respectivas operções pelo ano e numero da conta (fetchAccountPlanEntriesByYearAndNumber/year/accountPlanNumber)
+curl -s --location --request POST 'http://localhost:3333/sgf-api/planbudject/fetchAccountPlanEntriesByYearAndNumber/2024/1.0.0.0.00' |jq
 
 # 2.v.1.1 - Planos de conta - Actualização a dotação do plano de contas (reforço, anulação, redistribuição reforço, redistribuição anulação)
- # i. reforço da dotação (reinforceAccountPlanBudjectEntry)
+ # i. reforço da dotação (reinforceAccountPlanEntry)
   Parametros do body: 
         "accountPlanNumber" O numero/codigo da conta do plano de conta
         "value" O valor do reforço,
         "operationDate": "2024-10-10"
 
-curl --location 'http://localhost:3333/sgf-api/planbudject/reinforceAccountPlanBudjectEntry' \
+curl --location 'http://localhost:3333/sgf-api/planbudject/reinforceAccountPlanEntry' \
 --header 'Content-Type: application/json' \
 --data ' {
         "accountPlanNumber": "1.0.0.0.00",
@@ -104,12 +104,12 @@ curl --location 'http://localhost:3333/sgf-api/planbudject/reinforceAccountPlanB
         "operationDate": "2024-10-10"
     }'
 
- # ii. Anulação da dotação (annulAccountPlanBudjectEntry)
+ # ii. Anulação da dotação (annulAccountPlanEntry)
   Parametros do body: 
         "accountPlanNumber" O numero/codigo da conta do plano de conta
         "value" O valor do reforço
 
-curl --location 'http://localhost:3333/sgf-api/planbudject/annulAccountPlanBudjectEntry' \
+curl --location 'http://localhost:3333/sgf-api/planbudject/annulAccountPlanEntry' \
 --header 'Content-Type: application/json' \
 --data ' {
         "accountPlanNumber": "1.0.0.0.00",
@@ -117,13 +117,13 @@ curl --location 'http://localhost:3333/sgf-api/planbudject/annulAccountPlanBudje
         "operationDate": "2024-10-10"
     }'
 
- # iii. redistribuição reforço (redistribuitioReinforcimentAccountPlanBudjectEntry)
+ # iii. redistribuição reforço (redistribuitioReinforcimentAccountPlanEntry)
    Parametros do body: 
         "originAccountPlanNumber" O numero/codigo da conta do plano de conta origem
         "targetAccountPlanNumber" O numero/codigo da conta do plano de conta destino
         "value" O valor do reforço
  
- curl --location 'http://localhost:3333/sgf-api/planbudject/redistribuitioReinforcimentAccountPlanBudjectEntry' \
+ curl --location 'http://localhost:3333/sgf-api/planbudject/redistribuitioReinforcimentAccountPlanEntry' \
 --header 'Content-Type: application/json' \
 --data ' {
         "originAccountPlanNumber": "1.0.0.0.00",
@@ -132,13 +132,13 @@ curl --location 'http://localhost:3333/sgf-api/planbudject/annulAccountPlanBudje
         "operationDate": "2024-10-10"
     }'
 
- # v. redistribuição anulação (redistributeAnnulmentAccountPlanBudjectEntry)
+ # v. redistribuição anulação (redistributeAnnulmentAccountPlanEntry)
  Parametros do body: 
         "originAccountPlanNumber" O numero/codigo da conta do plano de conta origem
         "targetAccountPlanNumber" O numero/codigo da conta do plano de conta destino
         "value" O valor do reforço
  
-curl --location 'http://localhost:3333/sgf-api/planbudject/redistributeAnnulmentAccountPlanBudjectEntry' \
+curl --location 'http://localhost:3333/sgf-api/planbudject/redistributeAnnulmentAccountPlanEntry' \
 --header 'Content-Type: application/json' \
 --data ' {
         "originAccountPlanNumber": "1.1.1.1.01",

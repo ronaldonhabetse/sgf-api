@@ -69,17 +69,6 @@ export default class accountPlanEntryValidator {
     });
 
     public static async validateOnCreate(data: AccountPlanEntryDTO) {
-/*
-        const existAccount = await AccountPlan.findBy("number", data.accountPlanNumber);
-
-        if (!existAccount) {
-            throw new Error(this.messagesLabels['accountPlanNumber.database.notexists'].replace('value', data.accountPlanNumber))
-        }
-
-        if (AccountPlanTypeWritableType.MOVIMENT != data.) { 
-            throw new Error(this.messagesLabels['only.moviment.valid'].replace('value', data.accountPlanNumber))
-         }
-*/
         const exist = await AccountPlanEntry.query()
             .whereHas('accountPlan', (builder) => {
                 builder.where('number', data.accountPlanNumber);

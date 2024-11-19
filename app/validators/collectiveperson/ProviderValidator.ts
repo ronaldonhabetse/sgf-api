@@ -1,5 +1,5 @@
 import vine, { SimpleMessagesProvider } from '@vinejs/vine'
-import Provider from '../../models/provider.js'
+import Provider from '../../models/person/provider.js'
 
 export default class ProviderValidator {
 

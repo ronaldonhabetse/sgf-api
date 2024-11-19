@@ -30,7 +30,7 @@ export default class InternalRequestController {
     return response.ok(await this.internalRequestService.findAll());
   }
 
-  async findByRequestNumber({ request, response }: HttpContext) {
+  async findInternalRequestByRequestNumber({ request, response }: HttpContext) {
     const number = request.param('number');
     return response.ok(await this.internalRequestService.findByRequestNumber(number));
   }

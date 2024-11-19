@@ -9,6 +9,7 @@ import InternalRequest from "../../models/request/internal_request.js";
 import { DateTime } from "luxon";
 import Provider from "../../models/person/provider.js";
 import InternalRequestItem from "../../models/request/internal_request_item.js";
+import InternalRequestValidator from "../../validators/request/internalRequestValidator.js";
 
 /*
 * Servicos para requisicoes internas
@@ -19,17 +20,20 @@ export default class InternalRequestService {
 
   public async generateNextRequestNumber(accountPlanYear: AccountPlanYear) {
 
-    const sequenceArry = await InternalRequest.query().select("sequence")
-      .max("sequence")
+    const sequenceArry = await InternalRequest.query()
       .where('accountPlanYearId', accountPlanYear.id);
-
-    const sequence = sequenceArry[0];
-
-    const nextSequence = !sequence ? 1 : sequenceArry[0].sequence + 1;
-
+    const nextSequence = sequenceArry.length + 1;
     return nextSequence;
   }
   public async createInternalRequest(data: InternalRequestDTO) {
+
+    await InternalRequestValidator.validateOnCreate(data);
+
+    let totalItemsValue = 0;
+    data.items.forEach(async (itemData) => {
+      const intemValue = itemData.quantity * itemData.unitPrice;
+      totalItemsValue = totalItemsValue + intemValue;
+    })
 
     const currentDate = new Date();
     const operationDate = DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth(), data.operationDate.getDate())
@@ -63,44 +67,40 @@ export default class InternalRequestService {
 
       const createdInternalRequest = await new InternalRequest().fill({
         sequence: nextSequence,
-        requestNumber: nextSequence + "" + currentDate.getFullYear(),
+        requestNumber: nextSequence + "-" + currentDate.getMonth() + "" + currentDate.getFullYear(),
         requestorName: data.requestorName,
         requestorDepartment: data.requestorDepartment,
         operationDate: operationDate,
         initialAvailabilityAccountBuject: accountPlanBudjectEntry.finalAllocation,
         currentAccountBudjectBalance: accountPlanBudjectEntry.finalAllocation,
         finalAccountBujectBalance: (accountPlanBudjectEntry.finalAllocation - (data.totalRequestedValue ? data.totalRequestedValue : 0)),
-        totalRequestedValue: data.totalRequestedValue,
+        totalRequestedValue: totalItemsValue,
         justification: data.justification,
         sectorBudject: data.sectorBudject,
         chapterBudject: data.chapterBudject,
         clauseBudject: data.clauseBudject,
         clauseNumberBudject: data.clauseNumberBudject,
         accountPlanYearId: currentPlanYear.id,
-        provideId: provider.id,
+        providerId: provider.id,
         accountPlanBudjectId: accountPlanBudject.id,
         accountPlanFinancialId: accountPlanFinancial.id,
       }).useTransaction(trx).save();
 
-      let createdItems = [];
-
       data.items.forEach(async (itemData) => {
-        const item = await new InternalRequestItem()
-          .fill(
-            {
-              quantification: itemData.quantification,
-              quantity: itemData.quantity,
-              description: itemData.description,
-              operationDate: operationDate,
-              unitPrice: itemData.unitPrice,
-              internalRequestId: createdInternalRequest.id,
-
-            }).useTransaction(trx).save();
-
-        createdItems.push(item);
-        createdInternalRequest.items.push(item);
+        try {
+          await new InternalRequestItem().fill({
+            quantification: itemData.quantification,
+            quantity: itemData.quantity,
+            description: itemData.description,
+            operationDate: operationDate,
+            unitPrice: itemData.unitPrice,
+            internalRequestId: createdInternalRequest.id,
+          }).useTransaction(trx).save();
+        } catch (error) {
+          await trx.rollback();
+          throw error;
+        }
       });
-
       await trx.commit();
       return createdInternalRequest;
     } catch (error) {

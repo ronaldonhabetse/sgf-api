@@ -1,7 +1,8 @@
 import vine, { SimpleMessagesProvider } from '@vinejs/vine'
-import { QuantificationType } from '../../models/utility/Enums.js'
-import AccountPlan from '../../models/planbudject/account_plan.js'
+import { AccoutPlanType, QuantificationType } from '../../models/utility/Enums.js'
 import { InternalRequestDTO } from '../../services/request/utils/dtos.js'
+import AccountPlanEntry from '../../models/planbudject/account_plan_entry.js';
+import Provider from '../../models/person/provider.js';
 
 export default class InternalRequestValidator {
 
@@ -13,7 +14,7 @@ export default class InternalRequestValidator {
         operationDate: vine.date(),
         unitPrice: vine.number(),
         internalRequestId: vine.number().optional(),
-        internalRequestNumber: vine.string(),
+        internalRequestNumber: vine.string().optional(),
 
         createtBy: vine.number().optional(),
         updatedBy: vine.number().optional().nullable(),
@@ -62,6 +63,7 @@ export default class InternalRequestValidator {
         'id.database.unique': 'O id [{{ value }}] não existe no sistema',
         'accountPlanBudjectNumber.database.not.exists': 'O numero da conta [{{ value }}] não existe no sistema',
         'accountPlanFinancialNumber.database.not.exists': 'O numero da conta [{{ value }}] não existe no sistema',
+        'provider.database.not.exists': 'Provedor com codico [{{ value }}] não existe no sistema',
 
 
     }
@@ -77,18 +79,36 @@ export default class InternalRequestValidator {
 
     public static async validateOnCreate(data: InternalRequestDTO) {
         //valida o tipo de dados e enums
-        vine.compile(this.schemaCreateFields).validate(data);
+       // vine.compile(this.schemaCreateFields).validate(data);
 
-        const existAccountBuject = await AccountPlan.findBy("number", data.accountPlanBudjectNumber);
+        const provider = await Provider.query()
+            .where("accountPlanFinancialNumber", data.provideCode).first();
 
-        if (existAccountBuject) {
+        if (!provider) {
+            throw new Error(this.messagesLabels['provider.database.not.exists']
+                .replace('value', data.provideCode))
+        }
+
+        const existAccountBuject = await AccountPlanEntry.query()
+            .where("accountPlanNumber", data.accountPlanBudjectNumber)
+            .whereHas('accountPlan', (builder) => {
+                builder.where('number', data.accountPlanBudjectNumber)
+                    .where('type', AccoutPlanType.BUDJECT)
+            });
+
+        if (!existAccountBuject) {
             throw new Error(this.messagesLabels['accountPlanBudjectNumber.database.not.exists']
                 .replace('value', data.accountPlanBudjectNumber))
         }
 
-        const existAccountFinancial = await AccountPlan.findBy("number", data.accountPlanFinancialNumber);
+        const existAccountFinancial = await AccountPlanEntry.query()
+            .where("accountPlanNumber", data.accountPlanFinancialNumber)
+            .whereHas('accountPlan', (builder) => {
+                builder.where('number', data.accountPlanFinancialNumber)
+                    .where('type', AccoutPlanType.FINANCIAL);
+            });
 
-        if (existAccountFinancial) {
+        if (!existAccountFinancial) {
             throw new Error(this.messagesLabels['accountPlanFinancialNumber.database.not.exists']
                 .replace('value', data.accountPlanFinancialNumber))
         }
