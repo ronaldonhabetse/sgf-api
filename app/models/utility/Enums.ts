@@ -46,24 +46,20 @@ export enum AccoutPlanClassType {
 }
 
 /*
-*Tipo de entrada no plano de contas: Inicial, reforco, anulacao, redistribuicao
+*Tipo de lancamento no plano de contas: Inicial, reforco, anulacao, redistribuicao
 */
 export enum EntryEntryType {
   INITIAL = 'initial',
   INITIAL_ALLOCATION = 'initial_allocation',
   REINFORCEMENT = 'reinforcement',
   ANNULMENT = 'annulment',
-  REDISTRIBUTION_REINFORCEMENT = 'redistribuition_reinforcement',
-  REDISTRIBUTION_ANNULMENT = 'redistribuition_annulment',
+  REDISTRIBUITION_REINFORCEMENT = 'redistribuition_reinforcement',
+  REDISTRIBUITION_ANNULMENT = 'redistribuition_annulment',
 }
 
-/*
-*Tipo de objecto contabilistico
-*/
-export enum ObjectType {
-  BANK = '01', //Codico do banco + SEPARADOR + NIB + ANGENCIA+ENDERECO
-  BOX = '02',  //NUIT EMPRESA + SEPARADOR + SEQUENCIA_CAIXA
-  CLIENT = '02',
-  PROVIDER = '02',
-  OTHERS = '02',
+//Representa a quantificao de um item, ou seja grandeza para medir a quantidade
+export enum QuantificationType {
+  KG = 'KG',
+  L = 'L',
+  BOX = 'CAIXA',
 }
