@@ -4,6 +4,13 @@ import AccountPlanEntry from '../../models/planbudject/account_plan_entry.js';
 
 export default class accountPlanEntryValidator {
 
+    private static schemaFieldsAssociateAccounts = vine.object({
+        accountPlanFinancialNumber: vine.string(),
+        accountPlanBujectsNumber: vine.array(
+            vine.object({ accountPlanBujectNumber: vine.string() })
+        ),
+    });
+
     private static schemaFieldsReinforceOrAnnul = vine.object({
         accountPlanNumber: vine.string(),
         value: vine.number(),
@@ -58,6 +65,11 @@ export default class accountPlanEntryValidator {
         return vine.compile(this.schemaFields)
     });
 
+    public static validateFieldsAssociateAccounts = (() => {
+        this.setMessages();
+        return vine.compile(this.schemaFieldsAssociateAccounts)
+    });
+
     public static validateFieldsReinforceOrAnnul = (() => {
         this.setMessages();
         return vine.compile(this.schemaFieldsReinforceOrAnnul)
@@ -70,28 +82,61 @@ export default class accountPlanEntryValidator {
 
     public static async validateOnCreate(data: AccountPlanEntryDTO) {
         const exist = await AccountPlanEntry.query()
+            .where('accountPlanNumber', data.accountPlanNumber)
             .whereHas('accountPlan', (builder) => {
                 builder.where('number', data.accountPlanNumber);
-            }).first();
+            })
+            .first();
 
-            if (exist) {
-                throw new Error(this.messagesLabels['accountPlanEntry.database.exists'].replace('value', data.accountPlanNumber));
+        if (exist) {
+            throw new Error(this.messagesLabels['accountPlanEntry.database.exists'].replace('value', data.accountPlanNumber));
+        }
+
+        const query = AccountPlanEntry.query()
+            .where('accountPlanNumber', data.parentAccountPlanNumber)
+            .whereHas('accountPlan', (builder) => {
+                builder.where('number', data.parentAccountPlanNumber);
+            });
+
+        // Imprimir a consulta SQL gerada
+        console.log(query.toSQL().sql); // Adicione esta linha para imprimir a consulta
+
+        const existParent = await query.first();
+
+        if (!existParent) {
+            throw new Error(this.messagesLabels['accountPlanEntry.database.not.exists'].replace('value', data.parentAccountPlanNumber));
+        }
+    }
+
+    public static async validateOnAssociate(data: { accountPlanFinancialNumber: string, accountPlanBujectsNumber: { accountPlanBujectNumber: string }[] }) {
+
+        const existFinancialAccountEntry = await AccountPlanEntry.query()
+            .where('accountPlanNumber', data.accountPlanFinancialNumber)
+            .whereHas('accountPlan', (builder) => {
+                builder.where('number', data.accountPlanFinancialNumber);
+            })
+            .first();
+
+        if (existFinancialAccountEntry) {
+            throw new Error(this.messagesLabels['accountPlanEntry.database.not.exists'].replace('value', data.accountPlanFinancialNumber));
+        }
+
+        data.accountPlanBujectsNumber.forEach(async (budjectAccountNumber) => {
+            try {
+                const budjectAccountPlanEntry = await AccountPlanEntry.query()
+                    .where('accountPlanNumber', budjectAccountNumber.accountPlanBujectNumber)
+                    .whereHas('accountPlan', (builder) => {
+                        builder.where('number', budjectAccountNumber.accountPlanBujectNumber);
+                    })
+                    .first();
+
+                if (budjectAccountPlanEntry) {
+                    throw new Error(this.messagesLabels['accountPlanEntry.database.not.exists'].replace('value', budjectAccountNumber.accountPlanBujectNumber));
+                }
+
+            } catch (error) {
+                throw error;
             }
-            
-            const query = AccountPlanEntry.query()
-                .whereHas('accountPlan', (builder) => {
-                    builder.where('number', data.parentAccountPlanNumber);
-                });
-            
-            // Imprimir a consulta SQL gerada
-            console.log(query.toSQL().sql); // Adicione esta linha para imprimir a consulta
-            
-            const existParent = await query.first();
-            
-            if (!existParent) {
-                throw new Error(this.messagesLabels['accountPlanEntry.database.not.exists'].replace('value', data.parentAccountPlanNumber));
-            }
-
-
+        })
     }
 }

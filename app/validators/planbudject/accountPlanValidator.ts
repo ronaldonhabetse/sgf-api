@@ -14,6 +14,8 @@ export default class AccountPlanValidator {
         class: vine.enum(Object.values(AccoutPlanClassType)),
         parentId: vine.number().optional(),
         parentAccountPlanNumber: vine.string().minLength(1),
+        accountPlanfinancialId: vine.number().optional(),
+        accountPlanfinancialNumber: vine.string().optional(),
         createtBy: vine.number().optional(),
         updatedBy: vine.number().optional().nullable(),
         createdAt: vine.date().optional(),
@@ -76,15 +78,6 @@ export default class AccountPlanValidator {
                 throw new Error(this.messagesLabels['class.not.valid'].replace('value', data.class))
             }
         }
-
-        /*
-        if (AccoutPlanType.FINANCIAL) {
-            if ((AccountPlanTypeWritableType.MOVIMENT == data.writable)
-                && AccoutPlanClassType.D != data.class) {
-                throw new Error(this.messagesLabels['class.not.valid'].replace('value', data.class))
-            }
-        }
-        */
     }
 
 

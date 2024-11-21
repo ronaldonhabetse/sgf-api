@@ -15,7 +15,7 @@ export default class AccountPlanEntryService {
 
         await AccountPlanEntryValidator.validateOnCreate(data);
         const currentDate = new Date();
-        const operationDate= DateTime.local(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())
+        const operationDate = DateTime.local(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())
 
         const currentPlanYear = await AccountPlanYear.findByOrFail('year', currentDate.getFullYear());
         const parentEntry = await AccountPlanEntry.findBy('accountPlanNumber', data.parentAccountPlanNumber);
@@ -52,12 +52,40 @@ export default class AccountPlanEntryService {
         return createdCreditEntryEntry;
     }
 
+    public async associateFinancialAccountWithBujectAccounts(data: { accountPlanFinancialNumber: string, accountPlanBujectsNumber: { accountPlanBujectNumber: string }[] }) {
+        // Encontrar a conta existente pelo ID
+
+        await AccountPlanEntryValidator.validateOnAssociate(data);
+
+        const foundAccountPlanFinancial = await AccountPlanEntry.findByOrFail('accountPlanNumber', data.accountPlanFinancialNumber);
+        const trx = await db.transaction()  // Start transaction
+        try {
+            data.accountPlanBujectsNumber.forEach(async (budjectAccountNumber) => {
+                try {
+
+                    const budjectAccountPlan = await AccountPlanEntry.findByOrFail('accountPlanNumber', budjectAccountNumber);
+                    budjectAccountPlan.accountPlanfinancialId = foundAccountPlanFinancial.id;
+                    await budjectAccountPlan.useTransaction(trx).save()
+                } catch (error) {
+                    await trx.rollback();
+                    throw error;
+                }
+            })
+            await trx.commit();
+            return data;
+        } catch (error) {
+            await trx.rollback();
+            throw error;
+        }
+    }
+
+
     public async createAccountPlanEntryTest(data: AccountPlanEntryDTO) {
 
         await AccountPlanEntryValidator.validateOnCreate(data);
 
         const currentDate = new Date();
-        const operationDate= DateTime.local(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())
+        const operationDate = DateTime.local(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())
         const trx = await db.transaction()  // Start transaction
         try {
             const currentPlanbudject = await AccountPlanYear.findByOrFail('year', currentDate.getFullYear());
@@ -126,7 +154,7 @@ export default class AccountPlanEntryService {
     private async reinforceOrAnnulmentAccountPlanEntry(data: { accountPlanNumber: string, value: number, operationDate: Date }, isReinforce: boolean, isInitialAlocation: boolean) {
 
         const currentDate = new Date();
-        const operationDate= DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth(), data.operationDate.getDate())
+        const operationDate = DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth(), data.operationDate.getDate())
 
         const trx = await db.transaction()  // Start transaction
         try {
@@ -189,7 +217,7 @@ export default class AccountPlanEntryService {
     private async redistributeReinforeOrAnnulmentAccountPlanEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string, operationDate: Date }, isRedistributeReinforcement: boolean) {
 
         const currentDate = new Date();
-        const operationDate= DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth(), data.operationDate.getDate())
+        const operationDate = DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth(), data.operationDate.getDate())
         const trx = await db.transaction()  // Start transaction
         try {
 
