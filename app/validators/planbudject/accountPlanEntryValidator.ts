@@ -1,6 +1,7 @@
 import vine, { SimpleMessagesProvider } from '@vinejs/vine'
 import { AccountPlanEntryDTO } from '../../services/planbudject/utils/dtos.js';
 import AccountPlanEntry from '../../models/planbudject/account_plan_entry.js';
+import { AccoutPlanType } from '../../models/utility/Enums.js';
 
 export default class accountPlanEntryValidator {
 
@@ -113,12 +114,13 @@ export default class accountPlanEntryValidator {
         const existFinancialAccountEntry = await AccountPlanEntry.query()
             .where('accountPlanNumber', data.accountPlanFinancialNumber)
             .whereHas('accountPlan', (builder) => {
-                builder.where('number', data.accountPlanFinancialNumber);
+                builder.where('number', data.accountPlanFinancialNumber)
+                builder.where('type', AccoutPlanType.FINANCIAL);
             })
             .first();
 
         if (existFinancialAccountEntry) {
-            throw new Error(this.messagesLabels['accountPlanEntry.database.not.exists'].replace('value', data.accountPlanFinancialNumber));
+            throw new Error(this.messagesLabels['accountPlanEntry.database.not.exists'].replace('value', data.accountPlanFinancialNumber+" , "+AccoutPlanType.FINANCIAL.toString()));
         }
 
         data.accountPlanBujectsNumber.forEach(async (budjectAccountNumber) => {
@@ -126,12 +128,13 @@ export default class accountPlanEntryValidator {
                 const budjectAccountPlanEntry = await AccountPlanEntry.query()
                     .where('accountPlanNumber', budjectAccountNumber.accountPlanBujectNumber)
                     .whereHas('accountPlan', (builder) => {
-                        builder.where('number', budjectAccountNumber.accountPlanBujectNumber);
+                        builder.where('number', budjectAccountNumber.accountPlanBujectNumber)
+                        builder.where('type', AccoutPlanType.BUDJECT);
                     })
                     .first();
 
                 if (budjectAccountPlanEntry) {
-                    throw new Error(this.messagesLabels['accountPlanEntry.database.not.exists'].replace('value', budjectAccountNumber.accountPlanBujectNumber));
+                    throw new Error(this.messagesLabels['accountPlanEntry.database.not.exists'].replace('value', budjectAccountNumber.accountPlanBujectNumber +" , "+AccoutPlanType.BUDJECT.toString()));
                 }
 
             } catch (error) {
