@@ -13,8 +13,9 @@ export default class extends BaseSchema {
 
       table.integer('reserve_percent').notNullable().defaultTo(0)
       table.double('initial_allocation').notNullable()
-      table.double('final_allocation').notNullable()
-     // table.double('available_allocation').notNullable()
+      table.double
+      ('final_allocation').notNullable()
+     table.double('available_allocation').notNullable()
 
       table.integer('account_plan_year_id').notNullable().unsigned().references('account_plan_years.id')
       table.integer('account_plan_id').notNullable().unsigned().references('account_plans.id')
