@@ -23,11 +23,11 @@ export default class AccountPlanService {
     public async update(data: AccountPlanDTO) {
         // Encontrar a conta existente pelo ID
         const found = await AccountPlan.findByOrFail('id', data.id);
-        
+
         // Atualizar os campos necessários
         found.description = data.description;
         // Você pode adicionar mais campos para atualizar conforme necessário
-        
+
         // Salvar a conta atualizada
         return await found.save();
     }
@@ -35,23 +35,23 @@ export default class AccountPlanService {
     public async remove(data: AccountPlanDTO) {
         // Encontrar a conta existente pelo ID
         const foundAccountPlan = await AccountPlan.findByOrFail('id', data.id);
-    
+
         // Encontrar o registro em AccountPlanBudjectEntry associado à conta
         const foundAccountPlanEntry = await AccountPlanEntry.findByOrFail('accountPlanId', data.id);
-    
+
         // Encontrar o registro em AccountPlanBudjectEntriesEntry associado ao BudjectEntry
         const foundAccountPlanEntriesEntry = await AccountPlanEntryEntry.findByOrFail('entryId', foundAccountPlanEntry.id);
-    
+
         // Remover primeiro o AccountPlanBudjectEntriesEntry
         await foundAccountPlanEntriesEntry.delete();
-        
+
         // Remover segundo o AccountPlanBudjectEntry
         await foundAccountPlanEntry.delete();
-    
+
         // E por fim AccountPlan
         return await foundAccountPlan.delete();
     }
-    
+
     public async create(data: AccountPlanDTO) {
         await AccountPlanValidator.validateOnCreate(data);
         const currentDate = new Date();
@@ -66,7 +66,7 @@ export default class AccountPlanService {
             const createdAccountPlan = await accountPlan.useTransaction(trx).save();
 
             const currentPlanYear = await AccountPlanYear.findByOrFail('year', currentDate.getFullYear());
-           
+
             const entry: AccountPlanEntryDTO = {
                 accountPlanNumber: createdAccountPlan.number,
                 startPostingMonth: currentDate.getMonth(),

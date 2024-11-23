@@ -48,6 +48,12 @@ export default class AccountPlanEntry extends MutableAbstractModel {
   @belongsTo(() => AccountPlanEntry)
   declare parent: BelongsTo<typeof AccountPlanEntry>
 
+  @column()
+  declare accountPlanfinancialId: number
+
+  @belongsTo(() => AccountPlan)
+  declare accountPlanfinancial: BelongsTo<typeof AccountPlan>
+
   @hasMany(() => AccountPlanEntryEntry, {
     foreignKey: 'entryId', // defaults to entryId
   })

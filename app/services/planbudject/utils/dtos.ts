@@ -21,6 +21,8 @@ export interface AccountPlanDTO extends DomainDTO {
   class: AccoutPlanClassType;
   parentId: number | null | undefined
   parentAccountPlanNumber: string
+  accountPlanfinancialId: number | null | undefined
+  accountPlanfinancialNumber: string
 }
 
 export interface AccountPlanYearDTO extends DomainDTO {

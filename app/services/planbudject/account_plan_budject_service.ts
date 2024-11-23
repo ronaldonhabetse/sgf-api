@@ -28,6 +28,10 @@ export default class AccountPlanBudjectService {
     return await this.accountPlanEntryService.createAccountPlanEntryTest(data);
   }
 
+  public async associateFinancialAccountWithBujectAccounts(data: { accountPlanFinancialNumber: string, accountPlanBujectsNumber: { accountPlanBujectNumber: string }[] }) {
+    return await this.accountPlanEntryService.associateFinancialAccountWithBujectAccounts(data);
+
+  }
   public async initialAllocationAccountPlanEntry(data: { accountPlanNumber: string, value: number, operationDate: Date }) {
     return await this.accountPlanEntryService.initialAllocationAccountPlanEntry(data);
   }

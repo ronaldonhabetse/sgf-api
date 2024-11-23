@@ -7,7 +7,7 @@ import AccountPlanYearValidator from "../../validators/planbudject/accountPlanYe
 import { inject } from "@adonisjs/core";
 
 @inject()
-export default class  AccountPlanBudjectsController {
+export default class AccountPlanBudjectsController {
 
   constructor(
     private accountPlanBudjectService: AccountPlanBudjectService
@@ -27,14 +27,28 @@ export default class  AccountPlanBudjectsController {
     }
   }
 
-  async createAccountPlanEntry({ request, response }: HttpContext) {
+  public async associateFinancialAccountWithBujectAccounts({ request, response }: HttpContext) {
+
+    const data = await request.validateUsing(AccountPlanEntryValidator.validateFieldsAssociateAccounts());
+
+    try {
+      return response.created(await this.accountPlanBudjectService.associateFinancialAccountWithBujectAccounts(data));
+    } catch (error) {
+      console.log(error);
+      return response.status(500).json({
+        message: 'Ocorreu um erro ao associa o plano de conta orçamental e o plano financeiro',
+        error: error.message,
+      });
+    }
+  }
+
+  public async createAccountPlanEntry({ request, response }: HttpContext) {
 
     const data = await request.validateUsing(AccountPlanEntryValidator.validateFields());
 
     try {
       return response.created(await this.accountPlanBudjectService.createAccountPlanEntry(data));
     } catch (error) {
-
       console.log(error);
       return response.status(500).json({
         message: 'Ocorreu um erro ao criar o plano e orçamento',
@@ -43,14 +57,15 @@ export default class  AccountPlanBudjectsController {
     }
   }
 
-  async initialAllocationAccountPlanEntry({ request, response }: HttpContext) {
+
+
+  public async initialAllocationAccountPlanEntry({ request, response }: HttpContext) {
 
     const data = await request.validateUsing(AccountPlanEntryValidator.validateFieldsReinforceOrAnnul());
 
     try {
       return response.created(await this.accountPlanBudjectService.initialAllocationAccountPlanEntry(data));
     } catch (error) {
-
       console.log(error);
       return response.status(500).json({
         message: 'Ocorreu um erro ao criar o plano e orçamento',
@@ -59,14 +74,13 @@ export default class  AccountPlanBudjectsController {
     }
   }
 
-  async reinforceAccountPlanEntry({ request, response }: HttpContext) {
+  public async reinforceAccountPlanEntry({ request, response }: HttpContext) {
 
     const data = await request.validateUsing(AccountPlanEntryValidator.validateFieldsReinforceOrAnnul());
 
     try {
       return response.created(await this.accountPlanBudjectService.reinforceAccountPlanEntry(data));
     } catch (error) {
-
       console.log(error);
       return response.status(500).json({
         message: 'Ocorreu um erro ao executar o reforço do plano e orçamento na conta ' + data.accountPlanNumber,
@@ -75,14 +89,13 @@ export default class  AccountPlanBudjectsController {
     }
   }
 
-  async annulAccountPlanEntry({ request, response }: HttpContext) {
+  public async annulAccountPlanEntry({ request, response }: HttpContext) {
 
     const data = await request.validateUsing(AccountPlanEntryValidator.validateFieldsReinforceOrAnnul());
 
     try {
       return response.created(await this.accountPlanBudjectService.annulAccountPlanEntry(data));
     } catch (error) {
-
       console.log(error);
       return response.status(500).json({
         message: 'Ocorreu um erro ao executar a anulação do plano e orçamento na conta ' + data.accountPlanNumber,
@@ -91,14 +104,13 @@ export default class  AccountPlanBudjectsController {
     }
   }
 
-  async redistribuitioReinforcimentAccountPlanEntry({ request, response }: HttpContext) {
+  public async redistribuitioReinforcimentAccountPlanEntry({ request, response }: HttpContext) {
 
     const data = await request.validateUsing(AccountPlanEntryValidator.validateFieldsRedistributeReinforcementOrAnnulment());
 
     try {
       return response.created(await this.accountPlanBudjectService.redistribuitioReinforcimentAccountPlanEntry(data));
     } catch (error) {
-
       console.log(error);
       return response.status(500).json({
         message: 'Ocorreu um erro ao executar a redistribuicao do reforço do plano e orçamento na conta ' + data.originAccountPlanNumber,
@@ -107,14 +119,13 @@ export default class  AccountPlanBudjectsController {
     }
   }
 
-  async redistributeAnnulmentAccountPlanEntry({ request, response }: HttpContext) {
+  public async redistributeAnnulmentAccountPlanEntry({ request, response }: HttpContext) {
 
     const data = await request.validateUsing(AccountPlanEntryValidator.validateFieldsRedistributeReinforcementOrAnnulment());
 
     try {
       return response.created(await this.accountPlanBudjectService.redistributeAnnulmentAccountPlanEntry(data));
     } catch (error) {
-
       console.log(error);
       return response.status(500).json({
         message: 'Ocorreu um erro ao executar a redistribuicao da anulação do plano e orçamento na conta ' + data.originAccountPlanNumber,
@@ -123,34 +134,31 @@ export default class  AccountPlanBudjectsController {
     }
   }
 
-  
-
-
-  async findAllAccountPlanYear({response }: HttpContext) {
+  public async findAllAccountPlanYear({ response }: HttpContext) {
     return response.ok(await this.accountPlanBudjectService.findAllAccountPlanYear());
   }
 
-  async findAccountPlanYearByYear({ request, response }: HttpContext) {
+  public async findAccountPlanYearByYear({ request, response }: HttpContext) {
     const year = request.param('year');
     return response.ok(await this.accountPlanBudjectService.findAccountPlanYearByYear(year));
   }
 
-  async findAccountPlanEntriesByYear({ request, response }: HttpContext) {
+  public async findAccountPlanEntriesByYear({ request, response }: HttpContext) {
     const year = request.param('year');
     return response.ok(await this.accountPlanBudjectService.findAllAccountPlanEntries(year));
   }
 
-  async findAccountPlanEntriesEntryByYear({ request, response }: HttpContext) {
+  public async findAccountPlanEntriesEntryByYear({ request, response }: HttpContext) {
     const year = request.param('year');
     return response.ok(await this.accountPlanBudjectService.findAllAccountPlanEntriesEntry(year));
   }
 
-  async fetchAccountPlanEntriesByYear({ request, response }: HttpContext) {
+  public async fetchAccountPlanEntriesByYear({ request, response }: HttpContext) {
     const year = request.param('year');
     return response.ok(await this.accountPlanBudjectService.fetchAllAccountPlanEntries(year));
   }
 
-  async fetchAccountPlanEntriesByYearAndNumber({ request, response }: HttpContext) {
+  public async fetchAccountPlanEntriesByYearAndNumber({ request, response }: HttpContext) {
     const year = request.param('year');
     const accountPlanNumber = request.param('accountPlanNumber');
     return response.ok(await this.accountPlanBudjectService.fetchAccountPlanEntriesByYearAndNumber(year, accountPlanNumber));
