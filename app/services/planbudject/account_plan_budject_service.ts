@@ -68,7 +68,8 @@ export default class AccountPlanBudjectService {
       .whereHas('accountPlanYear', (builder) => {
         builder.where('year', year);
       })
-      .preload('accountPlanYear').preload('entry')
+      .preload('accountPlanYear')
+      .preload('entry')
       .preload('targetEntrieEntry')
   }
 
@@ -79,6 +80,7 @@ export default class AccountPlanBudjectService {
       })
       .preload('accountPlan')
       .preload('accountPlanYear')
+      .preload('accountPlanfinancial')
   }
 
   public async fetchAllAccountPlanEntries(year: number) {
@@ -89,6 +91,7 @@ export default class AccountPlanBudjectService {
       .preload('accountPlan')
       .preload('accountPlanYear')
       .preload('entriesEntry')
+      .preload('accountPlanfinancial')
   }
 
   public async fetchAccountPlanEntriesByYearAndNumber(year: number, accountPlanNumber: number) {
@@ -100,6 +103,7 @@ export default class AccountPlanBudjectService {
       })
       .preload('accountPlan')
       .preload('accountPlanYear')
+      .preload('accountPlanfinancial')
       .preload('entriesEntry')
   }
 }
