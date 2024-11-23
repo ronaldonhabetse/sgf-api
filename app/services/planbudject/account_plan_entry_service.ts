@@ -354,7 +354,7 @@ export default class AccountPlanEntryService {
     }
 
     public async findAccountPlanEntriesByYearAndNumber(year: number, accountPlanNumber: string) {
-        return await AccountPlanEntry.query()
+        return await AccountPlanEntry.query().where('accountPlanNumber', accountPlanNumber)
             .whereHas('accountPlanYear', (accountPlanBudjectBuilder) => {
                 accountPlanBudjectBuilder.where('year', year);
             }).whereHas('accountPlan', (accountPlanBuilder) => {
