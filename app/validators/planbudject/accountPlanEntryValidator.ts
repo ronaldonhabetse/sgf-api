@@ -111,17 +111,28 @@ export default class accountPlanEntryValidator {
 
     public static async validateOnAssociate(data: { accountPlanFinancialNumber: string, accountPlanBujectsNumber: { accountPlanBujectNumber: string }[] }) {
 
-        const existFinancialAccountEntry = await AccountPlanEntry.query()
-            .where('accountPlanNumber', data.accountPlanFinancialNumber)
-            .whereHas('accountPlan', (builder) => {
-                builder.where('number', data.accountPlanFinancialNumber)
-                builder.where('type', AccoutPlanType.FINANCIAL);
-            })
-            .first();
-
-        if (existFinancialAccountEntry) {
-            throw new Error(this.messagesLabels['accountPlanEntry.database.not.exists'].replace('value', data.accountPlanFinancialNumber+" , "+AccoutPlanType.FINANCIAL.toString()));
-        }
+        const query = AccountPlanEntry.query()
+        .where('accountPlanNumber', data.accountPlanFinancialNumber)
+        .whereHas('accountPlan', (builder) => {
+            builder.where('number', data.accountPlanFinancialNumber)
+                .where('type', AccoutPlanType.FINANCIAL);
+        });
+    
+    // Imprimir a consulta gerada
+    console.log('Consulta SQL:', query.toSQL().sql, 'Parâmetros:', query.toSQL().bindings);
+    
+    const existFinancialAccountEntry = await query.first();
+    
+    if (existFinancialAccountEntry) {
+        throw new Error(
+            this.messagesLabels['accountPlanEntry.database.not.exists']
+                .replace(
+                    'value', 
+                    `${data.accountPlanFinancialNumber} , ${AccoutPlanType.FINANCIAL.toString()}`
+                )
+        );
+    }
+    
 
         data.accountPlanBujectsNumber.forEach(async (budjectAccountNumber) => {
             try {
