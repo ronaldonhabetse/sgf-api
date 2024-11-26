@@ -14,8 +14,8 @@ export default class AccountingJournalEntryValidator {
         operator: vine.enum(Object.values(OperatorType)),
         value: vine.number(),
         description: vine.string(),
-        accountPlanFinancialNumber: vine.string(),
-        accountPlanfinancialId: vine.number().optional(),
+        accountPlanNumber: vine.string(),
+        accountPlanId: vine.number().optional(),
         accountPlanYearId: vine.number().optional(),
         entryId: vine.number().optional(),
 
@@ -187,6 +187,11 @@ export default class AccountingJournalEntryValidator {
     }
 
     private static async validateItensWithInternalRequest(data: AccountingJounalEntryDTO) {
+        //Caso seja o lancamento de abertura verificamos se existe a abertura
+        if (!data.internalRequestNumber) {
+            throw Error(" Requisicao não encontrada no sistema" + data.internalRequestNumber);
+        }
+
         const internalRequest = await InternalRequest.query()
             .where('requestNumber', data.internalRequestNumber)
             .preload('accountPlanBudject')

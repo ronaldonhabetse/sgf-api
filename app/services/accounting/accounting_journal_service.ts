@@ -25,7 +25,7 @@ export default class AccountingJournalService {
     }
 
     public async billToPayAccountingJournal(data: AccountingJounalEntryDTO) {
-        await AccountingJournalEntryValidator.validateOnWithInternalRequest(data,AccountingJournal.BILLS_TO_PAY);
+        await AccountingJournalEntryValidator.validateOnWithInternalRequest(data, AccountingJournal.BILLS_TO_PAY);
         return await this.criateFinancialAccountingJournalWithInternalRequest(data, EntryEntryType.ENTRY_BILLS_TO_PAY);
     }
 
@@ -40,12 +40,12 @@ export default class AccountingJournalService {
     }
 
     public async bankOutAccountingJournal(data: AccountingJounalEntryDTO) {
-        await AccountingJournalEntryValidator.validateOnWithInternalRequest(data,AccountingJournal.BANK_OUT);
+        await AccountingJournalEntryValidator.validateOnWithInternalRequest(data, AccountingJournal.BANK_OUT);
         return await this.criateFinancialAccountingJournalWithInternalRequest(data, EntryEntryType.ENTRY_BANK_OUT);
     }
 
     public async regulationAccountingJournal(data: AccountingJounalEntryDTO) {
-        await AccountingJournalEntryValidator.validateOnWithInternalRequest(data,AccountingJournal.REGULARIZATION);
+        await AccountingJournalEntryValidator.validateOnWithInternalRequest(data, AccountingJournal.REGULARIZATION);
         return await this.criateFinancialAccountingJournalWithInternalRequest(data, EntryEntryType.ENTRY_REGULARIZATION);
 
     }
@@ -162,5 +162,16 @@ export default class AccountingJournalService {
             await trx.rollback();
             throw error;
         }
+    }
+
+
+    public async findAllAccountingJournalEntry() {
+        return await AccountingJournalEntry.query()
+            .preload('internalRequest')
+            .preload('accountPlanYear')
+            .preload('accountingDocument')
+            .preload('accountingJournal')
+            .preload('entriesEntry')
+            .first();
     }
 }

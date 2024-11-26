@@ -31,7 +31,7 @@ export interface AccountingJounalItemDTO extends DomainDTO {
   accountPlanNumber: string,
   accountPlanId: number | undefined,
   accountPlanYearId: number | undefined,
-  entryId: number,
+  entryId: number | undefined,
 }
 
 export interface AccountingJounalEntryDTO extends DomainDTO {
@@ -41,7 +41,7 @@ export interface AccountingJounalEntryDTO extends DomainDTO {
   accountingJournalId: number | undefined,
   accountingDocumentNumber: string,
   accountingDocumentId: number | undefined,
-  internalRequestNumber: number,
+  internalRequestNumber: string | undefined,
   internalRequestId: number | undefined,
   items: AccountingJounalItemDTO[]
 }

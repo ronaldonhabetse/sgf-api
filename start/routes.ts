@@ -13,6 +13,7 @@ import AccountPlansController from '../app/controllers/planbudject/account_plans
 import AccountPlanBudjectsController from '../app/controllers/planbudject/account_plan_budjects_controller.js';
 import InternalRequestController from '../app/controllers/request/internal_request_controller.js';
 import ProvidersController from '../app/controllers/collectiveperson/providers_controller.js';
+import AccountingJournalController from '../app/controllers/accounting/accounting_journal_controller.js';
 
 
 router.group(() => {
@@ -84,6 +85,17 @@ router.group(() => {
 
   }).prefix("collectiveperson");
 
+  router.group(() => {
+    //Lancamentos
+    router.get('findAllAccountingJournalEntry', [AccountingJournalController, 'findAllAccountingJournalEntry']);
+    router.get('openAccountingJournal', [AccountingJournalController, 'openAccountingJournal']);
+    router.post('bankInAccountingJournal', [AccountingJournalController, 'bankInAccountingJournal']);
+    router.post('billToPayAccountingJournal', [AccountingJournalController, 'billToPayAccountingJournal']);
+    router.post('billToReceiveAccountingJournal', [AccountingJournalController, 'billToReceiveAccountingJournal']);
+    router.post('bankOutAccountingJournal', [AccountingJournalController, 'bankOutAccountingJournal']);
+    router.post('regulationAccountingJournal', [AccountingJournalController, 'regulationAccountingJournal']);
+
+  }).prefix("accounting");
 
 
   /*------------------------------------------------------------------------------------------*/

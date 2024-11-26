@@ -5,7 +5,7 @@ import AccountingJournal from './accounting_journal.js'
 
 
 /*
-* Model que representa um documento
+* Model que representa um documento contabilistico
 * Gautchi R. Chambe (chambegautchi@gmail.com)
 */
 export default class AccountingDocument extends CreatableAbstractModel {

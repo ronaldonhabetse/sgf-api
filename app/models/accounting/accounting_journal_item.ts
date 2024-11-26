@@ -8,7 +8,7 @@ import AccountPlan from '../planbudject/account_plan.js'
 import { OperatorType } from '../utility/Enums.js'
 
 /*
-* Model que representa lancamento do diario contabilistico
+* Model que representa um item lancado no diario contabilistico
 * Gautchi R. Chambe (chambegautchi@gmail.com)
 */
 export default class AccountPlanJournalItem extends LifecycleAbstractModel {
