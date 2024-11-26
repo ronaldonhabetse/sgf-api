@@ -55,6 +55,23 @@ export enum EntryEntryType {
   ANNULMENT = 'annulment',
   REDISTRIBUITION_REINFORCEMENT = 'redistribuition_reinforcement',
   REDISTRIBUITION_ANNULMENT = 'redistribuition_annulment',
+
+  //Operacoes de lancamentos
+  ENTRY_OPENING = 'entry_opening',
+  ENTRY_BILLS_TO_RECEIVER = 'entry_bills_to_receiver',
+  ENTRY_BILLS_TO_PAY = 'entry_bills_to_pay',
+  ENTRY_BANK_IN = 'entry_bank_in',
+  ENTRY_BANK_OUT = 'entry_bank_out',
+  ENTRY_REGULARIZATION = 'entry_regularization',
+}
+
+export enum FinancialEntryEntryType {
+  //Operacoes de lancamentos
+  ENTRY_OPENING = 'opening',
+  ENTRY_RECEIVER = 'receiver',
+  ENTRY_ENTRIES = 'in',
+  ENTRY_OUT = 'out',
+  ENTRY_REGULARIZATION = 'regularization',
 }
 
 //Representa a quantificao de um item, ou seja grandeza para medir a quantidade

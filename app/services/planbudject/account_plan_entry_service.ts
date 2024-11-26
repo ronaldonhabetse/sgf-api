@@ -327,14 +327,14 @@ export default class AccountPlanEntryService {
         }
     }
 
-    public async updateParentsAccountPlanEntriesByChild(child: AccountPlanEntry, value: number, isReinforce: boolean, trx: TransactionClientContract) {
+    public async updateParentsAccountPlanEntriesByChild(child: AccountPlanEntry, value: number, isCredit: boolean, trx: TransactionClientContract) {
         const parentId = child.parentId;
         if (parentId) {
             const parent = await AccountPlanEntry.query().where('id', child.parentId).first();
             if (parent) {
-                parent.finalAllocation = isReinforce ? parent.finalAllocation + value : parent.finalAllocation - value;
+                parent.finalAllocation = isCredit ? parent.finalAllocation + value : parent.finalAllocation - value;
                 await parent.useTransaction(trx).save();
-                await this.updateParentsAccountPlanEntriesByChild(parent, value, isReinforce, trx);
+                await this.updateParentsAccountPlanEntriesByChild(parent, value, isCredit, trx);
             } else return;
         }
     }

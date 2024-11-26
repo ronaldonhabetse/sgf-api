@@ -7,10 +7,20 @@ import AccountingDocument from './accounting_document.js'
 * Model que representa um diario contabilistico
 * Gautchi R. Chambe (chambegautchi@gmail.com)
 */
-export default class AccoutingJournal extends LifecycleAbstractModel {
+export default class AccountingJournal extends LifecycleAbstractModel {
+
+  public static OPENING = '00';
+  public static BILLS_TO_PAY = '10';
+  public static BILLS_TO_RECEIVE = '20';
+  public static BANK_IN = '30';
+  public static BANK_OUT = '40';
+  public static REGULARIZATION = '50';
 
   @column()
-  declare journal_number: number
+  declare journalNumber: string
+
+  @column()
+  declare description: string
 
   @hasMany(() => AccountingDocument, {
     foreignKey: 'accounting_document_id'

@@ -13,5 +13,20 @@ export default class Provider extends CreatableAbstractModel {
   declare name: string
 
   @column()
+  declare description: string
+
+  @column()
+  declare nuit: string
+
+  @column()
+  declare email: string
+
+  @column()
+  declare contact1: string
+
+  @column()
+  declare contact2: string
+
+  @column()
   declare accountPlanFinancialNumber: string
 }
