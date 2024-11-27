@@ -10,6 +10,9 @@ import CreatableAbstractModel from '../utility/CreatableAbstractModel.js'
 export default class Provider extends CreatableAbstractModel {
 
   @column()
+  declare accountPlanFinancialNumber: string
+
+  @column()
   declare name: string
 
   @column()
@@ -30,6 +33,5 @@ export default class Provider extends CreatableAbstractModel {
   @column()
   declare contact2: string
 
-  @column()
-  declare accountPlanFinancialNumber: string
+
 }

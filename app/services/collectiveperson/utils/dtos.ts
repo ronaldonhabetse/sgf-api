@@ -1,5 +1,3 @@
-import { QuantificationType } from "../../../models/utility/Enums.js";
-
 /*
 * Interfaces que representam todos 'DTO' do modulo plano e orcamento'
 * Estes DTO provem das requests Externas para a API
