@@ -19,6 +19,9 @@ export default class Provider extends CreatableAbstractModel {
   declare nuit: string
 
   @column()
+  declare nib: string
+
+  @column()
   declare email: string
 
   @column()

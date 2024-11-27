@@ -15,6 +15,17 @@ interface DomainDTO {
 
 
 export interface ProviderDTO extends DomainDTO {
+  nuit: string
+  nib: string
   name: string
-  accountPlanFinancialNumber: string | undefined;
+  description: string
+  accountPlanFinancialNumber: string;
+}
+
+export interface BankDTO extends DomainDTO {
+  nuit: string
+  nib: string
+  name: string
+  description: string
+  accountPlanFinancialNumber: string;
 }
