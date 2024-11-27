@@ -4,10 +4,13 @@ import CreatableAbstractModel from '../utility/CreatableAbstractModel.js'
 
 
 /*
-* Model que representa um provedor 
+* Model que representa um banco 
 * Gautchi R. Chambe (chambegautchi@gmail.com)
 */
 export default class Bank extends CreatableAbstractModel {
+
+  @column()
+  declare accountPlanFinancialNumber: string
 
   @column()
   declare name: string
@@ -21,6 +24,4 @@ export default class Bank extends CreatableAbstractModel {
   @column()
   declare nib: string
 
-  @column()
-  declare accountPlanFinancialNumber: string
 }

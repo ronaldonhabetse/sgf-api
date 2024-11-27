@@ -1,5 +1,3 @@
-import { QuantificationType } from "../../../models/utility/Enums.js";
-
 /*
 * Interfaces que representam todos 'DTO' do modulo plano e orcamento'
 * Estes DTO provem das requests Externas para a API
@@ -15,6 +13,17 @@ interface DomainDTO {
 
 
 export interface ProviderDTO extends DomainDTO {
+  nuit: string
+  nib: string
   name: string
-  accountPlanFinancialNumber: string | undefined;
+  description: string
+  accountPlanFinancialNumber: string;
+}
+
+export interface BankDTO extends DomainDTO {
+  nuit: string
+  nib: string
+  name: string
+  description: string
+  accountPlanFinancialNumber: string;
 }

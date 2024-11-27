@@ -165,13 +165,36 @@ export default class AccountingJournalService {
     }
 
 
-    public async findAllAccountingJournalEntry() {
+    public async fetchAllAccountingJournalEntry() {
         return await AccountingJournalEntry.query()
             .preload('internalRequest')
             .preload('accountPlanYear')
             .preload('accountingDocument')
             .preload('accountingJournal')
             .preload('entriesEntry')
+            .first();
+    }
+
+    /*
+    public async fetchAllAccountingJournalEntryByinternalRequestNumber() {
+        return await AccountingJournalEntry.query().whereHas()
+            .preload('internalRequest')
+            .preload('accountPlanYear')
+            .preload('accountingDocument')
+            .preload('accountingJournal')
+            .preload('entriesEntry')
+            .first();
+    }
+*/
+    public async fetchAllAccountingJournal() {
+        return await AccountingJournal.query()
+            .preload('documents')
+            .first();
+    }
+
+    public async fetchAllAccountingJournalByJournalNumber(journalNumber: string) {
+        return await AccountingJournal.query().where('journalNumber', journalNumber)
+            .preload('documents')
             .first();
     }
 }

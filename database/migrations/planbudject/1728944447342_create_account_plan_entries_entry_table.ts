@@ -14,7 +14,16 @@ export default class extends BaseSchema {
         EntryEntryType.REINFORCEMENT,
         EntryEntryType.ANNULMENT,
         EntryEntryType.REDISTRIBUITION_REINFORCEMENT,
-        EntryEntryType.REDISTRIBUITION_ANNULMENT,])
+        EntryEntryType.REDISTRIBUITION_ANNULMENT,
+
+        EntryEntryType.ENTRY_OPENING,
+        EntryEntryType.ENTRY_BANK_IN,
+        EntryEntryType.ENTRY_BANK_OUT,
+        EntryEntryType.ENTRY_BILLS_TO_PAY,
+        EntryEntryType.ENTRY_BILLS_TO_RECEIVER,
+        EntryEntryType.ENTRY_REGULARIZATION,
+        ])
+
       table.enum('operator', Object.values(OperatorType))
         .notNullable()
         .checkIn([OperatorType.DEBIT, OperatorType.CREDTI])

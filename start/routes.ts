@@ -12,7 +12,7 @@ import { AuthController } from '../app/controllers/security/auth_controller.js';
 import AccountPlansController from '../app/controllers/planbudject/account_plans_controller.js';
 import AccountPlanBudjectsController from '../app/controllers/planbudject/account_plan_budjects_controller.js';
 import InternalRequestController from '../app/controllers/request/internal_request_controller.js';
-import ProvidersController from '../app/controllers/collectiveperson/providers_controller.js';
+import CollectivePersonController from '../app/controllers/collectiveperson/collective_person_controller.js';
 import AccountingJournalController from '../app/controllers/accounting/accounting_journal_controller.js';
 import DiariesController from '#controllers/diaries/diariesController';
 import DocumentController from '#controllers/document/documentController';
@@ -84,16 +84,26 @@ router.group(() => {
   router.group(() => {
     //Provedores
     router.group(() => {
-      router.get('findAllProviders', [ProvidersController, 'findAllProviders']);
-      router.get('findProviderByAccountFinancialNumber', [ProvidersController, 'findProviderByAccountFinancialNumber']);
-      router.post('createProvider', [ProvidersController, 'createProvider']);
+      router.get('findAllProviders', [CollectivePersonController, 'findAllProviders']);
+      router.get('findProviderByAccountFinancialNumber/:accountFinancialNumber', [CollectivePersonController, 'findProviderByAccountFinancialNumber']);
+      router.post('createProvider', [CollectivePersonController, 'createProvider']);
     }).prefix("providers");
+
+     //Bancos
+     router.group(() => {
+      router.get('findAllBanks', [CollectivePersonController, 'findAllBanks']);
+      router.get('findBankByAccountFinancialNumber/:accountFinancialNumber', [CollectivePersonController, 'findBankByAccountFinancialNumber']);
+      router.post('createBank', [CollectivePersonController, 'createBank']);
+    }).prefix("banks");
 
   }).prefix("collectiveperson");
 
   router.group(() => {
     //Lancamentos
-    router.get('findAllAccountingJournalEntry', [AccountingJournalController, 'findAllAccountingJournalEntry']);
+    router.get('fetchAllAccountingJournalEntry', [AccountingJournalController, 'fetchAllAccountingJournalEntry']);
+    router.get('fetchAllAccountingJournal', [AccountingJournalController, 'fetchAllAccountingJournal']);
+    router.get('fetchAllAccountingJournalByJournalNumber/:number', [AccountingJournalController, 'fetchAllAccountingJournalByJournalNumber']);
+
     router.get('openAccountingJournal', [AccountingJournalController, 'openAccountingJournal']);
     router.post('bankInAccountingJournal', [AccountingJournalController, 'bankInAccountingJournal']);
     router.post('billToPayAccountingJournal', [AccountingJournalController, 'billToPayAccountingJournal']);

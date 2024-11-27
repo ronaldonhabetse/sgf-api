@@ -91,7 +91,21 @@ export default class AccountingJournalController {
     }
   }
 
+
+  async fetchAllAccountingJournalEntry({ response }: HttpContext) {
+    return response.ok(await this.accountingJournalService.fetchAllAccountingJournalEntry());
+  }
+
   async findAllAccountingJournalEntry({ response }: HttpContext) {
-    return response.ok(await this.accountingJournalService.findAllAccountingJournalEntry());
+    return response.ok(await this.accountingJournalService.fetchAllAccountingJournalEntry());
+  }
+
+  async fetchAllAccountingJournal({ response }: HttpContext) {
+    return response.ok(await this.accountingJournalService.fetchAllAccountingJournal());
+  }
+
+  async fetchAllAccountingJournalByJournalNumber({ request, response }: HttpContext) {
+    const journalNumber = request.param('number');
+    return response.ok(await this.accountingJournalService.fetchAllAccountingJournalByJournalNumber(journalNumber));
   }
 }
