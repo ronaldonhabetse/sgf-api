@@ -1,24 +1,24 @@
 import { belongsTo, column } from '@adonisjs/lucid/orm'
 import CreatableAbstractModel from '../utility/CreatableAbstractModel.js'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import AccoutingJournal from './accounting_journal.js'
+import AccountingJournal from './accounting_journal.js'
 
 
 /*
-* Model que representa um documento
+* Model que representa um documento contabilistico
 * Gautchi R. Chambe (chambegautchi@gmail.com)
 */
 export default class AccountingDocument extends CreatableAbstractModel {
 
   @column()
-  declare document_number: string
+  declare documentNumber: string
 
   @column()
   declare description: string
 
   @column()
-  declare accoutingJournalId: number
+  declare accountingJournalId: number
 
-  @belongsTo(() => AccoutingJournal)
-  declare accoutingJournal: BelongsTo<typeof AccoutingJournal>
+  @belongsTo(() => AccountingJournal)
+  declare accountingJournal: BelongsTo<typeof AccountingJournal>
 }

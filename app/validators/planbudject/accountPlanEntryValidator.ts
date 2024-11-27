@@ -3,7 +3,7 @@ import { AccountPlanEntryDTO } from '../../services/planbudject/utils/dtos.js';
 import AccountPlanEntry from '../../models/planbudject/account_plan_entry.js';
 import { AccoutPlanType } from '../../models/utility/Enums.js';
 
-export default class accountPlanEntryValidator {
+export default class AccountPlanEntryValidator {
 
     private static schemaFieldsAssociateAccounts = vine.object({
         accountPlanFinancialNumber: vine.string(),

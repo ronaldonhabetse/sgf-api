@@ -6,6 +6,7 @@ import AccountPlan from '../planbudject/account_plan.js'
 import InternalRequestItem from './internal_request_item.js'
 import Provider from '../person/provider.js'
 import LifecycleAbstractModel from '../utility/LifeclycleAbstractModel.js'
+import Bank from '../person/bank.js'
 
 /*
 * Model que representa uma requisicao interna
@@ -68,6 +69,12 @@ export default class InternalRequest extends LifecycleAbstractModel {
 
   @belongsTo(() => Provider)
   declare provider: BelongsTo<typeof Provider>
+
+  @column()
+  declare bankId: number
+
+  @belongsTo(() => Bank)
+  declare bank: BelongsTo<typeof Bank>
 
   @column()
   declare accountPlanBudjectId: number
