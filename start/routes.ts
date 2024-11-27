@@ -14,6 +14,8 @@ import AccountPlanBudjectsController from '../app/controllers/planbudject/accoun
 import InternalRequestController from '../app/controllers/request/internal_request_controller.js';
 import ProvidersController from '../app/controllers/collectiveperson/providers_controller.js';
 import AccountingJournalController from '../app/controllers/accounting/accounting_journal_controller.js';
+import DiariesController from '#controllers/diaries/diariesController';
+import DocumentController from '#controllers/document/documentController';
 
 
 router.group(() => {
@@ -42,6 +44,10 @@ router.group(() => {
       router.post('removeAccountPlan', [AccountPlansController, 'removeAccountPlan']);
       router.post('updateAccountPlan', [AccountPlansController, 'updateAccountPlan']);
     }).prefix("accountplan");
+
+    //Trazer diarios
+    router.get('findAllDiaries', [DiariesController, 'findAllDiaries']);
+    router.get('findAllDocuments', [DocumentController, 'findAllDiariesWithDocuments']);
 
     //Ano contabilistico especifico
     router.post('createAccountPlanYear', [AccountPlanBudjectsController, 'createAccountPlanYear']);
