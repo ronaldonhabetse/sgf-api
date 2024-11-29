@@ -6,7 +6,7 @@ import AccountingJournalEntryValidator from "../../validators/accounting/account
 import AccountingJournalEntry from "../../models/accounting/accounting_journal_entry.js";
 import AccountingJournal from "../../models/accounting/accounting_journal.js";
 import AccountingDocument from "../../models/accounting/accounting_document.js";
-import AccountPlanJournalItem from "../../models/accounting/accounting_journal_item.js";
+import AccountingJournalEntryItems from "../../models/accounting/accounting_journal_entry_items.js";
 import { inject } from "@adonisjs/core";
 import AccountPlanFinancialEntryService from "./account_plan_financial_entry_service.js";
 import { EntryEntryType } from "../../models/utility/Enums.js";
@@ -47,17 +47,14 @@ export default class AccountingJournalService {
     public async regulationAccountingJournal(data: AccountingJounalEntryDTO) {
         await AccountingJournalEntryValidator.validateOnWithInternalRequest(data, AccountingJournal.REGULARIZATION);
         return await this.criateFinancialAccountingJournalWithInternalRequest(data, EntryEntryType.ENTRY_REGULARIZATION);
-
     }
 
-
     public async criateFinancialAccountingJournalWithoutinternalRequest(data: AccountingJounalEntryDTO, entryEntryType: EntryEntryType) {
-
-        const trx = await db.transaction()  // Start transaction
+        const trx = await db.transaction();  // Start transaction
 
         try {
             const currentDate = new Date();
-            const operationDate = DateTime.local(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())
+            const operationDate = DateTime.local(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
             const currentPlanYear = await AccountPlanYear.findByOrFail('year', currentDate.getFullYear());
             const journal = await AccountingJournal.findByOrFail('journalNumber', data.accountingJournalNumber);
             const document = await AccountingDocument.findByOrFail('documentNumber', data.accountingDocumentNumber);
@@ -70,11 +67,11 @@ export default class AccountingJournalService {
                     accountingDocumentId: document.id,
                 }).useTransaction(trx).save();
 
-            data.items.forEach(async (itemData) => {
+            for (const itemData of data.items) {  // Use for...of to await async operations
                 try {
                     const financial = await AccountPlan.findByOrFail('number', itemData.accountPlanNumber);
 
-                    await new AccountPlanJournalItem()
+                    await new AccountingJournalEntryItems()
                         .fill({
                             operator: itemData.operator,
                             value: itemData.value,
@@ -85,7 +82,7 @@ export default class AccountingJournalService {
                             entryId: createdAccountingEntry.id,
                         }).useTransaction(trx).save();
 
-                    //Efectua os lançamentos e o calculo dos saldos contabilisticos 
+                    // Efectua os lançamentos e o cálculo dos saldos contabilísticos 
                     await this.accountPlanFinancialEntryService.entryCrediteOrDebit(
                         {
                             accountPlanNumber: itemData.accountPlanNumber,
@@ -94,12 +91,13 @@ export default class AccountingJournalService {
                             operator: itemData.operator,
                             operationDate: currentDate
                         },
-                        trx)
+                        trx
+                    );
                 } catch (error) {
                     await trx.rollback();
                     throw error;
                 }
-            });
+            }
 
             await trx.commit();
             return createdAccountingEntry;
@@ -110,11 +108,10 @@ export default class AccountingJournalService {
     }
 
     public async criateFinancialAccountingJournalWithInternalRequest(data: AccountingJounalEntryDTO, entryEntryType: EntryEntryType) {
-
-        const trx = await db.transaction()  // Start transaction
+        const trx = await db.transaction();  // Start transaction
         try {
             const currentDate = new Date();
-            const operationDate = DateTime.local(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())
+            const operationDate = DateTime.local(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
             const currentPlanYear = await AccountPlanYear.findByOrFail('year', currentDate.getFullYear());
             const journal = await AccountingJournal.findByOrFail('journalNumber', data.accountingJournalNumber);
             const document = await AccountingDocument.findByOrFail('documentNumber', data.accountingDocumentNumber);
@@ -127,10 +124,10 @@ export default class AccountingJournalService {
                     accountingDocumentId: document.id,
                 }).useTransaction(trx).save();
 
-            data.items.forEach(async (itemData) => {
+            for (const itemData of data.items) {  // Use for...of to await async operations
                 try {
                     const accountPlan = await AccountPlan.findByOrFail('number', itemData.accountPlanNumber);
-                    await new AccountPlanJournalItem()
+                    await new AccountingJournalEntryItems()
                         .fill({
                             operator: itemData.operator,
                             value: itemData.value,
@@ -141,7 +138,7 @@ export default class AccountingJournalService {
                             entryId: createdAccountingEntry.id,
                         }).useTransaction(trx).save();
 
-                    //Efectua os lançamentos e o calculo dos saldos contabilisticos 
+                    // Efectua os lançamentos e o cálculo dos saldos contabilísticos 
                     await this.accountPlanFinancialEntryService.entryCrediteOrDebit(
                         {
                             accountPlanNumber: itemData.accountPlanNumber,
@@ -150,12 +147,14 @@ export default class AccountingJournalService {
                             operator: itemData.operator,
                             operationDate: currentDate
                         },
-                        trx)
+                        trx
+                    );
                 } catch (error) {
                     await trx.rollback();
                     throw error;
                 }
-            });
+            }
+
             await trx.commit();
             return createdAccountingEntry;
         } catch (error) {
@@ -163,7 +162,6 @@ export default class AccountingJournalService {
             throw error;
         }
     }
-
 
     public async fetchAllAccountingJournalEntry() {
         return await AccountingJournalEntry.query()
@@ -175,17 +173,6 @@ export default class AccountingJournalService {
             .first();
     }
 
-    /*
-    public async fetchAllAccountingJournalEntryByinternalRequestNumber() {
-        return await AccountingJournalEntry.query().whereHas()
-            .preload('internalRequest')
-            .preload('accountPlanYear')
-            .preload('accountingDocument')
-            .preload('accountingJournal')
-            .preload('entriesEntry')
-            .first();
-    }
-*/
     public async fetchAllAccountingJournal() {
         return await AccountingJournal.query()
             .preload('documents')

@@ -77,6 +77,9 @@ export default class InternalRequest extends LifecycleAbstractModel {
   declare bank: BelongsTo<typeof Bank>
 
   @column()
+  declare bankValue: string
+
+  @column()
   declare accountPlanBudjectId: number
 
   @belongsTo(() => AccountPlan)

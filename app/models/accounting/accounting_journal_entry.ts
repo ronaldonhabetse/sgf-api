@@ -5,7 +5,7 @@ import AccountingDocument from './accounting_document.js'
 import { DateTime } from 'luxon'
 import AccountingJournal from './accounting_journal.js'
 import AccountPlanYear from '../planbudject/account_plan_year.js'
-import AccountPlanJournalItem from './accounting_journal_item.js'
+import AccountPlanJournalItem from './accounting_journal_entry_items.js'
 import InternalRequest from '../request/internal_request.js'
 
 /*

@@ -23,8 +23,7 @@ export default class AccountingJournal extends LifecycleAbstractModel {
   declare description: string
 
   @hasMany(() => AccountingDocument, {
-    foreignKey: 'accountingJournalId' // Corrigir aqui
-    // foreignKey: 'accounting_document_id'
+    foreignKey: 'accountingJournalId'
   })
   declare documents: HasMany<typeof AccountingDocument>
 }

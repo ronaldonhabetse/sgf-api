@@ -105,32 +105,51 @@ export default class AccountingJournalEntryValidator {
     }
 
     public static async validateOnWithoutInternalRequest(data: AccountingJounalEntryDTO, type: string) {
-
-        await this.validadeExistsJournalAndDocument({ accountingDocumentNumber: data.accountingDocumentNumber, accountingJournalNumber: data.accountingJournalNumber });
+        // Validar existência do diário e do documento
+        await this.validadeExistsJournalAndDocument({
+            accountingDocumentNumber: data.accountingDocumentNumber,
+            accountingJournalNumber: data.accountingJournalNumber,
+        });
 
         switch (type) {
             case AccountingJournal.OPENING:
-                {
-                    if (AccountingJournal.OPENING !== data.accountingJournalNumber) {
-                        throw new Error(this.messagesLabels['accountingJournalNumber.notvalid'].replace('value', data.accountingJournalNumber));
-                    }; AccountingJournalEntryValidator.validateItemsWithoutInternalRequest(data.items, AccountingJournal.OPENING);
+                if (AccountingJournal.OPENING !== data.accountingJournalNumber) {
+                    throw new Error(
+                        this.messagesLabels['accountingJournalNumber.notvalid']
+                            .replace('value', data.accountingJournalNumber)
+                    );
                 }
+                AccountingJournalEntryValidator.validateItemsWithoutInternalRequest(data.items, AccountingJournal.OPENING);
+                break;
+
             case AccountingJournal.BILLS_TO_RECEIVE:
-                {
-                    if (AccountingJournal.BILLS_TO_RECEIVE !== data.accountingJournalNumber) {
-                        throw new Error(this.messagesLabels['accountingJournalNumber.notvalid'].replace('value', data.accountingJournalNumber));
-                    }; AccountingJournalEntryValidator.validateItemsWithoutInternalRequest(data.items, AccountingJournal.BILLS_TO_RECEIVE);
+                if (AccountingJournal.BILLS_TO_RECEIVE !== data.accountingJournalNumber) {
+                    throw new Error(
+                        this.messagesLabels['accountingJournalNumber.notvalid']
+                            .replace('value', data.accountingJournalNumber)
+                    );
                 }
+                AccountingJournalEntryValidator.validateItemsWithoutInternalRequest(data.items, AccountingJournal.BILLS_TO_RECEIVE);
+                break;
+
             case AccountingJournal.BANK_IN:
-                {
-                    if (AccountingJournal.BANK_IN !== data.accountingJournalNumber) {
-                        throw new Error(this.messagesLabels['accountingJournalNumber.notvalid'].replace('value', data.accountingJournalNumber));
-                    }; AccountingJournalEntryValidator.validateItemsWithoutInternalRequest(data.items, AccountingJournal.BANK_IN);
+                if (AccountingJournal.BANK_IN !== data.accountingJournalNumber) {
+                    throw new Error(
+                        this.messagesLabels['accountingJournalNumber.notvalid']
+                            .replace('value', data.accountingJournalNumber)
+                    );
                 }
+                AccountingJournalEntryValidator.validateItemsWithoutInternalRequest(data.items, AccountingJournal.BANK_IN);
+                break;  
+
             default:
-                throw new Error(this.messagesLabels['accountingJournalNumber.notvalid'].replace('value', type));
+                throw new Error(
+                    this.messagesLabels['accountingJournalNumber.notvalid']
+                        .replace('value', type)
+                );
         }
     }
+
 
     private static validateItemsWithoutInternalRequest(items: AccountingJounalItemDTO[], journalNumber: string) {
         items.forEach(async (item) => {

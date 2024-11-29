@@ -41,4 +41,5 @@ export interface InternalRequestDTO extends DomainDTO {
   accountPlanBudjectNumber: string
   accountPlanFinancialNumber: string
   items: InternalRequestItemDTO[]
+  bank: string
 }

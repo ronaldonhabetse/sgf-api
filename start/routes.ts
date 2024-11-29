@@ -104,7 +104,7 @@ router.group(() => {
     router.get('fetchAllAccountingJournal', [AccountingJournalController, 'fetchAllAccountingJournal']);
     router.get('fetchAllAccountingJournalByJournalNumber/:number', [AccountingJournalController, 'fetchAllAccountingJournalByJournalNumber']);
 
-    router.get('openAccountingJournal', [AccountingJournalController, 'openAccountingJournal']);
+    router.post('openAccountingJournal', [AccountingJournalController, 'openAccountingJournal']);
     router.post('bankInAccountingJournal', [AccountingJournalController, 'bankInAccountingJournal']);
     router.post('billToPayAccountingJournal', [AccountingJournalController, 'billToPayAccountingJournal']);
     router.post('billToReceiveAccountingJournal', [AccountingJournalController, 'billToReceiveAccountingJournal']);

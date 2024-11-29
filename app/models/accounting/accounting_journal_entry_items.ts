@@ -10,8 +10,8 @@ import { OperatorType } from '../utility/Enums.js'
 /*
 * Model que representa um item lancado no diario contabilistico
 * Gautchi R. Chambe (chambegautchi@gmail.com)
-*/
-export default class AccountPlanJournalItem extends LifecycleAbstractModel {
+*/                   
+export default class AccountingJournalEntryItems extends LifecycleAbstractModel {
 
   @column.date({
     serialize: (value) => value?.toFormat('dd-MM-yyyy')

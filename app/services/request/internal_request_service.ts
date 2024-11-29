@@ -14,31 +14,33 @@ import InternalRequestValidator from "../../validators/request/internalRequestVa
 /*
 * Servicos para requisicoes internas
 * Gautchi R. Chambe (chambegautchi@gmail.com)
+* Cipriano P. Sagene (ciprianosagene@gmail.com)
 */
 @inject()
 export default class InternalRequestService {
 
   public async generateNextRequestNumber(accountPlanYear: AccountPlanYear) {
-
     const sequenceArry = await InternalRequest.query()
       .where('accountPlanYearId', accountPlanYear.id);
     const nextSequence = sequenceArry.length + 1;
     return nextSequence;
   }
-  public async createInternalRequest(data: InternalRequestDTO) {
 
+  public async createInternalRequest(data: InternalRequestDTO) {
+    // Validação do campo 'bank' já ocorre no validador
     await InternalRequestValidator.validateOnCreate(data);
 
     let totalItemsValue = 0;
-    data.items.forEach(async (itemData) => {
-      const intemValue = itemData.quantity * itemData.unitPrice;
-      totalItemsValue = totalItemsValue + intemValue;
-    })
+    // Corrigir o cálculo de totalItemsValue para garantir que a função assíncrona aguarde
+    for (const itemData of data.items) {
+      const itemValue = itemData.quantity * itemData.unitPrice;
+      totalItemsValue += itemValue;
+    }
 
     const currentDate = new Date();
-    const operationDate = DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth(), data.operationDate.getDate())
+    const operationDate = DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth(), data.operationDate.getDate());
 
-    const trx = await db.transaction()  // Start transaction
+    const trx = await db.transaction(); // Start transaction
     try {
       const currentPlanYear = await AccountPlanYear.findByOrFail('year', currentDate.getFullYear());
 
@@ -51,10 +53,10 @@ export default class InternalRequestService {
         }
       );
 
-      //Saldo da conta orcamental
+      // Saldo da conta orcamental
       const accountPlanBudjectEntry = await AccountPlanEntry.findByOrFail({
         'accountPlanNumber': data.accountPlanBudjectNumber,
-      })
+      });
 
       const accountPlanFinancial = await AccountPlan.findByOrFail(
         {
@@ -67,13 +69,13 @@ export default class InternalRequestService {
 
       const createdInternalRequest = await new InternalRequest().fill({
         sequence: nextSequence,
-        requestNumber: nextSequence + "-" + currentDate.getMonth() + "" + currentDate.getFullYear(),
+        requestNumber: `${nextSequence}-${currentDate.getMonth()}${currentDate.getFullYear()}`,
         requestorName: data.requestorName,
         requestorDepartment: data.requestorDepartment,
         operationDate: operationDate,
         initialAvailabilityAccountBuject: accountPlanBudjectEntry.finalAllocation,
         currentAccountBudjectBalance: accountPlanBudjectEntry.finalAllocation,
-        finalAccountBujectBalance: (accountPlanBudjectEntry.finalAllocation - (data.totalRequestedValue ? data.totalRequestedValue : 0)),
+        finalAccountBujectBalance: (accountPlanBudjectEntry.finalAllocation - (data.totalRequestedValue || 0)),
         totalRequestedValue: totalItemsValue,
         justification: data.justification,
         sectorBudject: data.sectorBudject,
@@ -84,9 +86,12 @@ export default class InternalRequestService {
         providerId: provider.id,
         accountPlanBudjectId: accountPlanBudject.id,
         accountPlanFinancialId: accountPlanFinancial.id,
+        // Novo campo 'bank' sendo salvo
+        bankValue: data.bank,  // Inclui o banco na requisição
       }).useTransaction(trx).save();
 
-      data.items.forEach(async (itemData) => {
+      // Substituir o forEach por for...of para garantir que o item seja processado de forma assíncrona
+      for (const itemData of data.items) {
         try {
           await new InternalRequestItem().fill({
             quantification: itemData.quantification,
@@ -100,9 +105,11 @@ export default class InternalRequestService {
           await trx.rollback();
           throw error;
         }
-      });
+      }
+
       await trx.commit();
       return createdInternalRequest;
+
     } catch (error) {
       await trx.rollback();
       throw error;
@@ -119,7 +126,6 @@ export default class InternalRequestService {
   }
 
   public async findByRequestNumber(requestNumber: string) {
-    return await InternalRequest.query().where("requestNumber", requestNumber)
-      .withScopes((scopes) => scopes.active()).firstOrFail();
+    return await InternalRequest.findByOrFail('requestNumber', requestNumber);
   }
 }

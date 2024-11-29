@@ -43,6 +43,9 @@ export default class InternalRequestValidator {
         accountPlanBudjectNumber: vine.string(),
         accountPlanFinancialNumber: vine.string(),
 
+        // Campo 'bank' agora obrigatório e sem limite de tamanho
+        bank: vine.string(),  // Banco é obrigatório, sem restrição de tamanho
+
         createtBy: vine.number().optional(),
         updatedBy: vine.number().optional().nullable(),
         createdAt: vine.date().optional(),
@@ -58,14 +61,14 @@ export default class InternalRequestValidator {
         minLength: 'O campo [{{ field }}] deve ter no minimo {{ min }} caractere',
         date: 'O campo [{{ field }}] deve estar no formato {{ format }}',
         enum: 'O campo [{{ field }}] é invalido, os valores devem ser:[{{ choices }}]',
-        // Error message for the username field
         'number.database.unique': 'O numero da conta [{{ value }}] já existe no sistema',
         'id.database.unique': 'O id [{{ value }}] não existe no sistema',
         'accountPlanBudjectNumber.database.not.exists': 'O numero da conta [{{ value }}] não existe no sistema',
         'accountPlanFinancialNumber.database.not.exists': 'O numero da conta [{{ value }}] não existe no sistema',
         'provider.database.not.exists': 'Provedor com codico [{{ value }}] não existe no sistema',
 
-
+        // Mensagem para o campo 'bank' caso não seja fornecido
+        'bank.required': 'O campo [{{ field }}] é obrigatório.',
     }
 
     private static setMessages = (() => {
@@ -78,9 +81,7 @@ export default class InternalRequestValidator {
     });
 
     public static async validateOnCreate(data: InternalRequestDTO) {
-        //valida o tipo de dados e enums
-       // vine.compile(this.schemaCreateFields).validate(data);
-
+        // Valida o tipo de dados e enums
         const provider = await Provider.query()
             .where("accountPlanFinancialNumber", data.provideCode).first();
 
@@ -111,6 +112,11 @@ export default class InternalRequestValidator {
         if (!existAccountFinancial) {
             throw new Error(this.messagesLabels['accountPlanFinancialNumber.database.not.exists']
                 .replace('value', data.accountPlanFinancialNumber))
+        }
+
+        // Verifica a validação do campo 'bank'
+        if (!data.bank) {
+            throw new Error(this.messagesLabels['bank.required'].replace('{{ field }}', 'Banco'));
         }
     }
 }
