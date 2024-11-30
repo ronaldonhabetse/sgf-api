@@ -43,5 +43,6 @@ export interface AccountingJounalEntryDTO extends DomainDTO {
   accountingDocumentId: number | undefined,
   internalRequestNumber: string | undefined,
   internalRequestId: number | undefined,
+  journalDocumentNumber: string,
   items: AccountingJounalItemDTO[]
 }

@@ -96,6 +96,12 @@ export default class AccountingJournalController {
     return response.ok(await this.accountingJournalService.fetchAllAccountingJournalEntry());
   }
 
+  async fetchAllAccountingJournalEntryItems({ response }: HttpContext) {
+    const items = await this.accountingJournalService.fetchAllAccountingJournalEntryItems();
+    return response.ok(items); // Retorna os itens carregados com as relações
+}
+
+
   async findAllAccountingJournalEntry({ response }: HttpContext) {
     return response.ok(await this.accountingJournalService.fetchAllAccountingJournalEntry());
   }

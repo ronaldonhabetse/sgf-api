@@ -7,14 +7,9 @@ import AccountPlanYear from '../planbudject/account_plan_year.js'
 import AccountPlan from '../planbudject/account_plan.js'
 import { OperatorType } from '../utility/Enums.js'
 
-/*
-* Model que representa um item lancado no diario contabilistico
-* Gautchi R. Chambe (chambegautchi@gmail.com)
-*/                   
 export default class AccountingJournalEntryItems extends LifecycleAbstractModel {
-
   @column.date({
-    serialize: (value) => value?.toFormat('dd-MM-yyyy')
+    serialize: (value) => value?.toFormat('dd-MM-yyyy'),
   })
   declare operationDate: DateTime
 
@@ -43,8 +38,10 @@ export default class AccountingJournalEntryItems extends LifecycleAbstractModel 
   declare accountPlanYear: BelongsTo<typeof AccountPlanYear>
 
   @column()
-  declare entryId: number //AccountingJournalEntry.id
+  declare entryId: number
 
-  @belongsTo(() => AccountingJournalEntry)
+  @belongsTo(() => AccountingJournalEntry, {
+    foreignKey: 'entryId', // Mapeia o campo correto
+  })
   declare entry: BelongsTo<typeof AccountingJournalEntry>
 }

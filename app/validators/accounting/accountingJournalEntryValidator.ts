@@ -36,6 +36,7 @@ export default class AccountingJournalEntryValidator {
         accountingDocumentId: vine.number().optional(),
         internalRequestNumber: vine.string().optional(),
         internalRequestId: vine.number().optional(),
+        journalDocumentNumber: vine.string(),  // Novo campo
         items: vine.array(
             this.schemaFieldsAccountingJournalItems,
         ),
@@ -77,7 +78,7 @@ export default class AccountingJournalEntryValidator {
         return vine.compile(this.schemaFieldsAccountingJournalEntry)
     });
 
-    private static async validadeExistsJournalAndDocument(data: { accountingDocumentNumber: string, accountingJournalNumber: string }) {
+    private static async validadeExistsJournalAndDocument(data: { accountingDocumentNumber: string, accountingJournalNumber: string, journalDocumentNumber: string }) {
 
         const existDocument = await AccountingDocument.query()
             .where('documentNumber', data.accountingDocumentNumber)
@@ -102,6 +103,12 @@ export default class AccountingJournalEntryValidator {
             throw new Error(this.messagesLabels['accountingDocumentNumber.notvalid'].replace('value', data.accountingDocumentNumber));
         }
 
+            // Validação do novo campo journalDocumentNumber
+            if (!data.journalDocumentNumber) {
+                // A propriedade journalDocumentNumber não existe em data
+                console.log("O campo journalDocumentNumber não foi fornecido.");
+            }
+            
     }
 
     public static async validateOnWithoutInternalRequest(data: AccountingJounalEntryDTO, type: string) {
@@ -109,6 +116,7 @@ export default class AccountingJournalEntryValidator {
         await this.validadeExistsJournalAndDocument({
             accountingDocumentNumber: data.accountingDocumentNumber,
             accountingJournalNumber: data.accountingJournalNumber,
+            journalDocumentNumber: data.journalDocumentNumber
         });
 
         switch (type) {
@@ -179,7 +187,7 @@ export default class AccountingJournalEntryValidator {
 
     public static async validateOnWithInternalRequest(data: AccountingJounalEntryDTO, type: string) {
 
-        await this.validadeExistsJournalAndDocument({ accountingDocumentNumber: data.accountingDocumentNumber, accountingJournalNumber: data.accountingJournalNumber });
+        await this.validadeExistsJournalAndDocument({ accountingDocumentNumber: data.accountingDocumentNumber, accountingJournalNumber: data.accountingJournalNumber, journalDocumentNumber:data.journalDocumentNumber });
 
         switch (type) {
             case AccountingJournal.BILLS_TO_PAY:

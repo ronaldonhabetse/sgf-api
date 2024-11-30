@@ -28,6 +28,9 @@ export default class AccountingJournalEntry extends LifecycleAbstractModel {
   @column()
   declare accountingJournalId: number
 
+  @column()
+  declare journalDocumentNumber: number
+
   @belongsTo(() => AccountingJournal)
   declare accountingJournal: BelongsTo<typeof AccountingJournal>
 

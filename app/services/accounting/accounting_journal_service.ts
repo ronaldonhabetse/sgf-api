@@ -59,12 +59,17 @@ export default class AccountingJournalService {
             const journal = await AccountingJournal.findByOrFail('journalNumber', data.accountingJournalNumber);
             const document = await AccountingDocument.findByOrFail('documentNumber', data.accountingDocumentNumber);
 
+            const journalDocNumber = Number(data.journalDocumentNumber);
+            if (isNaN(journalDocNumber)) {
+                throw new Error('journalDocumentNumber deve ser um número válido.');
+            }
             const createdAccountingEntry = await new AccountingJournalEntry()
                 .fill({
                     operationDate: operationDate,
                     accountPlanYearId: currentPlanYear.id,
                     accountingJournalId: journal.id,
                     accountingDocumentId: document.id,
+                    journalDocumentNumber: journalDocNumber,  // Adicionando o journalDocumentNumber
                 }).useTransaction(trx).save();
 
             for (const itemData of data.items) {  // Use for...of to await async operations
@@ -83,16 +88,16 @@ export default class AccountingJournalService {
                         }).useTransaction(trx).save();
 
                     // Efectua os lançamentos e o cálculo dos saldos contabilísticos 
-                    await this.accountPlanFinancialEntryService.entryCrediteOrDebit(
-                        {
-                            accountPlanNumber: itemData.accountPlanNumber,
-                            value: itemData.value,
-                            entryEntryType: entryEntryType,
-                            operator: itemData.operator,
-                            operationDate: currentDate
-                        },
-                        trx
-                    );
+                    // await this.accountPlanFinancialEntryService.entryCrediteOrDebit(
+                    //     {
+                    //         accountPlanNumber: itemData.accountPlanNumber,
+                    //         value: itemData.value,
+                    //         entryEntryType: entryEntryType,
+                    //         operator: itemData.operator,
+                    //         operationDate: currentDate
+                    //     },
+                    //     trx
+                    // );
                 } catch (error) {
                     await trx.rollback();
                     throw error;
@@ -170,9 +175,21 @@ export default class AccountingJournalService {
             .preload('accountingDocument')
             .preload('accountingJournal')
             .preload('entriesEntry')
-            .first();
     }
 
+    public async fetchAllAccountingJournalEntryItems() {
+        return await AccountingJournalEntryItems.query()
+            .preload('accountPlanYear')      // Carrega a relação accountPlanYear
+            .preload('accountPlan')          // Carrega a relação accountPlan
+            .preload('entry', (entryQuery) => { // Carrega a relação entry com suas relações internas
+                entryQuery
+                    .preload('accountingJournal')  // Carrega a relação accountingJournal dentro de entry
+                    .preload('accountingDocument') // Carrega a relação accountingDocument dentro de entry
+                    .preload('internalRequest');   // Carrega a relação internalRequest dentro de entry, se existir
+            })
+            .exec();
+    }
+    
     public async fetchAllAccountingJournal() {
         return await AccountingJournal.query()
             .preload('documents')
