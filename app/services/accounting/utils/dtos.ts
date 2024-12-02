@@ -44,5 +44,7 @@ export interface AccountingJounalEntryDTO extends DomainDTO {
   internalRequestNumber: string | undefined,
   internalRequestId: number | undefined,
   journalDocumentNumber: string,
+  paid: boolean,
+  conformance: 'PENDING_CONFORMANCE' | 'WITHOUT_CONFORMANCE' | 'CONFORMED',
   items: AccountingJounalItemDTO[]
 }

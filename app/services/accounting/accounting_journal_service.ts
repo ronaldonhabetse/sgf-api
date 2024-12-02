@@ -120,15 +120,27 @@ export default class AccountingJournalService {
             const currentPlanYear = await AccountPlanYear.findByOrFail('year', currentDate.getFullYear());
             const journal = await AccountingJournal.findByOrFail('journalNumber', data.accountingJournalNumber);
             const document = await AccountingDocument.findByOrFail('documentNumber', data.accountingDocumentNumber);
-
+            const journalDocNumber = Number(data.journalDocumentNumber);
+            const internalRequest = String(data.internalRequestNumber);
+            if (isNaN(journalDocNumber)) {
+                throw new Error('journalDocumentNumber deve ser um número válido.');
+            }
+    
+            // Criação do lançamento contábil
             const createdAccountingEntry = await new AccountingJournalEntry()
                 .fill({
                     operationDate: operationDate,
                     accountPlanYearId: currentPlanYear.id,
                     accountingJournalId: journal.id,
                     accountingDocumentId: document.id,
+                    journalDocumentNumber: journalDocNumber,  // Adicionando o journalDocumentNumber
                 }).useTransaction(trx).save();
-
+    
+            // Verifica se 'data.paid' é igual a 1 antes de atualizar o 'internalRequest'
+            if (data.paid === true) {
+                await trx.query().from('internal_requests').where('request_number', internalRequest).update({ paid: true });
+            }
+    
             for (const itemData of data.items) {  // Use for...of to await async operations
                 try {
                     const accountPlan = await AccountPlan.findByOrFail('number', itemData.accountPlanNumber);
@@ -142,7 +154,7 @@ export default class AccountingJournalService {
                             accountPlanYearId: currentPlanYear.id,
                             entryId: createdAccountingEntry.id,
                         }).useTransaction(trx).save();
-
+    
                     // Efectua os lançamentos e o cálculo dos saldos contabilísticos 
                     await this.accountPlanFinancialEntryService.entryCrediteOrDebit(
                         {
@@ -159,7 +171,7 @@ export default class AccountingJournalService {
                     throw error;
                 }
             }
-
+    
             await trx.commit();
             return createdAccountingEntry;
         } catch (error) {
@@ -167,6 +179,7 @@ export default class AccountingJournalService {
             throw error;
         }
     }
+    
 
     public async fetchAllAccountingJournalEntry() {
         return await AccountingJournalEntry.query()

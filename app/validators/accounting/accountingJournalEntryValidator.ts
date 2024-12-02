@@ -37,13 +37,15 @@ export default class AccountingJournalEntryValidator {
         internalRequestNumber: vine.string().optional(),
         internalRequestId: vine.number().optional(),
         journalDocumentNumber: vine.string(),  // Novo campo
+        paid: vine.boolean(),  // Novo campo
         items: vine.array(
-            this.schemaFieldsAccountingJournalItems,
+            AccountingJournalEntryValidator.schemaFieldsAccountingJournalItems
         ),
         createtBy: vine.number().optional(),
         updatedBy: vine.number().optional().nullable(),
         createdAt: vine.date().optional(),
         updatedAt: vine.date().optional().nullable(),
+
     })
 
     private static messagesLabels = {
@@ -60,10 +62,10 @@ export default class AccountingJournalEntryValidator {
         'accountPlanEntry.database.exists': 'O plano de conta com o numero da conta [{{ value }}] já existe no sistema',
         'accountPlanEntry.database.not.exists': 'A entrada do plano conta pai o numero da conta [{{ value }}] não existe no sistema',
 
-        'item.accountPlanBudject.database.not.exists': 'O numero da conta [{{ value }}] já existe no sistema',
-        'item.accountPlanFinancial.database.not.exists': 'O numero da conta [{{ value }}] já existe no sistema',
-        'item.provider.database.not.exists': 'O numero da conta [{{ value }}] já existe no sistema',
-        'item.bank.database.not.exists': 'O numero da conta [{{ value }}] já existe no sistema',
+        'item.accountPlanBudject.database.not.exists': 'O numero da conta [{{ value }}] não existe no sistema',
+        'item.accountPlanFinancial.database.not.exists': 'O numero da conta [{{ value }}] não existe no sistema',
+        'item.provider.database.not.exists': 'O numero da conta [{{ value }}] não existe no sistema',
+        'item.bank.database.not.exists': 'O numero da conta [{{ value }}] não existe no sistema',
 
         'accountingJournalNumber.notvalid': 'O numero do diario [{{ value }}] não é valido para esta operação',
         'accountingDocumentNumber.notvalid': 'O numero do documento [{{ value }}] não é valido para esta operação',
@@ -194,23 +196,30 @@ export default class AccountingJournalEntryValidator {
                 {
                     if (AccountingJournal.BILLS_TO_PAY !== data.accountingJournalNumber) {
                         throw new Error(this.messagesLabels['accountingJournalNumber.notvalid'].replace('value', data.accountingJournalNumber));
-                    }; AccountingJournalEntryValidator.validateItensWithInternalRequest(data);
+                    };
+                    AccountingJournalEntryValidator.validateItensWithInternalRequest(data);
+                    break; // Evita que o código continue para os outros casos
                 }
             case AccountingJournal.BANK_OUT:
                 {
                     if (AccountingJournal.BANK_OUT !== data.accountingJournalNumber) {
                         throw new Error(this.messagesLabels['accountingJournalNumber.notvalid'].replace('value', data.accountingJournalNumber));
-                    }; AccountingJournalEntryValidator.validateItensWithInternalRequest(data);
+                    };
+                    AccountingJournalEntryValidator.validateItensWithInternalRequest(data);
+                    break; // Evita que o código continue para os outros casos
                 }
             case AccountingJournal.REGULARIZATION:
                 {
                     if (AccountingJournal.REGULARIZATION !== data.accountingJournalNumber) {
                         throw new Error(this.messagesLabels['accountingJournalNumber.notvalid'].replace('value', data.accountingJournalNumber));
-                    }; AccountingJournalEntryValidator.validateItensWithInternalRequest(data);
+                    };
+                    AccountingJournalEntryValidator.validateItensWithInternalRequest(data);
+                    break; // Evita que o código continue para os outros casos
                 }
             default:
                 throw new Error(this.messagesLabels['accountingJournalNumber.notvalid'].replace('value', type));
         }
+        
     }
 
     private static async validateItensWithInternalRequest(data: AccountingJounalEntryDTO) {
@@ -224,9 +233,9 @@ export default class AccountingJournalEntryValidator {
             .preload('accountPlanBudject')
             .preload('accountPlanFinancial')
             .preload('provider')
-            .preload('bank')
             .first();
 
+        console.log(data)
         //Caso seja o lancamento de abertura verificamos se existe a abertura
         if (!internalRequest) {
             throw Error(" Requisicao não encontrada no sistema" + data.internalRequestNumber);
@@ -235,7 +244,8 @@ export default class AccountingJournalEntryValidator {
         const accountPlanBudject = internalRequest.accountPlanBudject;
         const accountPlanFinancial = internalRequest.accountPlanFinancial;
         const provider = internalRequest.provider;
-        const bank = internalRequest.bank;
+
+
 
         let hasBujectAccount = false;
         let hasFinancialAccount = false;
@@ -257,12 +267,9 @@ export default class AccountingJournalEntryValidator {
                 itemData.accountPlanNumber == provider.accountPlanFinancialNumber
                 : hastProvider;
 
-            hasBank = !hasBank ?
-                itemData.accountPlanNumber == bank.accountPlanFinancialNumber
-                : hasBank;
         });
 
-        if (!hasBujectAccount) {
+        if (hasBujectAccount) {
             throw new Error(this.messagesLabels['item.accountPlanBudject.database.not.exists'].replace('value', accountPlanBudject.number + " , " + AccoutPlanType.BUDJECT.toString()));
         }
         if (!hasFinancialAccount) {
@@ -270,9 +277,6 @@ export default class AccountingJournalEntryValidator {
         }
         if (!hastProvider) {
             throw new Error(this.messagesLabels['item.provider.database.not.exists'].replace('value', provider.accountPlanFinancialNumber));
-        }
-        if (!hasBank) {
-            throw new Error(this.messagesLabels['item.bank.database.not.exists'].replace('value', bank.accountPlanFinancialNumber));
         }
     }
 }

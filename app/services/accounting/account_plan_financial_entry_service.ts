@@ -8,7 +8,7 @@ import AccountPlanEntryService from "../planbudject/account_plan_entry_service.j
 import AccountPlanEntry from "../../models/planbudject/account_plan_entry.js";
 
 /*
-* Servicos para o plano de contas financeiro
+* Serviços para o plano de contas financeiro
 * Gautchi R. Chambe (chambegautchi@gmail.com)
 */
 @inject()
@@ -27,14 +27,45 @@ export default class AccountPlanFinancialEntryService {
     const operationDate = DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth(), data.operationDate.getDate())
     const currentPlanYear = await AccountPlanYear.findByOrFail('year', currentDate.getFullYear());
 
+    // Encontrar a conta pela numeração
     let entry = await this.accountPlanEntryService.
       findAccountPlanEntriesByYearAndNumber(currentDate.getFullYear(), data.accountPlanNumber);
+      console.log("Entry encontrada: ", entry);
 
+      
     if (!entry) {
       throw Error("Entrada do plano de conta não encontrado no sistema com a conta " + data.accountPlanNumber);
     }
 
-    const isCredit = (data.operator == OperatorType.CREDTI) ? true : false;
+    // Verificar se a conta é do tipo 'financial' para passar por todo o processo sem validações
+    if (entry.accountPlan?.type === 'financial') {
+      // Para contas financeiras, executa a operação sem qualquer validação
+      await new AccountPlanEntryEntry()
+        .fill(
+          {
+            type: data.entryEntryType,
+            operator: data.operator,
+            postingMonth: currentDate.getMonth(),
+            operationDate: operationDate,
+            allocation: data.value,
+            lastFinalAllocation: entry.finalAllocation,
+            entryId: entry.id,
+            accountPlanYearId: currentPlanYear.id,
+          }).useTransaction(trx).save();
+
+      // Atualiza o saldo da conta, independentemente de validações
+      entry.finalAllocation = entry.finalAllocation + (data.operator === OperatorType.CREDTI ? data.value : -data.value);
+      const updatedEntry = await entry.useTransaction(trx).save();
+
+      // Atualiza as entradas pai, se necessário
+      await this.accountPlanEntryService
+        .updateParentsAccountPlanEntriesByChild(updatedEntry, data.value, data.operator === OperatorType.CREDTI, trx);
+
+      return updatedEntry;
+    }
+
+    // Para contas não-financeiras, realiza as validações normais
+    const isCredit = (data.operator === OperatorType.CREDTI);
     const entryfinalAllocation = isCredit ?
       entry.finalAllocation + data.value :
       entry.finalAllocation - data.value;
@@ -42,9 +73,10 @@ export default class AccountPlanFinancialEntryService {
     if (entryfinalAllocation < 0) {
       throw Error(" Não pode efectuar a anulação, o valor da conta "
         + data.accountPlanNumber + " é insuficiente para anular " + data.value
-        + ". O valor actual é " + entry.finalAllocation)
+        + ". O valor actual é " + entry.finalAllocation);
     }
 
+    // Cria a entrada do plano de contas normalmente
     await new AccountPlanEntryEntry()
       .fill(
         {
@@ -58,12 +90,14 @@ export default class AccountPlanFinancialEntryService {
           accountPlanYearId: currentPlanYear.id,
         }).useTransaction(trx).save();
 
-    entry.finalAllocation = entryfinalAllocation
-    const updatedEntry = await entry.useTransaction(trx)
-      .save();
+    // Atualiza o saldo da conta
+    entry.finalAllocation = entryfinalAllocation;
+    const updatedEntry = await entry.useTransaction(trx).save();
 
+    // Atualiza as entradas pai
     await this.accountPlanEntryService
       .updateParentsAccountPlanEntriesByChild(updatedEntry, data.value, isCredit, trx);
+
     return updatedEntry;
   }
 }

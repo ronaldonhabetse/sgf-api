@@ -42,4 +42,6 @@ export interface InternalRequestDTO extends DomainDTO {
   accountPlanFinancialNumber: string
   items: InternalRequestItemDTO[]
   bank: string
+  paid: boolean,
+  conformance: 'PENDING_CONFORMANCE' | 'WITHOUT_CONFORMANCE' | 'CONFORMED',
 }

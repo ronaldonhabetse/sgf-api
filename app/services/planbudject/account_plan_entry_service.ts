@@ -353,12 +353,37 @@ export default class AccountPlanEntryService {
         return parents;
     }
 
+
     public async findAccountPlanEntriesByYearAndNumber(year: number, accountPlanNumber: string) {
-        return await AccountPlanEntry.query().where('accountPlanNumber', accountPlanNumber)
-            .whereHas('accountPlanYear', (accountPlanBudjectBuilder) => {
-                accountPlanBudjectBuilder.where('year', year);
-            }).whereHas('accountPlan', (accountPlanBuilder) => {
-                accountPlanBuilder.where('number', accountPlanNumber);
-            }).first()
+        const entry = await AccountPlanEntry.query()
+    .where('accountPlanNumber', accountPlanNumber)
+    .whereHas('accountPlanYear', (accountPlanBudjectBuilder) => {
+        accountPlanBudjectBuilder.where('year', year);
+    })
+    .whereHas('accountPlan', (accountPlanBuilder) => {
+        accountPlanBuilder.where('number', accountPlanNumber);
+    })
+    .first();
+
+// Carregar a relação 'accountPlan' explicitamente após a consulta
+if (entry) {
+    await entry.load('accountPlan');
+    
+    // Acessar os atributos do accountPlan
+    const accountPlan = entry.accountPlan;
+    console.log(accountPlan.$attributes);
+}
+
+        return entry;
     }
+    
+
+    // public async findAccountPlanEntriesByYearAndNumber(year: number, accountPlanNumber: string) {
+    //     return await AccountPlanEntry.query().where('accountPlanNumber', accountPlanNumber)
+    //         .whereHas('accountPlanYear', (accountPlanBudjectBuilder) => {
+    //             accountPlanBudjectBuilder.where('year', year);
+    //         }).whereHas('accountPlan', (accountPlanBuilder) => {
+    //             accountPlanBuilder.where('number', accountPlanNumber);
+    //         }).first()
+    // }
 }

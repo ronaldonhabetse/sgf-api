@@ -50,4 +50,11 @@ export default class AccountingJournalEntry extends LifecycleAbstractModel {
     foreignKey: 'entryId', // defaults to entryId
   })
   declare entriesEntry: HasMany<typeof AccountPlanJournalItem>
+
+  // New fields
+  @column()
+  declare paid: boolean
+
+  @column()
+  declare conformance: 'PENDING_CONFORMANCE' | 'WITHOUT_CONFORMANCE' | 'CONFORMED'
 }

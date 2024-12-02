@@ -66,7 +66,7 @@ export default class InternalRequestService {
       );
 
       const nextSequence = await this.generateNextRequestNumber(currentPlanYear);
-
+      const paid = data.paid ?? 0;
       const createdInternalRequest = await new InternalRequest().fill({
         sequence: nextSequence,
         requestNumber: `${nextSequence}-${currentDate.getMonth()}${currentDate.getFullYear()}`,
@@ -88,6 +88,7 @@ export default class InternalRequestService {
         accountPlanFinancialId: accountPlanFinancial.id,
         // Novo campo 'bank' sendo salvo
         bankValue: data.bank,  // Inclui o banco na requisição
+        paid: paid
       }).useTransaction(trx).save();
 
       // Substituir o forEach por for...of para garantir que o item seja processado de forma assíncrona
@@ -116,10 +117,54 @@ export default class InternalRequestService {
     }
   }
 
+  // public async findAll() {
+  //   return (await InternalRequest.query()
+  //     .withScopes((scopes) => scopes.active()))
+  // }
+
   public async findAll() {
-    return (await InternalRequest.query()
-      .withScopes((scopes) => scopes.active()))
+    return await InternalRequest.query()
+      .preload('accountPlanBudject') // Preload do orçamento
+      .preload('accountPlanFinancial') // Preload financeiro
+      .preload('items') // Preload dos itens relacionados
+      .orderBy('operationDate', 'desc') // Exemplo: Ordenação por data
   }
+  
+
+  public async fetchAll() {
+    const result = await InternalRequestItem.query()
+      .preload('internalRequest', (internalRequestQuery) => {
+        internalRequestQuery
+          .select([
+            'id',
+            'sequence',
+            'request_number',
+            'requestor_name',
+            'requestor_department',
+            'operation_date',
+            'paid',
+            'conformance',
+            'total_requested_value',
+            'bank_Value', // Inclua explicitamente o campo desejado
+            'account_plan_budject_id',
+            'account_plan_financial_id',
+          ])
+          .preload('accountPlanBudject') // Carrega a relação
+          .preload('accountPlanFinancial'); // Carrega a relação
+      });
+  
+    console.log(
+      result.map((item) => ({
+        internalRequestId: item.internalRequestId,
+        bankValue: item.internalRequest?.bankValue,
+      }))
+    ); // Debug para garantir que 'bankValue' está presente
+  
+    return result;
+  }
+  
+  
+  
 
   public async findById(id: number) {
     return await InternalRequest.findOrFail(id);
