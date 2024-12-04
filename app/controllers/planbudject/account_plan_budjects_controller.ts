@@ -163,4 +163,23 @@ export default class AccountPlanBudjectsController {
     const accountPlanNumber = request.param('accountPlanNumber');
     return response.ok(await this.accountPlanBudjectService.fetchAccountPlanEntriesByYearAndNumber(year, accountPlanNumber));
   }
+
+
+public async fetchAllFinancialAccountsAndAssociations({ params, response }: HttpContext) {
+
+  try {
+    const financialAccountsWithAssociations =
+      await this.accountPlanBudjectService.findAllFinancialAccountsAndAssociatedBudgets();
+    return response.ok(financialAccountsWithAssociations);
+  } catch (error) {
+    console.error(error);
+    return response.status(500).json({
+      message: 'Erro ao buscar todas as associações de contas financeiras.',
+      error: error.message,
+    });
+  }
+}
+
+  
+  
 }

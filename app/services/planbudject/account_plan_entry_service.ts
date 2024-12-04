@@ -51,34 +51,51 @@ export default class AccountPlanEntryService {
 
         return createdCreditEntryEntry;
     }
-
     public async associateFinancialAccountWithBujectAccounts(data: { accountPlanFinancialNumber: string, accountPlanBujectsNumber: { accountPlanBujectNumber: string }[] }) {
-        // Encontrar a conta existente pelo ID
-
+        // Validar os dados de associação
         await AccountPlanEntryValidator.validateOnAssociate(data);
 
-        const foundAccountPlanFinancial = await AccountPlanEntry.findByOrFail('accountPlanNumber', data.accountPlanFinancialNumber);
-        const trx = await db.transaction()  // Start transaction
-        try {
-            data.accountPlanBujectsNumber.forEach(async (budjectAccountNumber) => {
-                try {
+        // Buscar a conta financeira pelo número
+        const foundAccountPlanFinancial = await AccountPlan.findByOrFail('number', data.accountPlanFinancialNumber);
 
-                    const budjectAccountPlan = await AccountPlanEntry.findByOrFail('accountPlanNumber', budjectAccountNumber);
-                    budjectAccountPlan.accountPlanfinancialId = foundAccountPlanFinancial.id;
-                    await budjectAccountPlan.useTransaction(trx).save()
-                } catch (error) {
-                    await trx.rollback();
-                    throw error;
+        // Iniciar transação
+        const trx = await db.transaction();
+
+        try {
+            // Loop para associar cada conta orçamentária
+            for (const budjectAccount of data.accountPlanBujectsNumber) {
+                // Garantir que o número do orçamento seja utilizado
+                const budjectAccountPlan = await AccountPlan.findByOrFail('number', budjectAccount.accountPlanBujectNumber);
+
+                // Verificar se a conta orçamentária já está associada a uma conta financeira
+                const existingAssociation = await trx
+                    .from('financial_budget_associations')
+                    .where('budget_account_id', budjectAccountPlan.id)
+                    .first();
+
+                if (existingAssociation) {
+                    throw new Error(`A conta orçamentária ${budjectAccount.accountPlanBujectNumber} já está associada a uma conta financeira.`);
                 }
-            })
+
+                // Registrar a associação na tabela 'financial_budget_associations' dentro da transação
+                await trx
+                    .table('financial_budget_associations')
+                    .insert({
+                        financial_account_id: foundAccountPlanFinancial.id,
+                        budget_account_id: budjectAccountPlan.id,
+                    });
+            }
+
+            // Commit da transação
             await trx.commit();
             return data;
+
         } catch (error) {
+            // Reverter transação em caso de erro
             await trx.rollback();
             throw error;
         }
     }
-
 
     public async createAccountPlanEntryTest(data: AccountPlanEntryDTO) {
 

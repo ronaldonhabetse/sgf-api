@@ -110,47 +110,50 @@ export default class AccountPlanEntryValidator {
     }
 
     public static async validateOnAssociate(data: { accountPlanFinancialNumber: string, accountPlanBujectsNumber: { accountPlanBujectNumber: string }[] }) {
-
-        const query = AccountPlanEntry.query()
-        .where('accountPlanNumber', data.accountPlanFinancialNumber)
-        .whereHas('accountPlan', (builder) => {
-            builder.where('number', data.accountPlanFinancialNumber)
-                .where('type', AccoutPlanType.FINANCIAL);
-        });
+        // Validar entrada financeira
+        const financialQuery = AccountPlanEntry.query()
+            .join('account_plans', 'account_plan_entries.account_plan_id', '=', 'account_plans.id')
+            .where('account_plan_entries.account_plan_number', data.accountPlanFinancialNumber)
+            .where('account_plans.number', data.accountPlanFinancialNumber)
+            .where('account_plans.type', AccoutPlanType.FINANCIAL);
     
-    // Imprimir a consulta gerada
-    console.log('Consulta SQL:', query.toSQL().sql, 'Parâmetros:', query.toSQL().bindings);
+        // Imprimir a consulta SQL gerada
+        console.log('Consulta SQL (Financeira):', financialQuery.toSQL().sql, 'Parâmetros:', financialQuery.toSQL().bindings);
     
-    const existFinancialAccountEntry = await query.first();
+        const existFinancialAccountEntry = await financialQuery.first();
     
-    if (existFinancialAccountEntry) {
-        throw new Error(
-            this.messagesLabels['accountPlanEntry.database.not.exists']
-                .replace(
-                    'value', 
-                    `${data.accountPlanFinancialNumber} , ${AccoutPlanType.FINANCIAL.toString()}`
-                )
-        );
-    }
+        if (!existFinancialAccountEntry) {
+            throw new Error(
+                this.messagesLabels['accountPlanEntry.database.not.exists']
+                    .replace(
+                        'value',
+                        `${data.accountPlanFinancialNumber} , ${AccoutPlanType.FINANCIAL.toString()}`
+                    )
+            );
+        }
     
-
-        data.accountPlanBujectsNumber.forEach(async (budjectAccountNumber) => {
-            try {
-                const budjectAccountPlanEntry = await AccountPlanEntry.query()
-                    .where('accountPlanNumber', budjectAccountNumber.accountPlanBujectNumber)
-                    .whereHas('accountPlan', (builder) => {
-                        builder.where('number', budjectAccountNumber.accountPlanBujectNumber)
-                        builder.where('type', AccoutPlanType.BUDJECT);
-                    })
-                    .first();
-
-                if (budjectAccountPlanEntry) {
-                    throw new Error(this.messagesLabels['accountPlanEntry.database.not.exists'].replace('value', budjectAccountNumber.accountPlanBujectNumber +" , "+AccoutPlanType.BUDJECT.toString()));
-                }
-
-            } catch (error) {
-                throw error;
+        // Validar entradas de orçamento
+        for (const budjectAccountNumber of data.accountPlanBujectsNumber) {
+            const budjectQuery = AccountPlanEntry.query()
+                .join('account_plans', 'account_plan_entries.account_plan_id', '=', 'account_plans.id')
+                .where('account_plan_entries.account_plan_number', budjectAccountNumber.accountPlanBujectNumber)
+                .where('account_plans.number', budjectAccountNumber.accountPlanBujectNumber)
+                .where('account_plans.type', AccoutPlanType.BUDJECT);
+    
+            console.log('Consulta SQL (Orçamento):', budjectQuery.toSQL().sql, 'Parâmetros:', budjectQuery.toSQL().bindings);
+    
+            const budjectAccountPlanEntry = await budjectQuery.first();
+    
+            if (!budjectAccountPlanEntry) {
+                throw new Error(
+                    this.messagesLabels['accountPlanEntry.database.not.exists']
+                        .replace(
+                            'value',
+                            `${budjectAccountNumber.accountPlanBujectNumber} , ${AccoutPlanType.BUDJECT.toString()}`
+                        )
+                );
             }
-        })
+        }
     }
+    
 }

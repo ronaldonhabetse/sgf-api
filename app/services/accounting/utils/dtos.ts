@@ -46,5 +46,7 @@ export interface AccountingJounalEntryDTO extends DomainDTO {
   journalDocumentNumber: string,
   paid: boolean,
   conformance: 'PENDING_CONFORMANCE' | 'WITHOUT_CONFORMANCE' | 'CONFORMED',
-  items: AccountingJounalItemDTO[]
+  items: AccountingJounalItemDTO[],
+  receivable: boolean,
+  transactionType: string
 }

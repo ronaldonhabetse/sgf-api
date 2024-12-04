@@ -38,6 +38,8 @@ export default class AccountingJournalEntryValidator {
         internalRequestId: vine.number().optional(),
         journalDocumentNumber: vine.string(),  // Novo campo
         paid: vine.boolean(),  // Novo campo
+        receivable: vine.boolean(),  // Novo campo
+        transactionType: vine.string(),
         items: vine.array(
             AccountingJournalEntryValidator.schemaFieldsAccountingJournalItems
         ),

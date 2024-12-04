@@ -56,5 +56,8 @@ export default class AccountingJournalEntry extends LifecycleAbstractModel {
   declare paid: boolean
 
   @column()
+  declare is_receivable: boolean
+
+  @column()
   declare conformance: 'PENDING_CONFORMANCE' | 'WITHOUT_CONFORMANCE' | 'CONFORMED'
 }

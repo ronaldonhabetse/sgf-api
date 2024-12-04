@@ -53,6 +53,7 @@ router.group(() => {
     router.post('createAccountPlanYear', [AccountPlanBudjectsController, 'createAccountPlanYear']);
     router.post('findAllAccountPlanYear', [AccountPlanBudjectsController, 'findAllAccountPlanYear']);
     router.post('findAccountPlanYearByYear/:year', [AccountPlanBudjectsController, 'findAccountPlanYearByYear']);
+    router.get('fetchFinancialAccountWithAssociations', [AccountPlanBudjectsController, 'fetchAllFinancialAccountsAndAssociations']);
 
     // Entradas/Saldos do plano do ano especifico - dotação
     router.post('findAccountPlanEntriesByYear/:year', [AccountPlanBudjectsController, 'findAccountPlanEntriesByYear']);

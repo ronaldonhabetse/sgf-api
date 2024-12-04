@@ -113,71 +113,111 @@ export default class AccountingJournalService {
     }
 
     public async criateFinancialAccountingJournalWithInternalRequest(data: AccountingJounalEntryDTO, entryEntryType: EntryEntryType) {
-        const trx = await db.transaction();  // Start transaction
-        try {
-            const currentDate = new Date();
-            const operationDate = DateTime.local(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
-            const currentPlanYear = await AccountPlanYear.findByOrFail('year', currentDate.getFullYear());
-            const journal = await AccountingJournal.findByOrFail('journalNumber', data.accountingJournalNumber);
-            const document = await AccountingDocument.findByOrFail('documentNumber', data.accountingDocumentNumber);
-            const journalDocNumber = Number(data.journalDocumentNumber);
-            const internalRequest = String(data.internalRequestNumber);
-            if (isNaN(journalDocNumber)) {
-                throw new Error('journalDocumentNumber deve ser um número válido.');
-            }
-    
-            // Criação do lançamento contábil
-            const createdAccountingEntry = await new AccountingJournalEntry()
-                .fill({
-                    operationDate: operationDate,
-                    accountPlanYearId: currentPlanYear.id,
-                    accountingJournalId: journal.id,
-                    accountingDocumentId: document.id,
-                    journalDocumentNumber: journalDocNumber,  // Adicionando o journalDocumentNumber
-                }).useTransaction(trx).save();
-    
-            // Verifica se 'data.paid' é igual a 1 antes de atualizar o 'internalRequest'
-            if (data.paid === true) {
-                await trx.query().from('internal_requests').where('request_number', internalRequest).update({ paid: true });
-            }
-    
-            for (const itemData of data.items) {  // Use for...of to await async operations
-                try {
-                    const accountPlan = await AccountPlan.findByOrFail('number', itemData.accountPlanNumber);
-                    await new AccountingJournalEntryItems()
-                        .fill({
-                            operator: itemData.operator,
-                            value: itemData.value,
-                            description: itemData.description,
-                            accountPlanNumber: itemData.accountPlanNumber,
-                            accountPlanId: accountPlan.id,
-                            accountPlanYearId: currentPlanYear.id,
-                            entryId: createdAccountingEntry.id,
-                        }).useTransaction(trx).save();
-    
-                    // Efectua os lançamentos e o cálculo dos saldos contabilísticos 
-                    await this.accountPlanFinancialEntryService.entryCrediteOrDebit(
-                        {
-                            accountPlanNumber: itemData.accountPlanNumber,
-                            value: itemData.value,
-                            entryEntryType: entryEntryType,
-                            operator: itemData.operator,
-                            operationDate: currentDate
-                        },
-                        trx
-                    );
-                } catch (error) {
-                    await trx.rollback();
-                    throw error;
-                }
-            }
-    
-            await trx.commit();
-            return createdAccountingEntry;
-        } catch (error) {
-            await trx.rollback();
-            throw error;
+        const trx = await db.transaction(); // Inicia a transação
+    try {
+        const currentDate = new Date();
+        const operationDate = DateTime.local(
+            currentDate.getFullYear(),
+            currentDate.getMonth() + 1, // Meses são baseados em zero no JavaScript
+            currentDate.getDate()
+        );
+        const currentPlanYear = await AccountPlanYear.findByOrFail('year', currentDate.getFullYear());
+        const journal = await AccountingJournal.findByOrFail('journalNumber', data.accountingJournalNumber);
+        const document = await AccountingDocument.findByOrFail('documentNumber', data.accountingDocumentNumber);
+        const journalDocNumber = Number(data.journalDocumentNumber);
+        const internalRequest = String(data.internalRequestNumber);
+        const receivable = Boolean(data.receivable);
+        const transactionType = String(data.transactionType);
+
+        if (isNaN(journalDocNumber)) {
+            throw new Error('journalDocumentNumber deve ser um número válido.');
         }
+
+        // Se a transação for "BancosSaida", verifica se já existe um lançamento de contas a pagar
+        if (transactionType === "BancosSaida") {
+            const existingPayableEntry = await db
+                .from('accounting_journal_entries')
+                .where('accounting_journal_id', journal.id)
+                .where('is_receivable', false) // Verifica se é um lançamento de contas a PAGAR
+                .first();
+
+            if (!existingPayableEntry) {
+                throw new Error('Não existe um lançamento de contas a pagar para esta Requisição.');
+            }
+        } else {
+            // Para outros tipos de transação, verifica se já existe um lançamento
+            const existingEntry = await db
+                .from('accounting_journal_entries')
+                .where('accounting_journal_id', journal.id)
+                .first();
+
+            if (existingEntry) {
+                throw new Error('Já existe um lançamento para esta Requisição.');
+            }
+        }
+
+        // Criação do lançamento contábil
+        const createdAccountingEntry = await new AccountingJournalEntry()
+            .fill({
+                operationDate: operationDate,
+                accountPlanYearId: currentPlanYear.id,
+                accountingJournalId: journal.id,
+                accountingDocumentId: document.id,
+                journalDocumentNumber: journalDocNumber, // Adicionando o journalDocumentNumber
+                is_receivable: receivable,
+            })
+            .useTransaction(trx)
+            .save();
+
+        // Verifica se `data.paid` é igual a 1 antes de atualizar o `internalRequest`
+        if (data.paid === true) {
+            await trx
+                .query()
+                .from('internal_requests')
+                .where('request_number', internalRequest)
+                .update({ paid: true });
+        }
+
+        // Processando os itens associados
+        for (const itemData of data.items) {
+            try {
+                const accountPlan = await AccountPlan.findByOrFail('number', itemData.accountPlanNumber);
+                await new AccountingJournalEntryItems()
+                    .fill({
+                        operator: itemData.operator,
+                        value: itemData.value,
+                        description: itemData.description,
+                        accountPlanNumber: itemData.accountPlanNumber,
+                        accountPlanId: accountPlan.id,
+                        accountPlanYearId: currentPlanYear.id,
+                        entryId: createdAccountingEntry.id,
+                    })
+                    .useTransaction(trx)
+                    .save();
+
+                // Efectua os lançamentos e o cálculo dos saldos contabilísticos
+                await this.accountPlanFinancialEntryService.entryCrediteOrDebit(
+                    {
+                        accountPlanNumber: itemData.accountPlanNumber,
+                        value: itemData.value,
+                        entryEntryType: entryEntryType,
+                        operator: itemData.operator,
+                        operationDate: currentDate,
+                    },
+                    trx
+                );
+            } catch (error) {
+                await trx.rollback();
+                throw error;
+            }
+        }
+
+        await trx.commit();
+        return createdAccountingEntry;
+    } catch (error) {
+        await trx.rollback();
+        throw error;
+    }
     }
     
 
