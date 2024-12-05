@@ -77,9 +77,12 @@ router.group(() => {
   //Plano de contas
   router.group(() => {
     router.get('findAllInternalRequest', [InternalRequestController, 'findAllInternalRequest']);
+    router.get('feacthAllInternalRequest', [InternalRequestController, 'feacthAllInternalRequest']);
     router.get('fetchAllInternalRequest', [InternalRequestController, 'fetchAllInternalRequest']);
     router.get('findInternalRequestByRequestNumber', [InternalRequestController, 'findInternalRequestByRequestNumber']);
     router.post('createInternalRequest', [InternalRequestController, 'createInternalRequest']);
+    router.post('updateInternalRequestStatus', [InternalRequestController, 'updateInternalRequestStatus']);
+
   }).prefix("internalrequest");
 
 

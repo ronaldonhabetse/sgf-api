@@ -122,6 +122,34 @@ export default class InternalRequestService {
   //     .withScopes((scopes) => scopes.active()))
   // }
 
+  public async updateStatus(
+    requestNumber: string,
+    conformanceStatus: boolean,
+    justification?: string // Justificativa opcional
+  ) {
+    const internalRequest = await InternalRequest.findByOrFail('requestNumber', requestNumber);
+
+    // Mapeamento dos valores booleanos para os estados esperados
+    const statusMapping: Record<string, "CONFORMED" | "WITHOUT_CONFORMANCE"> = {
+      true: "CONFORMED",
+      false: "WITHOUT_CONFORMANCE",
+    };
+
+    // Atualize o status de conformidade
+    internalRequest.conformance = statusMapping[String(conformanceStatus)];
+
+    // Atualize a justificativa se fornecida
+    if (justification !== undefined) {
+      internalRequest.justification = justification;
+    }
+
+    await internalRequest.save();
+
+    return internalRequest;
+  }
+
+
+
   public async findAll() {
     return await InternalRequest.query()
       .preload('accountPlanBudject') // Preload do orçamento
@@ -129,7 +157,17 @@ export default class InternalRequestService {
       .preload('items') // Preload dos itens relacionados
       .orderBy('operationDate', 'desc') // Exemplo: Ordenação por data
   }
-  
+
+
+  public async feacthAll() {
+    return await InternalRequest.query()
+      .preload('accountPlanBudject') // Preload do orçamento
+      .preload('accountPlanFinancial') // Preload financeiro
+      .preload('items') // Preload dos itens relacionados
+      .leftJoin('account_plans', 'account_plan.id', 'internal_requests.account_plan_id') // Junção à esquerda com o plano de contas
+      .orderBy('operationDate', 'desc') // Ordenação por data
+  }
+
 
   public async fetchAll() {
     const result = await InternalRequestItem.query()
@@ -152,19 +190,19 @@ export default class InternalRequestService {
           .preload('accountPlanBudject') // Carrega a relação
           .preload('accountPlanFinancial'); // Carrega a relação
       });
-  
+
     console.log(
       result.map((item) => ({
         internalRequestId: item.internalRequestId,
         bankValue: item.internalRequest?.bankValue,
       }))
     ); // Debug para garantir que 'bankValue' está presente
-  
+
     return result;
   }
-  
-  
-  
+
+
+
 
   public async findById(id: number) {
     return await InternalRequest.findOrFail(id);
