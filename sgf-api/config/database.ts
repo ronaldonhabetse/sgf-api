@@ -1,11 +1,6 @@
 import env from '#start/env'
 import { defineConfig } from '@adonisjs/lucid'
 
-console.log('DB_HOST:', env.get('DB_HOST'));
-console.log('DB_USER:', env.get('DB_USER'));
-console.log('DB_PASSWORD:', env.get('DB_PASSWORD'));
-console.log('DB_DATABASE:', env.get('DB_DATABASE'));
-
 const dbConfig = defineConfig({
   connection: 'mysql',
   connections: {
@@ -22,9 +17,6 @@ const dbConfig = defineConfig({
         naturalSort: true,
         paths: ['database/migrations'],
       },
-      seeders: {
-        paths: ['./database/seeders/MainSeeder']
-      }
     },
   },
 })
