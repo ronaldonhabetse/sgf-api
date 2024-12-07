@@ -6,7 +6,6 @@ import AccountPlanYear from './account_plan_year.js'
 import CreatableAbstractModel from '../utility/CreatableAbstractModel.js'
 import AccountPlanEntry from './account_plan_entry.js'
 
-
 /*
 * Model que representa lancamentos do plano de contas para um ano especifico
 * Gautchi R. Chambe (chambegautchi@gmail.com)
@@ -46,15 +45,18 @@ export default class AccountPlanEntryEntry extends CreatableAbstractModel {
   @column()
   declare entryId: number //accountPlanBudjectEntry.id
 
-  @belongsTo(() => AccountPlanEntry)
-  declare entry: BelongsTo<typeof AccountPlanEntry>
+  // Relacionamento com AccountPlanEntry
+  @belongsTo(() => AccountPlanEntry, {
+    foreignKey: 'entry_id', // Chave estrangeira
+  })
+  public entry: BelongsTo<typeof AccountPlanEntry>
 
   @column()
   declare targetEntrieEntryId: number // accountPlanBudjectEntryEntry.id
 
+  // Relacionamento hasOne com AccountPlanEntryEntry
   @hasOne(() => AccountPlanEntryEntry, {
-    foreignKey: 'targetEntrieEntryId', // defaults to userId
+    foreignKey: 'target_entrie_entry_id', // Corrigir para 'target_entrie_entry_id' (verifique se corresponde à coluna no banco)
   })
   declare targetEntrieEntry: HasOne<typeof AccountPlanEntryEntry>
 }
-

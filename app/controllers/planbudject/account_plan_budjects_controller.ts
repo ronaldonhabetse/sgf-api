@@ -158,6 +158,18 @@ export default class AccountPlanBudjectsController {
     return response.ok(await this.accountPlanBudjectService.fetchAllAccountPlanEntries(year));
   }
 
+  public async fetchAccountPlanEntriesByYearInitial({ request, response }: HttpContext) {
+    const year = request.param('year');
+    return response.ok(await this.accountPlanBudjectService.fetchAllAccountPlanEntriesInitial(year));
+  }
+
+
+  public async fetchInitialAllocationsByParentId({ request, response }: HttpContext) {
+    const year = request.param('year');
+    return response.ok(await this.accountPlanBudjectService.fetchInitialAllocationsByParentId(year));
+  }
+
+
   public async fetchAccountPlanEntriesByYearAndNumber({ request, response }: HttpContext) {
     const year = request.param('year');
     const accountPlanNumber = request.param('accountPlanNumber');

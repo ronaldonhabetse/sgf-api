@@ -7,6 +7,7 @@
   import { inject } from "@adonisjs/core";
 import FinancialBudgetAssociations from "#models/planbudject/financial_budget_associations";
 import AccountPlan from "#models/planbudject/account_plan";
+import { EntryEntryType } from "#models/utility/Enums";
 
   /*
   * Servicos para o plano de contas
@@ -74,7 +75,21 @@ import AccountPlan from "#models/planbudject/account_plan";
         .preload('entry')
         .preload('targetEntrieEntry')
     }
-
+    public async fetchAllAccountPlanEntriesInitial(year: number) {
+      const query = AccountPlanEntryEntry.query()
+        .where('type', EntryEntryType.INITIAL_ALLOCATION) // Filtra pelo tipo "Initial"
+        .whereHas('accountPlanYear', (builder) => {
+          builder.where('year', year); // Filtra pelo ano no relacionamento
+        });
+    
+      // Imprime a consulta SQL nos logs
+      console.log(query.toSQL().sql);
+    
+      // Executa a consulta
+      return await query.exec();
+    }
+    
+    
     public async findAllAccountPlanEntries(year: number) {
       return await AccountPlanEntry.query()
         .whereHas('accountPlanYear', (builder) => {
@@ -108,6 +123,40 @@ import AccountPlan from "#models/planbudject/account_plan";
         .preload('accountPlanfinancial')
         .preload('entriesEntry')
     }
+
+    public async fetchInitialAllocationsByParentId(year: number) {
+      const query = AccountPlanEntryEntry.query()
+        .select('account_plan_entries.parent_id')
+        .sum('account_plan_entries_entry.allocation as total_allocation')  // Soma das alocações
+        .join('account_plan_entries', 'account_plan_entries_entry.entry_id', '=', 'account_plan_entries.id')
+        .join('account_plans', 'account_plan_entries.account_plan_id', '=', 'account_plans.id')
+        .where('account_plan_entries_entry.type', EntryEntryType.INITIAL_ALLOCATION)  // Filtra por "INITIAL_ALLOCATION"
+        .where('account_plan_entries_entry.allocation', '!=', 0)  // Exclui alocações zero
+        .where('account_plans.type', 'budject')  // Filtra por tipo "budject"
+        .groupBy('account_plan_entries.parent_id')  // Agrupa por parent_id
+        .orderBy('account_plan_entries.parent_id');  // Ordena por parent_id
+    
+      // Imprimir a consulta SQL no console
+      console.log("Consulta SQL: ", query.toSQL());
+    
+      const allocations = await query;
+    
+      // Criando o array com base nos dados
+      const resultArray = allocations.map(item => {
+        return {
+          parent_id: item.$extras.parent_id,
+          total_allocation: item.$extras.total_allocation
+        };
+      });
+    
+      // Imprimir o array resultante
+      console.log("Array de alocações: ", resultArray);
+    
+      return resultArray;
+    }
+    
+    
+    
 
 
     public async findAllFinancialAccountsAndAssociatedBudgets() {

@@ -58,6 +58,8 @@ router.group(() => {
     // Entradas/Saldos do plano do ano especifico - dotação
     router.post('findAccountPlanEntriesByYear/:year', [AccountPlanBudjectsController, 'findAccountPlanEntriesByYear']);
     router.post('fetchAccountPlanEntriesByYear/:year', [AccountPlanBudjectsController, 'fetchAccountPlanEntriesByYear']);
+    router.post('fetchAccountPlanEntriesByYearInitial/:year', [AccountPlanBudjectsController, 'fetchAccountPlanEntriesByYearInitial']);
+    router.post('fetchInitialAllocationsByParentId/:year', [AccountPlanBudjectsController, 'fetchInitialAllocationsByParentId']);
     router.post('fetchAccountPlanEntriesByYearAndNumber/:year/:accountPlanNumber', [AccountPlanBudjectsController, 'fetchAccountPlanEntriesByYearAndNumber']);
 
     //Criacao do saldo do plano de contas [Ver com Cipriano por que estamos a disponibilizar este serviço??
