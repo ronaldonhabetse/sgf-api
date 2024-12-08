@@ -304,22 +304,32 @@ export default class AccountPlanEntryService {
             * The relationship will implicitly reference the
             * targetEntrieEntry from the OriginEntryEntry instance
             */
-            const createdTargetEntryEntry = await createdOriginEntryEntry.related('targetEntrieEntry').create(
-                {
-                    type: targetEntryEntryType,
-                    operator: targetEntryEntryOperator,
-                    postingMonth: currentDate.getMonth(),
-                    operationDate: operationDate,
-                    allocation: data.value,
-                    lastFinalAllocation: originEntry.finalAllocation,
-                    entryId: targetEntry.id,
-                    accountPlanYearId: currentPlanbudject.id,
-                    targetEntrieEntryId: createdOriginEntryEntry.id
-                }
-            )
+            // Verifique se createdOriginEntryEntry foi salvo corretamente
+
+            console.log("Criou com sucesso",createdOriginEntryEntry )
+            if (!createdOriginEntryEntry.id) {
+                throw new Error('The parent entry (createdOriginEntryEntry) must be saved before creating the related target entry.');
+            }
+
+            // Criação do target entry
+            const createdTargetEntryEntry = await createdOriginEntryEntry.related('targetEntrieEntry').create({
+                type: targetEntryEntryType,
+                operator: targetEntryEntryOperator,
+                postingMonth: currentDate.getMonth(), // Define o mês de lançamento
+                operationDate: operationDate, // Data da operação
+                allocation: data.value, // Valor alocado
+                lastFinalAllocation: targetEntry.finalAllocation, // Última alocação final do registro de origem
+                entryId: targetEntry.id, // ID de entrada do plano de contas de destino
+                accountPlanYearId: currentPlanbudject.id, // ID do ano do plano de contas
+                target_entrie_entry_id: createdOriginEntryEntry.id, // ID de origem para o relacionamento
+            });
+            
+
+
+            console.log("Criou com sucesso createdTargetEntryEntry",createdTargetEntryEntry )
 
             //Actualizamos o targetEntrieEntryId na entrada origem
-            createdOriginEntryEntry.targetEntrieEntryId = createdTargetEntryEntry.id;
+            createdOriginEntryEntry.target_entrie_entry_id = createdTargetEntryEntry.id;
             await createdOriginEntryEntry.useTransaction(trx).save();
 
             originEntry.finalAllocation = originEntryfinalAllocation;
@@ -373,27 +383,27 @@ export default class AccountPlanEntryService {
 
     public async findAccountPlanEntriesByYearAndNumber(year: number, accountPlanNumber: string) {
         const entry = await AccountPlanEntry.query()
-    .where('accountPlanNumber', accountPlanNumber)
-    .whereHas('accountPlanYear', (accountPlanBudjectBuilder) => {
-        accountPlanBudjectBuilder.where('year', year);
-    })
-    .whereHas('accountPlan', (accountPlanBuilder) => {
-        accountPlanBuilder.where('number', accountPlanNumber);
-    })
-    .first();
+            .where('accountPlanNumber', accountPlanNumber)
+            .whereHas('accountPlanYear', (accountPlanBudjectBuilder) => {
+                accountPlanBudjectBuilder.where('year', year);
+            })
+            .whereHas('accountPlan', (accountPlanBuilder) => {
+                accountPlanBuilder.where('number', accountPlanNumber);
+            })
+            .first();
 
-// Carregar a relação 'accountPlan' explicitamente após a consulta
-if (entry) {
-    await entry.load('accountPlan');
-    
-    // Acessar os atributos do accountPlan
-    const accountPlan = entry.accountPlan;
-    console.log(accountPlan.$attributes);
-}
+        // Carregar a relação 'accountPlan' explicitamente após a consulta
+        if (entry) {
+            await entry.load('accountPlan');
+
+            // Acessar os atributos do accountPlan
+            const accountPlan = entry.accountPlan;
+            console.log(accountPlan.$attributes);
+        }
 
         return entry;
     }
-    
+
 
     // public async findAccountPlanEntriesByYearAndNumber(year: number, accountPlanNumber: string) {
     //     return await AccountPlanEntry.query().where('accountPlanNumber', accountPlanNumber)

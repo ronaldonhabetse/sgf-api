@@ -1,62 +1,63 @@
-import { DateTime } from 'luxon'
-import { belongsTo, column, hasOne } from '@adonisjs/lucid/orm'
-import type { BelongsTo, HasOne } from '@adonisjs/lucid/types/relations'
-import { EntryEntryType, OperatorType } from '../utility/Enums.js'
-import AccountPlanYear from './account_plan_year.js'
-import CreatableAbstractModel from '../utility/CreatableAbstractModel.js'
-import AccountPlanEntry from './account_plan_entry.js'
+import { DateTime } from 'luxon';
+import { belongsTo, column, hasOne } from '@adonisjs/lucid/orm';
+import type { BelongsTo, HasOne } from '@adonisjs/lucid/types/relations';
+import { EntryEntryType, OperatorType } from '../utility/Enums.js';
+import AccountPlanYear from './account_plan_year.js';
+import CreatableAbstractModel from '../utility/CreatableAbstractModel.js';
+import AccountPlanEntry from './account_plan_entry.js';
 
-/*
-* Model que representa lancamentos do plano de contas para um ano especifico
-* Gautchi R. Chambe (chambegautchi@gmail.com)
-*/
+/**
+ * Modelo que representa lançamentos do plano de contas para um ano específico.
+ * @author 
+ * Gautchi R. Chambe (chambegautchi@gmail.com)
+ */
 export default class AccountPlanEntryEntry extends CreatableAbstractModel {
-  public static table = 'account_plan_entries_entry' // Custom table name
+  public static table = 'account_plan_entries_entry'; // Nome customizado da tabela
 
   @column()
-  declare accountPlanYearId: number
+  declare accountPlanYearId: number;
 
   @belongsTo(() => AccountPlanYear)
-  declare accountPlanYear: BelongsTo<typeof AccountPlanYear>
+  declare accountPlanYear: BelongsTo<typeof AccountPlanYear>;
 
   @column()
-  declare type: EntryEntryType
+  declare type: EntryEntryType;
 
   @column()
-  declare operator: OperatorType
+  declare operator: OperatorType;
 
   @column()
-  declare postingMonth: number
+  declare postingMonth: number;
 
   @column.dateTime({ autoCreate: true })
-  declare postingDate: DateTime
+  declare postingDate: DateTime;
 
   @column.date({
-    serialize: (value) => value?.toFormat('dd-MM-yyyy'), // Custom format
+    serialize: (value: DateTime) => value?.toFormat('dd-MM-yyyy'), // Formato customizado de data
   })
-  declare operationDate: DateTime
+  declare operationDate: DateTime;
 
   @column()
-  declare allocation: number
+  declare allocation: number;
 
   @column()
-  declare lastFinalAllocation: number
+  declare lastFinalAllocation: number;
 
   @column()
-  declare entryId: number //accountPlanBudjectEntry.id
+  declare entryId: number; // ID relacionado ao registro do plano de contas
 
   // Relacionamento com AccountPlanEntry
   @belongsTo(() => AccountPlanEntry, {
-    foreignKey: 'entry_id', // Chave estrangeira
+    foreignKey: 'entry_id', // Chave estrangeira correspondente
   })
-  public entry: BelongsTo<typeof AccountPlanEntry>
+  public entry: BelongsTo<typeof AccountPlanEntry>;
 
   @column()
-  declare targetEntrieEntryId: number // accountPlanBudjectEntryEntry.id
+  declare target_entrie_entry_id: number; // ID relacionado ao targetEntryEntry
 
   // Relacionamento hasOne com AccountPlanEntryEntry
   @hasOne(() => AccountPlanEntryEntry, {
-    foreignKey: 'target_entrie_entry_id', // Corrigir para 'target_entrie_entry_id' (verifique se corresponde à coluna no banco)
+    foreignKey: 'target_entrie_entry_id', // Chave estrangeira correta
   })
-  declare targetEntrieEntry: HasOne<typeof AccountPlanEntryEntry>
+  public targetEntrieEntry: HasOne<typeof AccountPlanEntryEntry>;
 }
