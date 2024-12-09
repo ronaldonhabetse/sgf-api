@@ -39,6 +39,21 @@ export default class User extends compose(LifecycleAbstractModel, AuthFinder) {
   @belongsTo(() => Organic)
   declare organic: BelongsTo<typeof Organic>
 
+  @column({ columnName: 'isActive' })
+  declare isActive: boolean
+
+  @column({ columnName: 'isTech' })
+  declare isTech: boolean
+
+  @column({ columnName: 'isAdmin' })
+  declare isAdmin: boolean
+
+  @column({ columnName: 'isSuperAdmin' })
+  declare isSuperAdmin: boolean
+
+  @column({ columnName: 'permissions' })
+  declare permissions: any | null
+
   @column()
   declare accessProfileId: number
 
@@ -51,8 +66,8 @@ export default class User extends compose(LifecycleAbstractModel, AuthFinder) {
       /* O codco abaixo esta comentado por que ate este ponto o resultado é a password encriptada como Hash*/
       //console.log('user1 create .password_plan', user.password);
       //console.log('user1 create verified password_plan', await hash.verify(user.password, "sebadora123"))
-     // user.password = await hash.make(user.password)
-     // console.log('user1 create verified hash', await hash.verify(user.password, "sebadora123"))
+      // user.password = await hash.make(user.password)
+      // console.log('user1 create verified hash', await hash.verify(user.password, "sebadora123"))
     }
   }
 

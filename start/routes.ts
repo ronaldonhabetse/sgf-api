@@ -16,6 +16,7 @@ import CollectivePersonController from '../app/controllers/collectiveperson/coll
 import AccountingJournalController from '../app/controllers/accounting/accounting_journal_controller.js';
 import DiariesController from '#controllers/diaries/diariesController';
 import DocumentController from '#controllers/document/documentController';
+import UsersController from '#controllers/security/users_controller';
 
 
 router.group(() => {
@@ -130,5 +131,12 @@ router.group(() => {
   router.get('/about', async () => {
     return 'This is the about page'
   })
+
+  router.group(() => {
+    router.post('createUser', [UsersController, 'createUser']); // Rota para criar utilizador
+    router.post('updateUser', [UsersController, 'updateUser']); // Rota para atualizar utilizador
+    router.get('getUser', [UsersController, 'getUser']); // Rota para pegar dados do usuário logado
+
+  }).prefix("user");
 
 }).prefix("sgf-api");

@@ -1,7 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import AuthService from '../../services/security/auth_service.js'
 import { loginValidator } from '../../validators/security/auth.js';
-import User from '../../models/security/user.js';
+import User from '#models/security/user';
 
 
 /**
