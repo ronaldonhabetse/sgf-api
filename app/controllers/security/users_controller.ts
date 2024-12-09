@@ -111,18 +111,24 @@ export default class UsersController {
 
 
 
-  async getUser({ request, response }: HttpContext) {
+  public async getUser({ request, response }: HttpContext) {
     try {
       // Pega o token do cabeçalho da requisição
       const token = request.header('Authorization');
 
       console.log("Token", token)
 
-      // Verifica o token e pega os dados do usuário
-      const userId = await AuthService.verifyToken(token); // Verifique o token e obtenha o ID do usuário
+      // Verifica o token e pega o userId
+      const userId = await AuthService.verifyToken(token); // Verifica o token e obtém o userId
 
       // Busca os dados do usuário no banco
-      const user = await this.userService.findById(userId);
+      const user = await this.userService.findById(userId); // Supondo que você tenha um método findById
+
+      if (!user) {
+        return response.status(404).json({
+          message: 'Usuário não encontrado',
+        });
+      }
 
       return response.ok({ user }); // Retorna os dados do usuário
     } catch (error) {
