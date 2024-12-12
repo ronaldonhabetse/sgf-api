@@ -63,6 +63,7 @@ export enum EntryEntryType {
   ENTRY_BANK_IN = 'entry_bank_in',
   ENTRY_BANK_OUT = 'entry_bank_out',
   ENTRY_REGULARIZATION = 'entry_regularization',
+  REDISTRIBUTION_REINFORCEMENT = "REDISTRIBUTION_REINFORCEMENT",
 }
 
 export enum FinancialEntryEntryType {

@@ -192,6 +192,26 @@ public async fetchAllFinancialAccountsAndAssociations({ params, response }: Http
   }
 }
 
+
+public async fetchSummationAccountEntriesEntry({ params, response }: HttpContext) {
+
+  try {
+    const financialAccountsWithAssociations =
+      await this.accountPlanBudjectService.fetchSummationAccountEntriesEntry();
+    return response.ok(financialAccountsWithAssociations);
+  } catch (error) {
+    console.error(error);
+    return response.status(500).json({
+      message: 'Erro as contas.',
+      error: error.message,
+    });
+  }
+}
+
+
+
+
+
   
   
 }

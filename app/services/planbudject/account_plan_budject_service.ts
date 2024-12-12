@@ -155,6 +155,77 @@ import { EntryEntryType } from "#models/utility/Enums";
       return resultArray;
     }
     
+
+    // public async fetchSummationAccountEntriesEntry() {
+    //   const query = AccountPlan.query()
+    //     .select('account_plans.number as account_number')
+    //     .sum('CASE WHEN account_plan_entries_entry.type = \'initial\' THEN account_plan_entries_entry.allocation ELSE 0 END AS total_initial')
+    //     .sum('CASE WHEN account_plan_entries_entry.type = \'reinforcement\' THEN account_plan_entries_entry.allocation ELSE 0 END AS total_reinforcement')
+    //     .sum('CASE WHEN account_plan_entries_entry.type = \'annulment\' THEN account_plan_entries_entry.allocation ELSE 0 END AS total_annulment')
+    //     .sum('CASE WHEN account_plan_entries_entry.type = \'redistribuition_reinforcement\' THEN account_plan_entries_entry.allocation ELSE 0 END AS total_redistribution_reinforcement')
+    //     .sum('CASE WHEN account_plan_entries_entry.type IN (\'initial\', \'reinforcement\', \'annulment\', \'redistribuition_reinforcement\') THEN account_plan_entries_entry.allocation ELSE 0 END AS total_allocation')
+    //     .join('account_plan_entries', 'account_plans.id', '=', 'account_plan_entries.account_plan_id')
+    //     .join('account_plan_entries_entry', 'account_plan_entries.id', '=', 'account_plan_entries_entry.entry_id')
+    //     .groupBy('account_plans.number')
+    //     .orderBy('account_plans.number');
+    
+    //   // Log SQL for debugging
+    //   console.log("Generated SQL:", query.toSQL().sql);
+    
+    //   // Execute the query
+    //   const result = await query.exec();
+    
+    //   // Map results to a more readable structure (optional)
+    //   return result.map(item => ({
+    //     accountNumber: item.$extras.account_number,
+    //     totalInitial: item.$extras.total_initial,
+    //     totalReinforcement: item.$extras.total_reinforcement,
+    //     totalAnnulment: item.$extras.total_annulment,
+    //     totalRedistributionReinforcement: item.$extras.total_redistribution_reinforcement,
+    //     totalAllocation: item.$extras.total_allocation,
+    //   }));
+    // }
+    
+    public async fetchSummationAccountEntriesEntry() {
+      const query = AccountPlan.query()
+        .select(
+          'account_plans.number as account_number',
+          'account_plan_entries_entry.type as entry_type'
+        )
+        .sum('account_plan_entries_entry.allocation as total_allocation')
+        .join('account_plan_entries', 'account_plan_entries.account_plan_id', '=', 'account_plans.id')
+        .join('account_plan_entries_entry', 'account_plan_entries.id', '=', 'account_plan_entries_entry.entry_id')
+        .whereIn('account_plan_entries_entry.type', [
+          'initial',
+          'reinforcement',
+          'annulment',
+          'redistribuition_reinforcement',
+          'redistribuition_annulment'
+        ]) // Filtra pelos tipos desejados
+        .groupBy('account_plans.number', 'account_plan_entries_entry.type')
+        .havingRaw('SUM(account_plan_entries_entry.allocation) > 0')
+        .orderBy('account_plans.number');
+    
+      // Log da consulta SQL gerada
+      console.log("Consulta SQL gerada:");
+      console.log(query.toSQL().sql); // Exibe a consulta SQL gerada
+    
+      // Executa a consulta e retorna o resultado
+      const result = await query;
+    
+      // Formata o resultado para incluir totais por tipo de entrada
+      const formattedResult = result.map(item => ({
+        account_number: item.$extras.account_number,
+        entry_type: item.$extras.entry_type,
+        total_allocation: item.$extras.total_allocation,
+      }));
+    
+      // Log do resultado formatado
+      console.log("Resultado formatado:");
+      console.log(formattedResult);
+    
+      return formattedResult;
+    }
     
     
 

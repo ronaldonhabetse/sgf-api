@@ -63,6 +63,8 @@ router.group(() => {
     router.post('fetchInitialAllocationsByParentId/:year', [AccountPlanBudjectsController, 'fetchInitialAllocationsByParentId']);
     router.post('fetchAccountPlanEntriesByYearAndNumber/:year/:accountPlanNumber', [AccountPlanBudjectsController, 'fetchAccountPlanEntriesByYearAndNumber']);
 
+    router.get('fetchSummationAccountEntriesEntry', [AccountPlanBudjectsController, 'fetchSummationAccountEntriesEntry']);
+
     //Criacao do saldo do plano de contas [Ver com Cipriano por que estamos a disponibilizar este serviço??
     // pois criamos os saldos somente na criacao do plano de contas]
     router.post('createAccountPlanEntry', [AccountPlanBudjectsController, 'createAccountPlanEntry']);
