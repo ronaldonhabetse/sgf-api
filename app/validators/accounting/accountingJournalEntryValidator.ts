@@ -277,8 +277,8 @@ export default class AccountingJournalEntryValidator {
         if (!hasFinancialAccount) {
             throw new Error(this.messagesLabels['item.accountPlanFinancial.database.not.exists'].replace('value', accountPlanFinancial.number + " , " + AccoutPlanType.FINANCIAL.toString()));
         }
-        if (!hastProvider) {
-            throw new Error(this.messagesLabels['item.provider.database.not.exists'].replace('value', provider.accountPlanFinancialNumber));
-        }
+        // if (!hastProvider) {
+        //     throw new Error(this.messagesLabels['item.provider.database.not.exists'].replace('value', provider.accountPlanFinancialNumber));
+        // }
     }
 }
