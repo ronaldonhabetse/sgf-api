@@ -197,32 +197,6 @@ export default class AccountingJournalEntryValidator {
         return errors;
     }
     
-    // private static validateItemsWithoutInternalRequest(items: AccountingJounalItemDTO[], journalNumber: string) {
-    //     items.forEach(async (item) => {
-    //         try {
-    //             const financialAccountPlanEntry = await AccountPlanEntry.query()
-    //                 .where('accountPlanNumber', item.accountPlanNumber)
-    //                 .whereHas('accountPlan', (builder) => {
-    //                     builder.where('number', item.accountPlanNumber);
-    //                     builder.where('type', AccoutPlanType.FINANCIAL);
-    //                 })
-    //                 .first();
-
-    //             if (!financialAccountPlanEntry) {
-    //                 throw new Error(this.messagesLabels['accountPlanEntry.database.not.exists'].replace('value', item.accountPlanNumber + " , " + AccoutPlanType.FINANCIAL.toString()));
-    //             }
-
-    //             //Caso seja o lancamento de abertura verificamos se existe a abertura
-    //             if (AccountingJournal.OPENING == journalNumber && financialAccountPlanEntry && financialAccountPlanEntry.finalAllocation !== 0) {
-    //                 throw Error("O lancamento de abertura ja foi carregada para o plano de conta " + item.accountPlanNumber);
-    //             }
-
-    //         } catch (error) {
-    //             throw error;
-    //         }
-    //     });
-    // }
-
     public static async validateOnWithInternalRequest(data: AccountingJounalEntryDTO, type: string) {
 
         await this.validadeExistsJournalAndDocument({ accountingDocumentNumber: data.accountingDocumentNumber, accountingJournalNumber: data.accountingJournalNumber, journalDocumentNumber:data.journalDocumentNumber });
