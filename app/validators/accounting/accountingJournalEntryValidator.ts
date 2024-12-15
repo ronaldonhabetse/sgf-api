@@ -162,9 +162,10 @@ export default class AccountingJournalEntryValidator {
         }
     }
 
-
-    private static validateItemsWithoutInternalRequest(items: AccountingJounalItemDTO[], journalNumber: string) {
-        items.forEach(async (item) => {
+    private static async validateItemsWithoutInternalRequest(items: AccountingJounalItemDTO[], journalNumber: string): Promise<string[]> {
+        const errors: string[] = [];
+    
+        for (const item of items) {
             try {
                 const financialAccountPlanEntry = await AccountPlanEntry.query()
                     .where('accountPlanNumber', item.accountPlanNumber)
@@ -173,21 +174,54 @@ export default class AccountingJournalEntryValidator {
                         builder.where('type', AccoutPlanType.FINANCIAL);
                     })
                     .first();
-
+    
                 if (!financialAccountPlanEntry) {
-                    throw new Error(this.messagesLabels['accountPlanEntry.database.not.exists'].replace('value', item.accountPlanNumber + " , " + AccoutPlanType.FINANCIAL.toString()));
+                    errors.push(
+                        this.messagesLabels['accountPlanEntry.database.not.exists'].replace(
+                            'value',
+                            `${item.accountPlanNumber}, ${AccoutPlanType.FINANCIAL.toString()}`
+                        )
+                    );
+                    continue;
                 }
-
-                //Caso seja o lancamento de abertura verificamos se existe a abertura
-                if (AccountingJournal.OPENING == journalNumber && financialAccountPlanEntry && financialAccountPlanEntry.finalAllocation !== 0) {
-                    throw Error("O lancamento de abertura ja foi carregada para o plano de conta " + item.accountPlanNumber);
+    
+                if (AccountingJournal.OPENING === journalNumber && financialAccountPlanEntry.finalAllocation !== 0) {
+                    errors.push(`O lançamento de abertura já foi carregado para o plano de conta ${item.accountPlanNumber}`);
                 }
-
+    
             } catch (error) {
-                throw error;
+                errors.push(`Erro ao validar item ${item.accountPlanNumber}: ${error.message}`);
             }
-        });
+        }
+    
+        return errors;
     }
+    
+    // private static validateItemsWithoutInternalRequest(items: AccountingJounalItemDTO[], journalNumber: string) {
+    //     items.forEach(async (item) => {
+    //         try {
+    //             const financialAccountPlanEntry = await AccountPlanEntry.query()
+    //                 .where('accountPlanNumber', item.accountPlanNumber)
+    //                 .whereHas('accountPlan', (builder) => {
+    //                     builder.where('number', item.accountPlanNumber);
+    //                     builder.where('type', AccoutPlanType.FINANCIAL);
+    //                 })
+    //                 .first();
+
+    //             if (!financialAccountPlanEntry) {
+    //                 throw new Error(this.messagesLabels['accountPlanEntry.database.not.exists'].replace('value', item.accountPlanNumber + " , " + AccoutPlanType.FINANCIAL.toString()));
+    //             }
+
+    //             //Caso seja o lancamento de abertura verificamos se existe a abertura
+    //             if (AccountingJournal.OPENING == journalNumber && financialAccountPlanEntry && financialAccountPlanEntry.finalAllocation !== 0) {
+    //                 throw Error("O lancamento de abertura ja foi carregada para o plano de conta " + item.accountPlanNumber);
+    //             }
+
+    //         } catch (error) {
+    //             throw error;
+    //         }
+    //     });
+    // }
 
     public static async validateOnWithInternalRequest(data: AccountingJounalEntryDTO, type: string) {
 

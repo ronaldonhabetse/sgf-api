@@ -141,9 +141,9 @@ export default class AccountingJournalService {
                 .where('is_receivable', false) // Verifica se é um lançamento de contas a PAGAR
                 .first();
 
-            // if (!existingPayableEntry) {
-            //     throw new Error('Não existe um lançamento de contas a pagar para esta Requisição.');
-            // }
+            if (!existingPayableEntry) {
+                throw new Error('Não existe um lançamento de contas a pagar para esta Requisição.');
+            }
         } else {
             // Para outros tipos de transação, verifica se já existe um lançamento
             const existingEntry = await db
