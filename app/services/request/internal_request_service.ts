@@ -40,6 +40,12 @@ export default class InternalRequestService {
     const currentDate = new Date();
     const operationDate = DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth(), data.operationDate.getDate());
 
+    let entry = await this.findAccountPlanEntriesByYearAndNumber(currentDate.getFullYear(), data.accountPlanBudjectNumber);
+
+    if (!entry) {
+      throw Error("Plano de conta com id informado não encontrado no sistema Id: " + data.accountPlanBudjectNumber);
+    }
+
     const trx = await db.transaction(); // Start transaction
     try {
       const currentPlanYear = await AccountPlanYear.findByOrFail('year', currentDate.getFullYear());
@@ -102,6 +108,22 @@ export default class InternalRequestService {
             unitPrice: itemData.unitPrice,
             internalRequestId: createdInternalRequest.id,
           }).useTransaction(trx).save();
+
+          const round = (totalItemsValue / 2.5);
+
+          let availableAllocation =
+            (entry.availableAllocation - round);
+
+          console.log(availableAllocation, entry.availableAllocation, round);
+
+          // Atualiza o `availableAllocation` no entry
+          entry.availableAllocation = availableAllocation;
+
+          // Salva a entrada com a transação
+          const updatedEntry = await entry.useTransaction(trx).save();
+
+          await trx.commit();
+          return updatedEntry;
         } catch (error) {
           await trx.rollback();
           throw error;
@@ -115,6 +137,31 @@ export default class InternalRequestService {
       await trx.rollback();
       throw error;
     }
+  }
+
+
+
+  public async findAccountPlanEntriesByYearAndNumber(year: number, accountPlanNumber: string) {
+    const entry = await AccountPlanEntry.query()
+      .where('accountPlanNumber', accountPlanNumber)
+      .whereHas('accountPlanYear', (accountPlanBudjectBuilder) => {
+        accountPlanBudjectBuilder.where('year', year);
+      })
+      .whereHas('accountPlan', (accountPlanBuilder) => {
+        accountPlanBuilder.where('number', accountPlanNumber);
+      })
+      .first();
+
+    // Carregar a relação 'accountPlan' explicitamente após a consulta
+    if (entry) {
+      await entry.load('accountPlan');
+
+      // Acessar os atributos do accountPlan
+      const accountPlan = entry.accountPlan;
+      console.log(accountPlan.$attributes);
+    }
+
+    return entry;
   }
 
   // public async findAll() {

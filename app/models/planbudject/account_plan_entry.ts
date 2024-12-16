@@ -28,6 +28,9 @@ export default class AccountPlanEntry extends MutableAbstractModel {
   declare finalAllocation: number
 
   @column()
+  declare availableAllocation: number
+
+  @column()
   declare accountPlanYearId: number
 
   @belongsTo(() => AccountPlanYear)
