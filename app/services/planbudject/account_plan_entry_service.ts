@@ -150,6 +150,59 @@ export default class AccountPlanEntryService {
 
         return this.reinforceOrAnnulmentAccountPlanEntry(data, true, true);
     }
+    public async conformInitialAllocation(data: any) {
+        const trx = await db.transaction(); // Inicia a transação para garantir a atomicidade
+
+        console.log("Dados recebidos para atualização:", data);
+
+        try {
+            // Verificar se já existe conformidade para o 'type' específico
+            const existingEntry = await AccountPlanEntryEntry
+                .query()
+                .where('type', 'initial_allocation')
+                .andWhere('complianceStatus', 'CONFORMANCE')
+                .first();
+
+
+            if (existingEntry) {
+                console.log("Tem dados já conformados", existingEntry);
+                // Se já existe uma conformidade CONFORMANCE, lança um erro para interromper o processo
+                throw new Error('A conformidade já está definida como CONFORMANCE. Não é necessário atualizar.');
+            }
+            // Preparar a consulta para a atualização
+            const query = AccountPlanEntryEntry
+                .query()
+                .where('type', 'initial_allocation')  // Incluindo a cláusula WHERE
+                .update({
+                    complianceStatus: 'CONFORMANCE', // Alterando para 'CONFORMANCE'
+                    descriptionCompliance: data.observation, // Usando o campo 'observation' como descrito
+                });
+
+            // Obter a consulta gerada com knexQuery()
+            const sql = query.knexQuery.toString();
+            console.log("Consulta gerada para execução:", sql);
+
+            // Executar a consulta
+            const updatedEntries = await query;
+
+            console.log("Número de entradas atualizadas:", updatedEntries);
+
+            if (updatedEntries.length > 0) {  // Verifica se há registros atualizados
+                // Comitar a transação
+                await trx.commit();
+                return { message: `Conformidade de alocação inicial foi atualizada com sucesso em ${updatedEntries} entradas.` };
+            } else {
+                // Não há registros atualizados
+                await trx.rollback();
+                return { message: 'Nenhuma entrada foi atualizada. Verifique os critérios da consulta.' };
+            }
+        } catch (error) {
+            // Se algo falhar, reverte a transação
+            await trx.rollback();
+            console.error("Erro durante a atualização:", error);
+            throw new Error(`Erro ao atualizar a conformidade de alocação inicial: ${error.message}`);
+        }
+    }
 
     public async reinforceAccountPlanEntry(data: { accountPlanNumber: string, value: number, operationDate: Date }) {
         return this.reinforceOrAnnulmentAccountPlanEntry(data, true, false);
@@ -293,26 +346,26 @@ export default class AccountPlanEntryService {
                 originEntryEntryType = EntryEntryType.REDISTRIBUITION_REINFORCEMENT;
                 originEntryEntryOperator = OperatorType.CREDTI;
                 originEntryfinalAllocation = originEntry.finalAllocation + data.value;
-            
+
                 const saldoOrigemExistente = Number(originEntry.finalAllocation) - (Number(originEntry.finalAllocation) * 0.05);
                 const saldoOrigemAposReforco = originEntryfinalAllocation - (originEntryfinalAllocation * 0.05);
                 const resultOrigemAvaliableAllocation = saldoOrigemAposReforco - saldoOrigemExistente;
-            
+
                 const availableAllocationOrigemNumber = Number(originEntry.availableAllocation);
                 originEntry.availableAllocation = availableAllocationOrigemNumber + resultOrigemAvaliableAllocation;
-            
+
                 // Para o destino
                 targetEntryEntryType = EntryEntryType.REDISTRIBUITION_ANNULMENT;
                 targetEntryEntryOperator = OperatorType.DEBIT;
                 targetEntryfinalAllocation = targetEntry.finalAllocation - data.value;
-            
+
                 const saldoDestinoExistente = Number(targetEntry.finalAllocation) - (Number(targetEntry.finalAllocation) * 0.05);
                 const saldoDestinoAposAnulacao = targetEntryfinalAllocation - (targetEntryfinalAllocation * 0.05);
                 const resultDestinoAvaliableAllocation = saldoDestinoExistente - saldoDestinoAposAnulacao;
-            
+
                 const availableAllocationDestinoNumber = Number(targetEntry.availableAllocation);
                 targetEntry.availableAllocation = availableAllocationDestinoNumber - resultDestinoAvaliableAllocation;
-            
+
                 if (targetEntryfinalAllocation < 0) {
                     throw Error("Não pode efectuar a redistribuição do reforço para a conta " + data.originAccountPlanNumber + ", o valor da conta destino "
                         + data.targetAccountPlanNumber + " é insuficiente para anular " + data.value
@@ -323,32 +376,32 @@ export default class AccountPlanEntryService {
                 originEntryEntryType = EntryEntryType.REDISTRIBUITION_ANNULMENT;
                 originEntryEntryOperator = OperatorType.DEBIT;
                 originEntryfinalAllocation = originEntry.finalAllocation - data.value;
-            
+
                 const saldoOrigemExistente = Number(originEntry.finalAllocation) - (Number(originEntry.finalAllocation) * 0.05);
                 const saldoOrigemAposAnulacao = originEntryfinalAllocation - (originEntryfinalAllocation * 0.05);
                 const resultOrigemAvaliableAllocation = saldoOrigemExistente - saldoOrigemAposAnulacao;
-            
+
                 const availableAllocationOrigemNumber = Number(originEntry.availableAllocation);
                 originEntry.availableAllocation = availableAllocationOrigemNumber - resultOrigemAvaliableAllocation;
-            
+
                 // Para o destino
                 targetEntryEntryType = EntryEntryType.REDISTRIBUITION_REINFORCEMENT;
                 targetEntryEntryOperator = OperatorType.CREDTI;
                 targetEntryfinalAllocation = targetEntry.finalAllocation + data.value;
-            
+
                 const saldoDestinoExistente = Number(targetEntry.finalAllocation) - (Number(targetEntry.finalAllocation) * 0.05);
                 const saldoDestinoAposReforco = targetEntryfinalAllocation - (targetEntryfinalAllocation * 0.05);
                 const resultDestinoAvaliableAllocation = saldoDestinoAposReforco - saldoDestinoExistente;
-            
+
                 const availableAllocationDestinoNumber = Number(targetEntry.availableAllocation);
                 targetEntry.availableAllocation = availableAllocationDestinoNumber + resultDestinoAvaliableAllocation;
-            
+
                 if (originEntryfinalAllocation < 0) {
                     throw Error("Não pode efectuar a redistribuição da anulação para a conta " + data.originAccountPlanNumber + ", no valor de "
                         + data.value + ". O valor actual é " + originEntry.finalAllocation);
                 }
             }
-            
+
 
             const createdOriginEntryEntry = await new AccountPlanEntryEntry().fill
                 (

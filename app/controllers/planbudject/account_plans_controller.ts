@@ -20,7 +20,7 @@ export default class AccountPlansController {
       return response.created(await this.accountPlanService.create(data));
     } catch (error) {
       return response.status(500).json({
-        message: 'Ocorrer erro ao criar o plano de contas',
+        message: 'Ocorreu um erro ao criar o plano de contas',
         error: error.message,
       });
     }
@@ -53,7 +53,6 @@ export default class AccountPlansController {
       });
     }
   }
-
 
   async findAllAccountPlan({ response }: HttpContext) {
     return response.ok(await this.accountPlanService.findAll());

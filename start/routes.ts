@@ -68,6 +68,11 @@ router.group(() => {
     //Criacao do saldo do plano de contas [Ver com Cipriano por que estamos a disponibilizar este serviço??
     // pois criamos os saldos somente na criacao do plano de contas]
     router.post('createAccountPlanEntry', [AccountPlanBudjectsController, 'createAccountPlanEntry']);
+    router.post('conformInitialAllocation', [AccountPlanBudjectsController, 'conformInitialAllocation']);
+
+
+    router.get('findConformInitialAllocation', [AccountPlanBudjectsController, 'findConformInitialAllocation']);
+
 
     // Actualização a dotação do plano de contas (reforço, anulação, redistribuição reforço, redistribuição anulação)
     router.post('initialAllocationAccountPlanEntry', [AccountPlanBudjectsController, 'initialAllocationAccountPlanEntry']);

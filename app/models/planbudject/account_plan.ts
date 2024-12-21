@@ -18,6 +18,9 @@ export default class AccountPlan extends LifecycleAbstractModel {
   declare final_allocation_type: string
 
   @column()
+  declare financial_type: string
+
+  @column()
   declare writable: AccountPlanWritableType
 
   @column()

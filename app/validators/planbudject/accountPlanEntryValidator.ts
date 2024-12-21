@@ -12,6 +12,12 @@ export default class AccountPlanEntryValidator {
         ),
     });
 
+    private static schemaFieldsWithConformance = vine.object({
+        conformityType: vine.string(),
+        observation: vine.string(),
+    });
+    
+
     private static schemaFieldsReinforceOrAnnul = vine.object({
         accountPlanNumber: vine.string(),
         value: vine.number(),
@@ -69,6 +75,11 @@ export default class AccountPlanEntryValidator {
     public static validateFieldsAssociateAccounts = (() => {
         this.setMessages();
         return vine.compile(this.schemaFieldsAssociateAccounts)
+    });
+
+    public static validateFieldsWithConformance = (() => {
+        this.setMessages();
+        return vine.compile(this.schemaFieldsWithConformance)
     });
 
     public static validateFieldsReinforceOrAnnul = (() => {

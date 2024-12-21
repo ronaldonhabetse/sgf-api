@@ -44,6 +44,12 @@ export default class AccountPlanEntryEntry extends CreatableAbstractModel {
   declare lastFinalAllocation: number;
 
   @column()
+  declare complianceStatus: String;
+
+  @column()
+  declare   descriptionCompliance: String;
+
+  @column()
   declare entryId: number; // ID relacionado ao registro do plano de contas
 
   // Relacionamento com AccountPlanEntry

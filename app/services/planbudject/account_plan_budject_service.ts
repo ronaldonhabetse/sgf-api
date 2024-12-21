@@ -35,6 +35,11 @@ import { EntryEntryType } from "#models/utility/Enums";
       return await this.accountPlanEntryService.associateFinancialAccountWithBujectAccounts(data);
 
     }
+
+    public async conformInitialAllocation(data: { complianceStatus: string, descriptionCompliance: { accountPlanBujectNumber: string }[] }) {
+      return await this.accountPlanEntryService.conformInitialAllocation(data);
+    }
+
     public async initialAllocationAccountPlanEntry(data: { accountPlanNumber: string, value: number, operationDate: Date }) {
       return await this.accountPlanEntryService.initialAllocationAccountPlanEntry(data);
     }
@@ -258,6 +263,17 @@ import { EntryEntryType } from "#models/utility/Enums";
     }
     
 
+    public async findConformInitialAllocation() {
+      // Consultar todas as entradas de plano de contas com tipo 'initial_allocation' e conformidade 'CONFORMANCE'
+      const entries = await AccountPlanEntryEntry
+        .query()
+        .where('type', 'initial_allocation')  // Filtra pelo tipo 'initial_allocation'
+        .where('complianceStatus', 'CONFORMANCE');  // Filtra pelo status de conformidade 'CONFORMANCE'
+      
+      // Retorna true se houver entradas, caso contrário, retorna false
+      return entries.length > 0;
+    }
     
+  
     
   }

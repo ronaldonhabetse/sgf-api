@@ -42,6 +42,28 @@ export default class AccountPlanBudjectsController {
     }
   }
 
+
+// Método de conformidade inicial para alocação
+public async conformInitialAllocation({ request, response }: HttpContext) {
+  try {
+    // Validação dos dados recebidos
+    const data = await request.validateUsing(AccountPlanEntryValidator.validateFieldsWithConformance());
+    
+    console.log("conformInitialAllocation", data);
+    // Chamando o serviço para processar a conformidade
+    const result = await this.accountPlanBudjectService.conformInitialAllocation(data);
+
+    // Retorna o resultado com status 200 em caso de sucesso
+    return response.status(200).json(result);
+  } catch (error) {
+    // Retorna erro com status 500 em caso de falha
+    return response.status(500).json({
+      message: 'Ocorreu erro ao Dar Conformidade do Orcamento aprovado!',
+      error: error.message,
+    });
+  }
+}
+
   public async createAccountPlanEntry({ request, response }: HttpContext) {
 
     const data = await request.validateUsing(AccountPlanEntryValidator.validateFields());
@@ -207,6 +229,26 @@ public async fetchSummationAccountEntriesEntry({ params, response }: HttpContext
     });
   }
 }
+
+
+public async findConformInitialAllocation({ params, response }: HttpContext) {
+  try {
+    const findConformInitialAllocationData =
+      await this.accountPlanBudjectService.findConformInitialAllocation();
+
+    // Retorna o valor booleano diretamente como resposta
+    return response.ok({ data: findConformInitialAllocationData });
+  } catch (error) {
+    console.error(error);
+    return response.status(500).json({
+      message: 'Erro ao consultar as contas.',
+      error: error.message,
+    });
+  }
+}
+
+
+
 
 
 
