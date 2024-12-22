@@ -39,6 +39,12 @@ export default class AccountPlanEntryEntry extends CreatableAbstractModel {
 
   @column()
   declare allocation: number;
+  
+  @column()
+  declare descriptionMoviment: string;
+
+  @column({ columnName: 'approvedBy' })
+  declare approvedBy: number;
 
   @column()
   declare lastFinalAllocation: number;

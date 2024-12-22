@@ -176,6 +176,7 @@ export default class AccountPlanEntryService {
                 .update({
                     complianceStatus: 'CONFORMANCE', // Alterando para 'CONFORMANCE'
                     descriptionCompliance: data.observation, // Usando o campo 'observation' como descrito
+                    approvedBy: data.userId
                 });
 
             // Obter a consulta gerada com knexQuery()
@@ -212,10 +213,20 @@ export default class AccountPlanEntryService {
         return this.reinforceOrAnnulmentAccountPlanEntry(data, false, false);
     }
 
-    public async redistribuitioReinforcimentAccountPlanEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string, operationDate: Date }) {
-
+    public async redistribuitioReinforcimentAccountPlanEntry(data: {
+        destinationAccounts: {
+            targetAccountPlanNumber: string,
+            value: number
+        }[],
+        totalValue: number,
+        type: string,
+        motivo?: string,
+        originAccountPlanNumber: string,
+        operationDate: Date
+    }) {
         return this.redistributeReinforeOrAnnulmentAccountPlanEntry(data, true);
     }
+
 
     public async redistributeAnnulmentAccountPlanEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string, operationDate: Date }) {
         return this.redistributeReinforeOrAnnulmentAccountPlanEntry(data, false);
@@ -314,160 +325,172 @@ export default class AccountPlanEntryService {
         }
     }
 
-    private async redistributeReinforeOrAnnulmentAccountPlanEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string, operationDate: Date }, isRedistributeReinforcement: boolean) {
+    public async redistributeReinforeOrAnnulmentAccountPlanEntry(data: {
+        originAccountPlanNumber: string,
+        value: number,
+        destinationAccounts: {
+            targetAccountPlanNumber: string,
+            value: number
+        }[],
+        operationDate: Date,
+        motivo: string
+    }, isRedistributeReinforcement: boolean) {
+
+        console.log("Data", data)
+        if (!data.operationDate) {
+            throw new Error("A data de operação é obrigatória e não pode ser nula ou indefinida.");
+        }
+
 
         const currentDate = new Date();
-        const operationDate = DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth(), data.operationDate.getDate())
-        const trx = await db.transaction()  // Start transaction
-        try {
+        const operationDate = DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth(), data.operationDate.getDate());
+        const trx = await db.transaction();  // Start transaction
 
-            if (data.originAccountPlanNumber === data.targetAccountPlanNumber) {
-                throw Error("O Plano de conta origem deve ser difernte do plano de conta destino ");
+        try {
+            if (!data.destinationAccounts || data.destinationAccounts.length === 0) {
+                throw Error("Deve haver pelo menos uma conta de destino.");
             }
+
             const currentPlanbudject = await AccountPlanYear.findByOrFail('year', currentDate.getFullYear());
 
             let originEntry = await this.findAccountPlanEntriesByYearAndNumber(currentDate.getFullYear(), data.originAccountPlanNumber);
-
             if (!originEntry) {
                 throw Error("Plano de conta não encontrado no sistema com a conta " + data.originAccountPlanNumber);
             }
 
-            let targetEntry = await this.findAccountPlanEntriesByYearAndNumber(currentDate.getFullYear(), data.targetAccountPlanNumber);
-
-            if (!targetEntry) {
-                throw Error("Plano de conta não encontrado no sistema com a conta " + data.targetAccountPlanNumber);
-            }
-
-            let originEntryEntryType, originEntryEntryOperator, originEntryfinalAllocation;
-            let targetEntryEntryType, targetEntryEntryOperator, targetEntryfinalAllocation;
-
-            if (isRedistributeReinforcement) {
-                // Para a origem
-                originEntryEntryType = EntryEntryType.REDISTRIBUITION_REINFORCEMENT;
-                originEntryEntryOperator = OperatorType.CREDTI;
-                originEntryfinalAllocation = originEntry.finalAllocation + data.value;
-
-                const saldoOrigemExistente = Number(originEntry.finalAllocation) - (Number(originEntry.finalAllocation) * 0.05);
-                const saldoOrigemAposReforco = originEntryfinalAllocation - (originEntryfinalAllocation * 0.05);
-                const resultOrigemAvaliableAllocation = saldoOrigemAposReforco - saldoOrigemExistente;
-
-                const availableAllocationOrigemNumber = Number(originEntry.availableAllocation);
-                originEntry.availableAllocation = availableAllocationOrigemNumber + resultOrigemAvaliableAllocation;
-
-                // Para o destino
-                targetEntryEntryType = EntryEntryType.REDISTRIBUITION_ANNULMENT;
-                targetEntryEntryOperator = OperatorType.DEBIT;
-                targetEntryfinalAllocation = targetEntry.finalAllocation - data.value;
-
-                const saldoDestinoExistente = Number(targetEntry.finalAllocation) - (Number(targetEntry.finalAllocation) * 0.05);
-                const saldoDestinoAposAnulacao = targetEntryfinalAllocation - (targetEntryfinalAllocation * 0.05);
-                const resultDestinoAvaliableAllocation = saldoDestinoExistente - saldoDestinoAposAnulacao;
-
-                const availableAllocationDestinoNumber = Number(targetEntry.availableAllocation);
-                targetEntry.availableAllocation = availableAllocationDestinoNumber - resultDestinoAvaliableAllocation;
-
-                if (targetEntryfinalAllocation < 0) {
-                    throw Error("Não pode efectuar a redistribuição do reforço para a conta " + data.originAccountPlanNumber + ", o valor da conta destino "
-                        + data.targetAccountPlanNumber + " é insuficiente para anular " + data.value
-                        + ". O valor actual é " + targetEntry.finalAllocation);
-                }
-            } else {
-                // Para a origem
-                originEntryEntryType = EntryEntryType.REDISTRIBUITION_ANNULMENT;
-                originEntryEntryOperator = OperatorType.DEBIT;
-                originEntryfinalAllocation = originEntry.finalAllocation - data.value;
-
-                const saldoOrigemExistente = Number(originEntry.finalAllocation) - (Number(originEntry.finalAllocation) * 0.05);
-                const saldoOrigemAposAnulacao = originEntryfinalAllocation - (originEntryfinalAllocation * 0.05);
-                const resultOrigemAvaliableAllocation = saldoOrigemExistente - saldoOrigemAposAnulacao;
-
-                const availableAllocationOrigemNumber = Number(originEntry.availableAllocation);
-                originEntry.availableAllocation = availableAllocationOrigemNumber - resultOrigemAvaliableAllocation;
-
-                // Para o destino
-                targetEntryEntryType = EntryEntryType.REDISTRIBUITION_REINFORCEMENT;
-                targetEntryEntryOperator = OperatorType.CREDTI;
-                targetEntryfinalAllocation = targetEntry.finalAllocation + data.value;
-
-                const saldoDestinoExistente = Number(targetEntry.finalAllocation) - (Number(targetEntry.finalAllocation) * 0.05);
-                const saldoDestinoAposReforco = targetEntryfinalAllocation - (targetEntryfinalAllocation * 0.05);
-                const resultDestinoAvaliableAllocation = saldoDestinoAposReforco - saldoDestinoExistente;
-
-                const availableAllocationDestinoNumber = Number(targetEntry.availableAllocation);
-                targetEntry.availableAllocation = availableAllocationDestinoNumber + resultDestinoAvaliableAllocation;
-
-                if (originEntryfinalAllocation < 0) {
-                    throw Error("Não pode efectuar a redistribuição da anulação para a conta " + data.originAccountPlanNumber + ", no valor de "
-                        + data.value + ". O valor actual é " + originEntry.finalAllocation);
+            // Verificar se todas as contas de destino existem
+            for (const destination of data.destinationAccounts) {
+                let targetEntry = await this.findAccountPlanEntriesByYearAndNumber(currentDate.getFullYear(), destination.targetAccountPlanNumber);
+                if (!targetEntry) {
+                    throw Error("Plano de conta não encontrado no sistema com a conta " + destination.targetAccountPlanNumber);
                 }
             }
+            for (const destination of data.destinationAccounts) {
+                let originEntryEntryType, originEntryEntryOperator, originEntryfinalAllocation;
+                let targetEntryEntryType, targetEntryEntryOperator;
+                let targetEntryfinalAllocation: number;  // A variável deve ser inicializada adequadamente
+
+                const valueToTransfer = destination.value;
+
+                // Certifique-se de que targetEntry é carregado corretamente
+                const targetEntry = await this.findAccountPlanEntriesByYearAndNumber(currentDate.getFullYear(), destination.targetAccountPlanNumber);
+                if (!targetEntry) {
+                    throw new Error("A conta de destino não foi encontrada para o número: " + destination.targetAccountPlanNumber);
+                }
+
+                if (isRedistributeReinforcement) {
+                    // Para a origem
+                    // Para a origem
+                    originEntryEntryType = EntryEntryType.REDISTRIBUITION_REINFORCEMENT;
+                    originEntryEntryOperator = OperatorType.DEBIT;  // A origem irá ser debitada
+                    originEntryfinalAllocation = originEntry.finalAllocation - valueToTransfer;  // A origem anula o valor
+
+                    const saldoOrigemExistente = Number(originEntry.finalAllocation) - (Number(originEntry.finalAllocation) * 0.05);
+                    const saldoOrigemAposReforco = originEntryfinalAllocation - (originEntryfinalAllocation * 0.05);
+                    const resultOrigemAvaliableAllocation = saldoOrigemAposReforco - saldoOrigemExistente;
+
+                    const availableAllocationOrigemNumber = Number(originEntry.availableAllocation);
+                    originEntry.availableAllocation = availableAllocationOrigemNumber - resultOrigemAvaliableAllocation;  // Subtrai o valor da origem
+
+                    // Verifica se a conta origem tem saldo suficiente
+                    if (originEntryfinalAllocation < 0) {
+                        throw Error("Não pode efectuar a redistribuição para a conta " + data.originAccountPlanNumber + ", o valor atual é " + originEntry.finalAllocation);
+                    }
+
+                    // Para o destino
+                    targetEntryEntryType = EntryEntryType.REDISTRIBUITION_REINFORCEMENT;
+                    targetEntryEntryOperator = OperatorType.CREDTI;  // A conta destino será creditada
+                    targetEntryfinalAllocation = targetEntry.finalAllocation + valueToTransfer;  // A conta destino recebe o valor
+
+                    const saldoDestinoExistente = Number(targetEntry.finalAllocation) - (Number(targetEntry.finalAllocation) * 0.05);
+                    const saldoDestinoAposReforco = targetEntryfinalAllocation - (targetEntryfinalAllocation * 0.05);
+                    const resultDestinoAvaliableAllocation = saldoDestinoAposReforco - saldoDestinoExistente;
+
+                    const availableAllocationDestinoNumber = Number(targetEntry.availableAllocation);
+                    targetEntry.availableAllocation = availableAllocationDestinoNumber + resultDestinoAvaliableAllocation;  // Aumenta o valor da conta destino
+
+                    // if (targetEntryfinalAllocation < 0) {
+                    //     throw Error("Não pode efectuar a redistribuição do reforço para a conta " + data.originAccountPlanNumber + ", o valor da conta destino "
+                    //         + destination.targetAccountPlanNumber + " é insuficiente para anular " + valueToTransfer
+                    //         + ". O valor actual é " + targetEntry.finalAllocation);
+                    // }
+                } else {
+                    // Para a origem
+                    originEntryEntryType = EntryEntryType.REDISTRIBUITION_ANNULMENT;
+                    originEntryEntryOperator = OperatorType.DEBIT;
+                    originEntryfinalAllocation = originEntry.finalAllocation - valueToTransfer;
+
+                    const saldoOrigemExistente = Number(originEntry.finalAllocation) - (Number(originEntry.finalAllocation) * 0.05);
+                    const saldoOrigemAposAnulacao = originEntryfinalAllocation - (originEntryfinalAllocation * 0.05);
+                    const resultOrigemAvaliableAllocation = saldoOrigemExistente - saldoOrigemAposAnulacao;
+
+                    const availableAllocationOrigemNumber = Number(originEntry.availableAllocation);
+                    originEntry.availableAllocation = availableAllocationOrigemNumber - resultOrigemAvaliableAllocation;
+
+                    // Para o destino
+                    targetEntryEntryType = EntryEntryType.REDISTRIBUITION_REINFORCEMENT;
+                    targetEntryEntryOperator = OperatorType.CREDTI;
+                    targetEntryfinalAllocation = targetEntry.finalAllocation + valueToTransfer; // Inicialize targetEntryfinalAllocation
+
+                    const saldoDestinoExistente = Number(targetEntry.finalAllocation) - (Number(targetEntry.finalAllocation) * 0.05);
+                    const saldoDestinoAposReforco = targetEntryfinalAllocation - (targetEntryfinalAllocation * 0.05);
+                    const resultDestinoAvaliableAllocation = saldoDestinoAposReforco - saldoDestinoExistente;
+
+                    const availableAllocationDestinoNumber = Number(targetEntry.availableAllocation);
+                    targetEntry.availableAllocation = availableAllocationDestinoNumber + resultDestinoAvaliableAllocation;
+
+                    if (originEntryfinalAllocation < 0) {
+                        throw Error("Não pode efectuar a redistribuição da anulação para a conta " + data.originAccountPlanNumber + ", no valor de "
+                            + valueToTransfer + ". O valor actual é " + originEntry.finalAllocation);
+                    }
+                }
 
 
-            const createdOriginEntryEntry = await new AccountPlanEntryEntry().fill
-                (
-                    {
-                        type: originEntryEntryType,
-                        operator: originEntryEntryOperator,
-                        postingMonth: currentDate.getMonth(),
-                        operationDate: operationDate,
-                        allocation: data.value,
-                        lastFinalAllocation: originEntry.finalAllocation,
-                        entryId: originEntry.id,
-                        accountPlanYearId: currentPlanbudject.id,
-                    }).useTransaction(trx).save();
-            /**
-            * The relationship will implicitly reference the
-            * targetEntrieEntry from the OriginEntryEntry instance
-            */
-            // Verifique se createdOriginEntryEntry foi salvo corretamente
+                // Criação da entrada para origem e destino
+                const createdOriginEntryEntry = await new AccountPlanEntryEntry().fill({
+                    type: originEntryEntryType,
+                    operator: originEntryEntryOperator,
+                    postingMonth: currentDate.getMonth(),
+                    operationDate: operationDate,
+                    allocation: valueToTransfer,
+                    lastFinalAllocation: originEntry.finalAllocation,
+                    entryId: originEntry.id,
+                    accountPlanYearId: currentPlanbudject.id,
+                    descriptionMoviment: data.motivo, // Adicionando motivo
+                }).useTransaction(trx).save();
 
-            console.log("Criou com sucesso", createdOriginEntryEntry)
-            if (!createdOriginEntryEntry.id) {
-                throw new Error('The parent entry (createdOriginEntryEntry) must be saved before creating the related target entry.');
+                const createdTargetEntryEntry = await createdOriginEntryEntry.related('targetEntrieEntry').create({
+                    type: targetEntryEntryType,
+                    operator: targetEntryEntryOperator,
+                    postingMonth: currentDate.getMonth(),
+                    operationDate: operationDate,
+                    allocation: valueToTransfer,
+                    lastFinalAllocation: targetEntry.finalAllocation,
+                    entryId: targetEntry.id,
+                    accountPlanYearId: currentPlanbudject.id,
+                    target_entrie_entry_id: createdOriginEntryEntry.id,
+                    descriptionMoviment: data.motivo, // Adicionando motivo
+                });
+
+                // Atualizar os saldos finais e realizar o commit da transação
+                originEntry.finalAllocation = originEntryfinalAllocation;
+                targetEntry.finalAllocation = targetEntryfinalAllocation;
+
+                await createdOriginEntryEntry.useTransaction(trx).save();
+                await createdTargetEntryEntry.useTransaction(trx).save();
+
+                await originEntry.useTransaction(trx).save();
+                await targetEntry.useTransaction(trx).save();
             }
-
-            // Criação do target entry
-            const createdTargetEntryEntry = await createdOriginEntryEntry.related('targetEntrieEntry').create({
-                type: targetEntryEntryType,
-                operator: targetEntryEntryOperator,
-                postingMonth: currentDate.getMonth(), // Define o mês de lançamento
-                operationDate: operationDate, // Data da operação
-                allocation: data.value, // Valor alocado
-                lastFinalAllocation: targetEntry.finalAllocation, // Última alocação final do registro de origem
-                entryId: targetEntry.id, // ID de entrada do plano de contas de destino
-                accountPlanYearId: currentPlanbudject.id, // ID do ano do plano de contas
-                target_entrie_entry_id: createdOriginEntryEntry.id, // ID de origem para o relacionamento
-            });
-
-
-
-            console.log("Criou com sucesso createdTargetEntryEntry", createdTargetEntryEntry)
-
-            //Actualizamos o targetEntrieEntryId na entrada origem
-            createdOriginEntryEntry.target_entrie_entry_id = createdTargetEntryEntry.id;
-            await createdOriginEntryEntry.useTransaction(trx).save();
-
-            originEntry.finalAllocation = originEntryfinalAllocation;
-            targetEntry.finalAllocation = targetEntryfinalAllocation;
-            const updatedOriginEntry = await originEntry
-                .useTransaction(trx)
-                .save();
-
-            await targetEntry
-                .useTransaction(trx)
-                .save();
-
-            await this.updateParentsAccountPlanEntriesByChild(updatedOriginEntry, data.value, isRedistributeReinforcement, trx);
-            await this.updateParentsAccountPlanEntriesByChild(targetEntry, data.value, !isRedistributeReinforcement, trx);
-
             // Commit the transaction if everything is successful
             await trx.commit();
-            return updatedOriginEntry;
+            return { status: 'success' };
         } catch (error) {
             await trx.rollback();
             throw error;
         }
     }
+
 
     public async updateParentsAccountPlanEntriesByChild(child: AccountPlanEntry, value: number, isCredit: boolean, trx: TransactionClientContract) {
         const parentId = child.parentId;

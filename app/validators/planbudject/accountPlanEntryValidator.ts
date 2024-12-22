@@ -15,8 +15,10 @@ export default class AccountPlanEntryValidator {
     private static schemaFieldsWithConformance = vine.object({
         conformityType: vine.string(),
         observation: vine.string(),
+        userId: vine.number() // Define que o userId será um número inteiro.
     });
-    
+
+
 
     private static schemaFieldsReinforceOrAnnul = vine.object({
         accountPlanNumber: vine.string(),
@@ -25,10 +27,18 @@ export default class AccountPlanEntryValidator {
     });
 
     private static schemaFieldsRedistributeReinforcementOrAnnulment = vine.object({
-        originAccountPlanNumber: vine.string(),
-        targetAccountPlanNumber: vine.string(),
-        value: vine.number(),
+        destinationAccounts: vine.array(
+            vine.object({
+                targetAccountPlanNumber: vine.string(), // Número da conta destino
+                value: vine.number(),                  // Valor a ser transferido para a conta destino
+            })
+        ),
+        totalValue: vine.number(),                      // Valor total a ser retirado da conta origem
+        type: vine.enum(['redistribution_reinforcement', 'annulment']), // Tipo da operação
+        motivo: vine.string().optional(),
         operationDate: vine.date(),
+        // Motivo da redistribuição (opcional)
+        originAccountPlanNumber: vine.string()
     });
 
     private static schemaFields = vine.object({
@@ -127,12 +137,12 @@ export default class AccountPlanEntryValidator {
             .where('account_plan_entries.account_plan_number', data.accountPlanFinancialNumber)
             .where('account_plans.number', data.accountPlanFinancialNumber)
             .where('account_plans.type', AccoutPlanType.FINANCIAL);
-    
+
         // Imprimir a consulta SQL gerada
         console.log('Consulta SQL (Financeira):', financialQuery.toSQL().sql, 'Parâmetros:', financialQuery.toSQL().bindings);
-    
+
         const existFinancialAccountEntry = await financialQuery.first();
-    
+
         if (!existFinancialAccountEntry) {
             throw new Error(
                 this.messagesLabels['accountPlanEntry.database.not.exists']
@@ -142,7 +152,7 @@ export default class AccountPlanEntryValidator {
                     )
             );
         }
-    
+
         // Validar entradas de orçamento
         for (const budjectAccountNumber of data.accountPlanBujectsNumber) {
             const budjectQuery = AccountPlanEntry.query()
@@ -150,11 +160,11 @@ export default class AccountPlanEntryValidator {
                 .where('account_plan_entries.account_plan_number', budjectAccountNumber.accountPlanBujectNumber)
                 .where('account_plans.number', budjectAccountNumber.accountPlanBujectNumber)
                 .where('account_plans.type', AccoutPlanType.BUDJECT);
-    
+
             console.log('Consulta SQL (Orçamento):', budjectQuery.toSQL().sql, 'Parâmetros:', budjectQuery.toSQL().bindings);
-    
+
             const budjectAccountPlanEntry = await budjectQuery.first();
-    
+
             if (!budjectAccountPlanEntry) {
                 throw new Error(
                     this.messagesLabels['accountPlanEntry.database.not.exists']
@@ -166,5 +176,5 @@ export default class AccountPlanEntryValidator {
             }
         }
     }
-    
+
 }

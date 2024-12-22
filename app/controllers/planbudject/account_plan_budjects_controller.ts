@@ -68,6 +68,8 @@ public async conformInitialAllocation({ request, response }: HttpContext) {
 
     const data = await request.validateUsing(AccountPlanEntryValidator.validateFields());
 
+    console.log("Dados recebido", data)
+
     try {
       return response.created(await this.accountPlanBudjectService.createAccountPlanEntry(data));
     } catch (error) {
@@ -130,6 +132,7 @@ public async conformInitialAllocation({ request, response }: HttpContext) {
 
     const data = await request.validateUsing(AccountPlanEntryValidator.validateFieldsRedistributeReinforcementOrAnnulment());
 
+    console.log("Dados Recebidos", data)
     try {
       return response.created(await this.accountPlanBudjectService.redistribuitioReinforcimentAccountPlanEntry(data));
     } catch (error) {

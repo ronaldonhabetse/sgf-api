@@ -36,7 +36,7 @@ import { EntryEntryType } from "#models/utility/Enums";
 
     }
 
-    public async conformInitialAllocation(data: { complianceStatus: string, descriptionCompliance: { accountPlanBujectNumber: string }[] }) {
+    public async conformInitialAllocation(data: { complianceStatus: string, descriptionCompliance: { accountPlanBujectNumber: string }[], userID: number }) {
       return await this.accountPlanEntryService.conformInitialAllocation(data);
     }
 
@@ -52,9 +52,20 @@ import { EntryEntryType } from "#models/utility/Enums";
       return this.accountPlanEntryService.annulAccountPlanEntry(data);
     }
 
-    public async redistribuitioReinforcimentAccountPlanEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string, operationDate: Date }) {
+    public async redistribuitioReinforcimentAccountPlanEntry(data: { 
+      destinationAccounts: { 
+          targetAccountPlanNumber: string, 
+          value: number 
+      }[], 
+      totalValue: number, 
+      type: string, 
+      motivo?: string,
+      originAccountPlanNumber: string,
+      operationDate: Date
+  }) {
       return this.accountPlanEntryService.redistribuitioReinforcimentAccountPlanEntry(data);
-    }
+  }
+  
 
     public async redistributeAnnulmentAccountPlanEntry(data: { originAccountPlanNumber: string, value: number, targetAccountPlanNumber: string, operationDate: Date }) {
       return this.accountPlanEntryService.redistributeAnnulmentAccountPlanEntry(data);
