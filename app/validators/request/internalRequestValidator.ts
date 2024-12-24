@@ -44,7 +44,7 @@ export default class InternalRequestValidator {
         accountPlanFinancialNumber: vine.string(),
 
         // Campo 'bank' agora obrigatório e sem limite de tamanho
-        bank: vine.string(),  // Banco é obrigatório, sem restrição de tamanho
+        bank: vine.string().optional(),  // Banco é obrigatório, sem restrição de tamanho
 
         createtBy: vine.number().optional(),
         updatedBy: vine.number().optional().nullable(),
@@ -66,9 +66,6 @@ export default class InternalRequestValidator {
         'accountPlanBudjectNumber.database.not.exists': 'O numero da conta [{{ value }}] não existe no sistema',
         'accountPlanFinancialNumber.database.not.exists': 'O numero da conta [{{ value }}] não existe no sistema',
         'provider.database.not.exists': 'Provedor com codico [{{ value }}] não existe no sistema',
-
-        // Mensagem para o campo 'bank' caso não seja fornecido
-        'bank.required': 'O campo [{{ field }}] é obrigatório.',
     }
 
     private static setMessages = (() => {
@@ -112,11 +109,6 @@ export default class InternalRequestValidator {
         if (!existAccountFinancial) {
             throw new Error(this.messagesLabels['accountPlanFinancialNumber.database.not.exists']
                 .replace('value', data.accountPlanFinancialNumber))
-        }
-
-        // Verifica a validação do campo 'bank'
-        if (!data.bank) {
-            throw new Error(this.messagesLabels['bank.required'].replace('{{ field }}', 'Banco'));
         }
     }
 }

@@ -59,17 +59,17 @@ export default class AccountingJournalService {
             const journal = await AccountingJournal.findByOrFail('journalNumber', data.accountingJournalNumber);
             const document = await AccountingDocument.findByOrFail('documentNumber', data.accountingDocumentNumber);
 
-            const journalDocNumber = Number(data.journalDocumentNumber);
-            if (isNaN(journalDocNumber)) {
-                throw new Error('journalDocumentNumber deve ser um número válido.');
-            }
+            // const journalDocNumber = Number(data.journalDocumentNumber);
+            // if (isNaN(journalDocNumber)) {
+            //     throw new Error('journalDocumentNumber deve ser um número válido.');
+            // }
             const createdAccountingEntry = await new AccountingJournalEntry()
                 .fill({
                     operationDate: operationDate,
                     accountPlanYearId: currentPlanYear.id,
                     accountingJournalId: journal.id,
                     accountingDocumentId: document.id,
-                    journalDocumentNumber: journalDocNumber,  // Adicionando o journalDocumentNumber
+                    // journalDocumentNumber: journalDocNumber,  // Adicionando o journalDocumentNumber
                 }).useTransaction(trx).save();
 
             for (const itemData of data.items) {  // Use for...of to await async operations
@@ -124,7 +124,7 @@ export default class AccountingJournalService {
             const currentPlanYear = await AccountPlanYear.findByOrFail('year', currentDate.getFullYear());
             const journal = await AccountingJournal.findByOrFail('journalNumber', data.accountingJournalNumber);
             const document = await AccountingDocument.findByOrFail('documentNumber', data.accountingDocumentNumber);
-            const journalDocNumber = Number(data.journalDocumentNumber);
+            // const journalDocNumber = Number(data.journalDocumentNumber);
             const internalRequest = String(data.internalRequestNumber);
             const receivable = Boolean(data.receivable);
             const transactionType = String(data.transactionType);
@@ -144,11 +144,11 @@ export default class AccountingJournalService {
 
             const internalRequestId = internalRequestIdQuery.id; // Aqui você recebe o id da requisição
             console.log(`ID da requisição interna: ${internalRequestId}`);
+            // console.log("journalDocNumber", journalDocNumber)
 
-
-            if (isNaN(journalDocNumber)) {
-                throw new Error('journalDocumentNumber deve ser um número válido.');
-            }
+            // if (isNaN(journalDocNumber)) {
+            //     throw new Error('journalDocumentNumber deve ser um número válido.');
+            // }
 
             // Se a transação for "BancosSaida", verifica se já existe um lançamento de contas a pagar
             if (transactionType === "BancosSaida") {
@@ -185,7 +185,7 @@ export default class AccountingJournalService {
                     accountPlanYearId: currentPlanYear.id,
                     accountingJournalId: journal.id,
                     accountingDocumentId: document.id,
-                    journalDocumentNumber: journalDocNumber, // Adicionando o journalDocumentNumber
+                    // journalDocumentNumber: journalDocNumber, // Adicionando o journalDocumentNumber
                     is_receivable: receivable,
                     internalRequestId: internalRequestId,
                 })

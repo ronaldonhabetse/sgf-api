@@ -481,6 +481,9 @@ export default class AccountPlanEntryService {
 
                 await originEntry.useTransaction(trx).save();
                 await targetEntry.useTransaction(trx).save();
+                
+                await this.updateParentsAccountPlanEntriesByChild(originEntry, valueToTransfer, false, trx); // Débito na origem
+                await this.updateParentsAccountPlanEntriesByChild(targetEntry, valueToTransfer, true, trx);  // Crédito no destino
             }
             // Commit the transaction if everything is successful
             await trx.commit();

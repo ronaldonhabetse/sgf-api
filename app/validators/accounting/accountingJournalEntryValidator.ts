@@ -30,13 +30,13 @@ export default class AccountingJournalEntryValidator {
         id: vine.number().optional(),
         operationDate: vine.date(),
         accountPlanYearId: vine.number().optional(),
-        accountingJournalNumber: vine.string(),
+        accountingJournalNumber: vine.string().optional(),
         accountingJournalId: vine.number().optional(),
-        accountingDocumentNumber: vine.string(),
+        accountingDocumentNumber: vine.string().optional(),
         accountingDocumentId: vine.number().optional(),
         internalRequestNumber: vine.string().optional(),
         internalRequestId: vine.number().optional(),
-        journalDocumentNumber: vine.string(),  // Novo campo
+        journalDocumentNumber: vine.string().optional(),  // Novo campo
         paid: vine.boolean(),  // Novo campo
         receivable: vine.boolean(),  // Novo campo
         transactionType: vine.string(),
