@@ -54,6 +54,7 @@ export default class AccountPlanService {
 
     public async create(data: AccountPlanDTO) {
         await AccountPlanValidator.validateOnCreate(data);
+        console.log("Erro De data")
         const currentDate = new Date();
         const trx = await db.transaction()  // Start transaction
         try {

@@ -15,8 +15,17 @@ export default class AccountPlanEntryService {
 
         await AccountPlanEntryValidator.validateOnCreate(data);
         const currentDate = new Date();
-        const operationDate = DateTime.local(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())
 
+        const parsedDate = new Date(); // Converte string para Date
+        if (isNaN(parsedDate.getTime())) {
+            throw new Error("Data inválida fornecida para operationDate: " + data.operationDate);
+        }
+        
+        const operationDate = DateTime.local(
+            parsedDate.getFullYear(),
+            parsedDate.getMonth() + 1, // Ajusta o mês
+            parsedDate.getDate()
+        );
         const currentPlanYear = await AccountPlanYear.findByOrFail('year', currentDate.getFullYear());
         const parentEntry = await AccountPlanEntry.findBy('accountPlanNumber', data.parentAccountPlanNumber);
 
