@@ -13,13 +13,16 @@ export default class InternalRequestValidator {
         description: vine.string(),
         operationDate: vine.date(),
         unitPrice: vine.number(),
+        importancia: vine.number(),
         internalRequestId: vine.number().optional(),
         internalRequestNumber: vine.string().optional(),
-
+        financiamentoView: vine.string().optional(),
+        orcamento: vine.string(),
         createtBy: vine.number().optional(),
         updatedBy: vine.number().optional().nullable(),
         createdAt: vine.date().optional(),
         updatedAt: vine.date().optional().nullable(),
+        beneficiaryName: vine.number().optional()
     });
 
     private static schemaCreateFields = vine.object({
@@ -33,6 +36,8 @@ export default class InternalRequestValidator {
         currentAccountBudjectBalance: vine.number().optional(),
         finalAccountBujectBalance: vine.number().optional(),
         totalRequestedValue: vine.number().optional(),
+        documentNumber: vine.string().optional(),
+        document: vine.string(),
 
         justification: vine.string(),
         sectorBudject: vine.string(),
@@ -40,11 +45,13 @@ export default class InternalRequestValidator {
         clauseBudject: vine.string(),
         clauseNumberBudject: vine.string(),
         provideCode: vine.string(),
-        accountPlanBudjectNumber: vine.string(),
-        accountPlanFinancialNumber: vine.string(),
+        accountPlanBudjectNumber: vine.string().optional(),
+        accountPlanFinancialNumber: vine.string().optional(),
+        accountPlanFinancialAssociation: vine.string().optional(),
 
         // Campo 'bank' agora obrigatório e sem limite de tamanho
         bank: vine.string().optional(),  // Banco é obrigatório, sem restrição de tamanho
+        transactionType: vine.string(),
 
         createtBy: vine.number().optional(),
         updatedBy: vine.number().optional().nullable(),
@@ -87,28 +94,28 @@ export default class InternalRequestValidator {
                 .replace('value', data.provideCode))
         }
 
-        const existAccountBuject = await AccountPlanEntry.query()
-            .where("accountPlanNumber", data.accountPlanBudjectNumber)
-            .whereHas('accountPlan', (builder) => {
-                builder.where('number', data.accountPlanBudjectNumber)
-                    .where('type', AccoutPlanType.BUDJECT)
-            });
+        // const existAccountBuject = await AccountPlanEntry.query()
+        //     .where("accountPlanNumber", data.accountPlanBudjectNumber)
+        //     .whereHas('accountPlan', (builder) => {
+        //         builder.where('number', data.accountPlanBudjectNumber)
+        //             .where('type', AccoutPlanType.BUDJECT)
+        //     });
 
-        if (!existAccountBuject) {
-            throw new Error(this.messagesLabels['accountPlanBudjectNumber.database.not.exists']
-                .replace('value', data.accountPlanBudjectNumber))
-        }
+        // if (!existAccountBuject) {
+        //     throw new Error(this.messagesLabels['accountPlanBudjectNumber.database.not.exists']
+        //         .replace('value', data.accountPlanBudjectNumber))
+        // }
 
-        const existAccountFinancial = await AccountPlanEntry.query()
-            .where("accountPlanNumber", data.accountPlanFinancialNumber)
-            .whereHas('accountPlan', (builder) => {
-                builder.where('number', data.accountPlanFinancialNumber)
-                    .where('type', AccoutPlanType.FINANCIAL);
-            });
+        // const existAccountFinancial = await AccountPlanEntry.query()
+        //     .where("accountPlanNumber", data.accountPlanFinancialNumber)
+        //     .whereHas('accountPlan', (builder) => {
+        //         builder.where('number', data.accountPlanFinancialNumber)
+        //             .where('type', AccoutPlanType.FINANCIAL);
+        //     });
 
-        if (!existAccountFinancial) {
-            throw new Error(this.messagesLabels['accountPlanFinancialNumber.database.not.exists']
-                .replace('value', data.accountPlanFinancialNumber))
-        }
+        // if (!existAccountFinancial) {
+        //     throw new Error(this.messagesLabels['accountPlanFinancialNumber.database.not.exists']
+        //         .replace('value', data.accountPlanFinancialNumber))
+        // }
     }
 }

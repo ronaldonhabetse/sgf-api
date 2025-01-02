@@ -235,8 +235,18 @@ export default class AccountPlanEntryService {
     private async reinforceOrAnnulmentAccountPlanEntry(data: { accountPlanNumber: string, value: number, operationDate: Date }, isReinforce: boolean, isInitialAlocation: boolean) {
 
         const currentDate = new Date();
-        const operationDate = DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth(), data.operationDate.getDate())
-
+        // const operationDate = DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth(), data.operationDate.getDate());
+        const parsedDate = new Date(data.operationDate); // Converte string para Date
+        if (isNaN(parsedDate.getTime())) {
+            throw new Error("Data inválida fornecida para operationDate: " + data.operationDate);
+        }
+        
+        const operationDate = DateTime.local(
+            parsedDate.getFullYear(),
+            parsedDate.getMonth() + 1, // Ajusta o mês
+            parsedDate.getDate()
+        );
+        console.log("Data Local", operationDate)
         const trx = await db.transaction()  // Start transaction
         try {
 

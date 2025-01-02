@@ -5,6 +5,7 @@ import { AccountingJounalEntryDTO, AccountingJounalItemDTO } from '../../service
 import AccountingDocument from '../../models/accounting/accounting_document.js';
 import AccountingJournal from '../../models/accounting/accounting_journal.js';
 import InternalRequest from '../../models/request/internal_request.js';
+import { Console } from 'console';
 
 export default class AccountingJournalEntryValidator {
 
@@ -17,6 +18,19 @@ export default class AccountingJournalEntryValidator {
         accountPlanNumber: vine.string(),
         accountPlanId: vine.number().optional(),
         accountPlanYearId: vine.number().optional(),
+        entryId: vine.number().optional(),
+
+        createtBy: vine.number().optional(),
+        updatedBy: vine.number().optional().nullable(),
+        createdAt: vine.date().optional(),
+        updatedAt: vine.date().optional().nullable(),
+    });
+
+    private static schemaFieldsAccountingJournalItemsTableDataBudject = vine.object({
+        id: vine.number().optional(),
+        description: vine.string(),
+        account: vine.string(),
+        debit: vine.number().optional(),
         entryId: vine.number().optional(),
 
         createtBy: vine.number().optional(),
@@ -43,6 +57,9 @@ export default class AccountingJournalEntryValidator {
         items: vine.array(
             AccountingJournalEntryValidator.schemaFieldsAccountingJournalItems
         ),
+        tableDataBudject: vine.array(
+            AccountingJournalEntryValidator.schemaFieldsAccountingJournalItemsTableDataBudject
+        ).optional(),
         createtBy: vine.number().optional(),
         updatedBy: vine.number().optional().nullable(),
         createdAt: vine.date().optional(),
@@ -87,6 +104,8 @@ export default class AccountingJournalEntryValidator {
         const existDocument = await AccountingDocument.query()
             .where('documentNumber', data.accountingDocumentNumber)
             .first();
+
+        console.log("", data.accountingDocumentNumber)
 
         if (!existDocument) {
             throw new Error(this.messagesLabels['accountingDocumentNumber.database.notexists'].replace('value', data.accountingDocumentNumber));
@@ -262,22 +281,20 @@ export default class AccountingJournalEntryValidator {
         let hastProvider = false;
         let hasBank = false;
 
-        //Validate internalrequest
         data.items.forEach(async (itemData) => {
-
-            hasBujectAccount = !hasBujectAccount ?
-                itemData.accountPlanNumber == accountPlanBudject.number
+            hasBujectAccount = !hasBujectAccount && accountPlanBudject?.number
+                ? itemData.accountPlanNumber == accountPlanBudject.number
                 : hasBujectAccount;
-
-            hasFinancialAccount = !hasFinancialAccount ?
-                itemData.accountPlanNumber == accountPlanFinancial.number
+        
+            hasFinancialAccount = !hasFinancialAccount && accountPlanFinancial?.number
+                ? itemData.accountPlanNumber == accountPlanFinancial.number
                 : hasFinancialAccount;
-
-            hastProvider = !hastProvider ?
-                itemData.accountPlanNumber == provider.accountPlanFinancialNumber
+        
+            hastProvider = !hastProvider && provider?.accountPlanFinancialNumber
+                ? itemData.accountPlanNumber == provider.accountPlanFinancialNumber
                 : hastProvider;
-
         });
+        
 
         if (hasBujectAccount) {
             throw new Error(this.messagesLabels['item.accountPlanBudject.database.not.exists'].replace('value', accountPlanBudject.number + " , " + AccoutPlanType.BUDJECT.toString()));

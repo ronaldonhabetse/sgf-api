@@ -7,6 +7,7 @@ import InternalRequestItem from './internal_request_item.js'
 import Provider from '../person/provider.js'
 import LifecycleAbstractModel from '../utility/LifeclycleAbstractModel.js'
 import Bank from '../person/bank.js'
+import { EnumType } from 'typescript'
 
 /*
 * Model que representa uma requisicao interna
@@ -81,8 +82,24 @@ export default class InternalRequest extends LifecycleAbstractModel {
   @column({ columnName: 'account_plan_financial_id' })
   declare accountPlanFinancialId: number;
 
+  @column({ columnName: 'document' })
+  declare document: string;
+  
+  @column({ columnName: 'documentNumber' })
+  declare documentNumber: string;
+
+  @column({ columnName: 'transaction_type' })
+  declare transactionType: string;
+
+
   @belongsTo(() => AccountPlan, { foreignKey: 'accountPlanFinancialId' })
   declare accountPlanFinancial: BelongsTo<typeof AccountPlan>;
+
+  @column({ columnName: 'account_plan_financial_association_id' })
+  declare accountPlanFinancialAssociationId: number;
+
+  @belongsTo(() => AccountPlan, { foreignKey: 'accountPlanFinancialAssociationId' })
+  declare accountPlanFinancialAssociation: BelongsTo<typeof AccountPlan>;
 
   @hasMany(() => InternalRequestItem, { foreignKey: 'internalRequestId' })
   declare items: HasMany<typeof InternalRequestItem>;

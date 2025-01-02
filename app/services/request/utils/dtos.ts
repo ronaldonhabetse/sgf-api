@@ -21,6 +21,10 @@ export interface InternalRequestItemDTO extends DomainDTO {
   unitPrice: number
   internalRequestId: number | undefined
   internalRequestNumber: string
+  orcamento: string,
+  importancia: number,
+  beneficiaryName:number
+  financiamentoView: number
 }
 
 export interface InternalRequestDTO extends DomainDTO {
@@ -40,8 +44,12 @@ export interface InternalRequestDTO extends DomainDTO {
   provideCode: string
   accountPlanBudjectNumber: string
   accountPlanFinancialNumber: string
+  accountPlanFinancialAssociation: string
   items: InternalRequestItemDTO[]
   bank: string
   paid: boolean,
+  documentNumber:string,
+  document: string,
+  transactionType: 'UNIQUE_BENEFICIARY' | 'MULTIPLE_BENEFICIARIES'
   conformance: 'PENDING_CONFORMANCE' | 'WITHOUT_CONFORMANCE' | 'CONFORMED',
 }

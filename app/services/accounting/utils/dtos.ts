@@ -34,6 +34,12 @@ export interface AccountingJounalItemDTO extends DomainDTO {
   entryId: number | undefined,
 }
 
+export interface AccountingJounalItemOrcamentoDTO extends DomainDTO {
+  account: number,
+  description: string,
+  debit: number | undefined,
+}
+
 export interface AccountingJounalEntryDTO extends DomainDTO {
   operationDate: Date,
   accountPlanYearId: number | undefined,
@@ -48,5 +54,6 @@ export interface AccountingJounalEntryDTO extends DomainDTO {
   conformance: 'PENDING_CONFORMANCE' | 'WITHOUT_CONFORMANCE' | 'CONFORMED',
   items: AccountingJounalItemDTO[],
   receivable: boolean,
-  transactionType: string
+  transactionType: string,
+  tableDataBudject: AccountingJounalItemOrcamentoDTO[]
 }

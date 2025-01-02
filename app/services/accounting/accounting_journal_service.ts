@@ -11,6 +11,8 @@ import { inject } from "@adonisjs/core";
 import AccountPlanFinancialEntryService from "./account_plan_financial_entry_service.js";
 import { EntryEntryType } from "../../models/utility/Enums.js";
 import db from "@adonisjs/lucid/services/db";
+import InternalRequest from "#models/request/internal_request";
+import AccountPlanEntry from "#models/planbudject/account_plan_entry";
 
 @inject()
 export default class AccountingJournalService {
@@ -41,7 +43,7 @@ export default class AccountingJournalService {
 
     public async bankOutAccountingJournal(data: AccountingJounalEntryDTO) {
         await AccountingJournalEntryValidator.validateOnWithInternalRequest(data, AccountingJournal.BANK_OUT);
-        return await this.criateFinancialAccountingJournalWithInternalRequest(data, EntryEntryType.ENTRY_BANK_OUT);
+        return await this.createFinancialAccountingJournalWithInternalRequestExit(data);
     }
 
     public async regulationAccountingJournal(data: AccountingJounalEntryDTO) {
@@ -111,6 +113,95 @@ export default class AccountingJournalService {
             throw error;
         }
     }
+
+
+    public async createFinancialAccountingJournalWithInternalRequestExit(data: AccountingJounalEntryDTO) {
+        const trx = await db.transaction(); // Inicia a transação
+
+        try {
+            if (!data.tableDataBudject || !data.items || !data.internalRequestNumber) {
+                throw new Error('Os campos tableDataBudject, items e internalRequestNumber são obrigatórios.');
+            }
+
+            // Processar os itens de orçamento
+            for (const budgetItem of data.tableDataBudject) {
+                if (budgetItem.debit === undefined) {
+                    throw new Error(`O valor de debit para o item de orçamento ${budgetItem.account} não está definido.`);
+                }
+
+                const accountPlan = await AccountPlan.query()
+                    .useTransaction(trx)
+                    .where('number', budgetItem.account)
+                    .firstOrFail();
+
+                const currentBalance = await this.getAccountPlanBalance(accountPlan.id);
+                const newBalance = currentBalance - budgetItem.debit;
+
+
+                await InternalRequest.query()
+                    .useTransaction(trx)
+                    .where('request_number', data.internalRequestNumber)
+                    .update({ paid: true });
+
+                await AccountPlanEntry.query()
+                    .useTransaction(trx)
+                    .where('account_plan_id', accountPlan.id)
+                    .update({ available_allocation: newBalance });
+            }
+
+            // Processar os itens de lançamento
+            for (const item of data.items) {
+                const accountPlan = await AccountPlan.query()
+                    .useTransaction(trx)
+                    .where('number', item.accountPlanNumber)
+                    .firstOrFail();
+
+                const currentBalance = await this.getAccountPlanBalance(accountPlan.id);
+                const operation = item.operator === 'debit' ? -item.value : item.value;
+                const newBalance = currentBalance + operation;
+
+                // Atualizar a requisição interna
+                await AccountPlanEntry.query()
+                    .useTransaction(trx)
+                    .where('account_plan_id', accountPlan.id)
+                    .update({ available_allocation: newBalance });
+            }
+
+            await trx.commit(); // Confirma a transação
+        } catch (error) {
+            await trx.rollback(); // Reverte a transação em caso de erro
+            throw error;
+        }
+    }
+
+
+    // Função para obter o saldo atual da conta
+    private async getAccountPlanBalance(accountPlanId: number): Promise<number> {
+        const accountPlan = await db
+            .from('account_plan_entries') // Usando a tabela de entradas do plano de contas
+            .where('account_plan_id', accountPlanId)
+            .select('available_allocation')
+            .first();
+
+        if (!accountPlan) {
+            throw new Error(`Conta não encontrada com ID ${accountPlanId}`);
+        }
+
+        return accountPlan.available_allocation || 0; // Retorna o saldo disponível
+    }
+
+    // Função para atualizar o saldo da conta
+    private async updateAccountPlanBalance(accountPlanId: number, newBalance: number, trx: any): Promise<void> {
+        await trx('account_plan_entries') // Usando a transação para realizar a atualização
+            .where('account_plan_id', accountPlanId)
+            .update({ available_allocation: newBalance });
+    }
+
+
+
+
+
+
 
     public async criateFinancialAccountingJournalWithInternalRequest(data: AccountingJounalEntryDTO, entryEntryType: EntryEntryType) {
         const trx = await db.transaction(); // Inicia a transação
