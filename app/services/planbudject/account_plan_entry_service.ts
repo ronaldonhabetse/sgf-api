@@ -400,7 +400,7 @@ export default class AccountPlanEntryService {
                 if (isRedistributeReinforcement) {
                     // Para a origem
                     // Para a origem
-                    originEntryEntryType = EntryEntryType.REDISTRIBUITION_REINFORCEMENT;
+                    originEntryEntryType = EntryEntryType.REDISTRIBUITION_ANNULMENT;
                     originEntryEntryOperator = OperatorType.DEBIT;  // A origem irá ser debitada
                     originEntryfinalAllocation = originEntry.finalAllocation - valueToTransfer;  // A origem anula o valor
 
@@ -416,6 +416,8 @@ export default class AccountPlanEntryService {
                         throw Error("Não pode efectuar a redistribuição para a conta " + data.originAccountPlanNumber + ", o valor atual é " + originEntry.finalAllocation);
                     }
 
+
+                   
                     // Para o destino
                     targetEntryEntryType = EntryEntryType.REDISTRIBUITION_REINFORCEMENT;
                     targetEntryEntryOperator = OperatorType.CREDTI;  // A conta destino será creditada
@@ -434,6 +436,8 @@ export default class AccountPlanEntryService {
                     //         + ". O valor actual é " + targetEntry.finalAllocation);
                     // }
                 } else {
+
+                    console.log("entrou aqui")
                     // Para a origem
                     originEntryEntryType = EntryEntryType.REDISTRIBUITION_ANNULMENT;
                     originEntryEntryOperator = OperatorType.DEBIT;
@@ -463,6 +467,8 @@ export default class AccountPlanEntryService {
                             + valueToTransfer + ". O valor actual é " + originEntry.finalAllocation);
                     }
                 }
+
+                console.log("DADOS ENCVIADOS", data.operationDate);
 
 
                 // Criação da entrada para origem e destino
@@ -501,8 +507,17 @@ export default class AccountPlanEntryService {
                 await originEntry.useTransaction(trx).save();
                 await targetEntry.useTransaction(trx).save();
                 
-                await this.updateParentsAccountPlanEntriesByChild(originEntry, valueToTransfer, false, trx); // Débito na origem
-                await this.updateParentsAccountPlanEntriesByChild(targetEntry, valueToTransfer, true, trx);  // Crédito no destino
+                if(originEntry.id != targetEntry.id){
+                    await this.updateParentsAccountPlanEntriesByChild(originEntry, valueToTransfer, false, trx); // Débito na origem
+                    await this.updateParentsAccountPlanEntriesByChild(targetEntry, valueToTransfer, true, trx);  // Crédito no destino    
+                    console.log("Actualizando as contas")
+                }
+          
+                console.log("originEntry", originEntryfinalAllocation)
+                console.log("targetEntryfinalAllocation", targetEntryfinalAllocation)
+                console.log("originEntry", originEntry)
+                console.log("targetEntry", targetEntry)
+
             }
             // Commit the transaction if everything is successful
             await trx.commit();

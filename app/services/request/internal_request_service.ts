@@ -88,10 +88,14 @@ export default class InternalRequestService {
       const paid = data.paid ?? 0;
 
       // Criação da requisição interna
+      // const currentDate = new Date();
+      const formattedMonth = String(currentDate.getMonth() + 1).padStart(2, '0'); // Ajusta e formata o mês
+      const formattedYear = currentDate.getFullYear();
+      
       const createdInternalRequest = await new InternalRequest()
         .fill({
           sequence: nextSequence,
-          requestNumber: `${nextSequence}-${currentDate.getMonth()}${currentDate.getFullYear()}`,
+          requestNumber: `${nextSequence}-${formattedMonth}${formattedYear}`, // Formatação correta do mês e ano
           requestorName: data.requestorName,
           requestorDepartment: data.requestorDepartment,
           operationDate: operationDate,
@@ -112,6 +116,10 @@ export default class InternalRequestService {
         })
         .useTransaction(trx)
         .save();
+      
+      console.log("Número de requisição gerado:", createdInternalRequest.requestNumber);
+      
+
       // Processamento dos itens da requisição
       for (const itemData of data.items) {
         console.log("Iniciando processamento do item");
