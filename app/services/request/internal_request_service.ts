@@ -365,8 +365,6 @@ export default class InternalRequestService {
   //   }
   // }
 
-
-
   public async findAccountPlanEntriesByYearAndNumber(year: number, accountPlanNumber: string) {
     const entry = await AccountPlanEntry.query()
       .where('accountPlanNumber', accountPlanNumber)
@@ -421,16 +419,16 @@ export default class InternalRequestService {
     return internalRequest;
   }
 
-
-
   public async findAll() {
     return await InternalRequest.query()
-      .preload('accountPlanBudject') // Preload do orçamento
-      .preload('accountPlanFinancial') // Preload financeiro
-      .preload('items') // Preload dos itens relacionados
-      .orderBy('operationDate', 'desc') // Exemplo: Ordenação por data
+      .preload('accountPlanBudject') // Preload do orçamento relacionado à requisição
+      .preload('accountPlanFinancial') // Preload financeiro relacionado à requisição
+      .preload('items', (query) => {
+        query.preload('accountPlanBudject'); // Preload do orçamento relacionado aos itens
+      }) // Preload dos itens e seus relacionamentos
+      .orderBy('operationDate', 'desc'); // Ordenação por data de operação
   }
-
+  
 
   public async feacthAll() {
     return await InternalRequest.query()
@@ -479,9 +477,6 @@ export default class InternalRequestService {
 
     return result;
   }
-
-
-
 
   public async findById(id: number) {
     return await InternalRequest.findOrFail(id);
