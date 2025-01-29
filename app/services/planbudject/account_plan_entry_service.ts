@@ -409,7 +409,7 @@ export default class AccountPlanEntryService {
                     const resultOrigemAvaliableAllocation = saldoOrigemAposReforco - saldoOrigemExistente;
 
                     const availableAllocationOrigemNumber = Number(originEntry.availableAllocation);
-                    originEntry.availableAllocation = availableAllocationOrigemNumber - resultOrigemAvaliableAllocation;  // Subtrai o valor da origem
+                    originEntry.availableAllocation = availableAllocationOrigemNumber - valueToTransfer;  // Subtrai o valor da origem
 
                     // Verifica se a conta origem tem saldo suficiente
                     if (originEntryfinalAllocation < 0) {
@@ -510,7 +510,7 @@ export default class AccountPlanEntryService {
                 if(originEntry.id != targetEntry.id){
                     await this.updateParentsAccountPlanEntriesByChild(originEntry, valueToTransfer, false, trx); // Débito na origem
                     await this.updateParentsAccountPlanEntriesByChild(targetEntry, valueToTransfer, true, trx);  // Crédito no destino    
-                    console.log("Actualizando as contas")
+                    console.log("Actualizando as")
                 }
           
                 console.log("originEntry", originEntryfinalAllocation)
@@ -550,7 +550,7 @@ export default class AccountPlanEntryService {
                 await this.findParentsAccountPlanEntriesByChild(parent, parents)
             } else {
                 return
-            };
+            };  
         }
         return parents;
     }

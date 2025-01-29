@@ -24,7 +24,8 @@ export interface InternalRequestItemDTO extends DomainDTO {
   orcamento: string,
   importancia: number,
   beneficiaryName:number
-  financiamentoView: number
+  financiamentoView: number,
+  saldoExistente: number
 }
 
 export interface InternalRequestDTO extends DomainDTO {

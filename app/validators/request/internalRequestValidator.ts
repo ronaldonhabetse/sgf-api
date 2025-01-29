@@ -22,8 +22,10 @@ export default class InternalRequestValidator {
         updatedBy: vine.number().optional().nullable(),
         createdAt: vine.date().optional(),
         updatedAt: vine.date().optional().nullable(),
-        beneficiaryName: vine.number().optional()
+        beneficiaryName: vine.number().optional(),
+        saldoExistente: vine.number()
     });
+
 
     private static schemaCreateFields = vine.object({
         id: vine.number().optional(),

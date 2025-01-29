@@ -52,8 +52,8 @@ import { EntryEntryType } from "#models/utility/Enums";
       return this.accountPlanEntryService.annulAccountPlanEntry(data);
     }
 
-    public async redistribuitioReinforcimentAccountPlanEntry(data: { 
-      destinationAccounts: { 
+    public async redistribuitioReinforcimentAccountPlanEntry(data: {
+      destinationAccounts: {
           targetAccountPlanNumber: string, 
           value: number 
       }[], 

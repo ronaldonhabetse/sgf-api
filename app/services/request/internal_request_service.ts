@@ -179,7 +179,8 @@ export default class InternalRequestService {
           }
         }
 
-        console.log("LOSASLKS:", financiamentoView);
+        console.log("LOSASLKS:", itemData.saldoExistente);
+        console.log("LOSASLKS:", itemData);
 
         // Criação do item da requisição interna
         await new InternalRequestItem()
@@ -193,7 +194,8 @@ export default class InternalRequestService {
             accountPlanBudjectId: accountPlanBudject.id,
             totalAmount: itemData.importancia,
             beneficiaryNameId: beneficiaryName ? beneficiaryName.id : undefined, // Definido como undefined se não encontrado
-            accountPlanFinancialAssociationId: financiamentoView ? financiamentoView.id : undefined
+            accountPlanFinancialAssociationId: financiamentoView ? financiamentoView.id : undefined,
+            saldoExistente: itemData.saldoExistente
           })
           .useTransaction(trx)
           .save();

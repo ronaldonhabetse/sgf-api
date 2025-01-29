@@ -29,6 +29,9 @@ export default class InternalRequestItem extends CreatableAbstractModel {
   @column({ columnName: 'total_amount' })
   declare totalAmount: number
   
+  @column({ columnName: 'saldoExistente' })
+  declare saldoExistente: number
+  
   @belongsTo(() => InternalRequest)
   declare internalRequest: BelongsTo<typeof InternalRequest>
 
@@ -40,7 +43,6 @@ export default class InternalRequestItem extends CreatableAbstractModel {
   })
   declare accountPlanBudject: BelongsTo<typeof AccountPlan>;
   
-
 
   @column({ columnName: 'beneficiary_id' })
   declare beneficiaryNameId: number
