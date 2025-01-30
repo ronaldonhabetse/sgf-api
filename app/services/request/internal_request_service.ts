@@ -167,7 +167,7 @@ export default class InternalRequestService {
         if (itemData.financiamentoView) {
           try {
             financiamentoView = await AccountPlan.findByOrFail({
-              number: itemData.financiamentoView,
+              number: itemData.financiamentoView.toString().split(" -")[0],
               type: AccoutPlanType.FINANCIAL,
             });
             console.log("Beneficiário encontrado:", financiamentoView);

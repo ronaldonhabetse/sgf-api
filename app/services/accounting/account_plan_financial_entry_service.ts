@@ -24,7 +24,7 @@ export default class AccountPlanFinancialEntryService {
     }, trx: TransactionClientContract) {
 
     const currentDate = new Date();
-    const operationDate = DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth(), data.operationDate.getDate())
+    const operationDate = DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth() + 1, data.operationDate.getDate())
     const currentPlanYear = await AccountPlanYear.findByOrFail('year', currentDate.getFullYear());
 
     // Encontrar a conta pela numeração
