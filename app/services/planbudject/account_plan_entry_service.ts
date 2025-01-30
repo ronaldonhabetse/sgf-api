@@ -362,7 +362,7 @@ export default class AccountPlanEntryService {
 
 
         const currentDate = new Date();
-        const operationDate = DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth(), data.operationDate.getDate());
+        const operationDate = DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth() + 1, data.operationDate.getDate());
         const trx = await db.transaction();  // Start transaction
 
         try {
