@@ -54,6 +54,7 @@ export default class InternalRequestValidator {
         // Campo 'bank' agora obrigatório e sem limite de tamanho
         bank: vine.string().optional(),  // Banco é obrigatório, sem restrição de tamanho
         transactionType: vine.string(),
+        isReceivable: vine.boolean().optional(),
 
         createtBy: vine.number().optional(),
         updatedBy: vine.number().optional().nullable(),

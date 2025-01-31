@@ -141,7 +141,12 @@ export default class AccountingJournalService {
                 await InternalRequest.query()
                     .useTransaction(trx)
                     .where('request_number', data.internalRequestNumber)
-                    .update({ paid: true });
+                    .update({ paidReq: true});
+
+                await InternalRequest.query()
+                    .useTransaction(trx)
+                    .where('request_number', data.internalRequestNumber)
+                    .update({ is_parcial: data.is_parcial});
 
                 await AccountPlanEntry.query()
                     .useTransaction(trx)
@@ -166,6 +171,8 @@ export default class AccountingJournalService {
                     .where('account_plan_id', accountPlan.id)
                     .update({ available_allocation: newBalance });
             }
+
+            
 
             await trx.commit(); // Confirma a transação
         } catch (error) {
@@ -283,13 +290,22 @@ export default class AccountingJournalService {
                 .useTransaction(trx)
                 .save();
 
+            if (data.receivable === true) {
+                    await trx
+                        .query()
+                        .from('internal_requests')
+                        .where('request_number', internalRequest)
+                        .update({ is_receivable: true });
+            }
             // Verifica se `data.paid` é igual a 1 antes de atualizar o `internalRequest`
             if (data.paid === true) {
                 await trx
                     .query()
                     .from('internal_requests')
                     .where('request_number', internalRequest)
-                    .update({ paid: true });
+                    .update({ paid: false });
+
+                    console.log("Pagou aqui")
             }
 
             // Processando os itens associados

@@ -64,6 +64,7 @@ export default class AccountingJournalEntryValidator {
         updatedBy: vine.number().optional().nullable(),
         createdAt: vine.date().optional(),
         updatedAt: vine.date().optional().nullable(),
+        is_parcial: vine.boolean().optional()
 
     })
 

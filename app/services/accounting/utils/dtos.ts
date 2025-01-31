@@ -55,5 +55,6 @@ export interface AccountingJounalEntryDTO extends DomainDTO {
   items: AccountingJounalItemDTO[],
   receivable: boolean,
   transactionType: string,
-  tableDataBudject: AccountingJounalItemOrcamentoDTO[]
+  tableDataBudject: AccountingJounalItemOrcamentoDTO[],
+  is_parcial: boolean
 }

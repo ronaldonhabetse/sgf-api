@@ -109,7 +109,7 @@ export default class InternalRequestService {
           accountPlanFinancialId: accountPlanFinancial?.id, // Usa undefined se não encontrado
           providerId: provider.id,
           bankValue: data.bank,
-          paid: paid,
+          paidReq: paid,
           documentNumber: data.documentNumber,
           document: data.document,
           transactionType: data.transactionType,
@@ -456,7 +456,7 @@ export default class InternalRequestService {
             'requestor_name',
             'requestor_department',
             'operation_date',
-            'paid',
+            'paidReq',
             'conformance',
             'total_requested_value',
             'bank_Value', // Inclua explicitamente o campo desejado

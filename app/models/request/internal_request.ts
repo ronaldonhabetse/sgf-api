@@ -6,8 +6,7 @@ import AccountPlan from '../planbudject/account_plan.js'
 import InternalRequestItem from './internal_request_item.js'
 import Provider from '../person/provider.js'
 import LifecycleAbstractModel from '../utility/LifeclycleAbstractModel.js'
-import Bank from '../person/bank.js'
-import { EnumType } from 'typescript'
+
 
 /*
 * Model que representa uma requisicao interna
@@ -91,9 +90,14 @@ export default class InternalRequest extends LifecycleAbstractModel {
   @column({ columnName: 'transaction_type' })
   declare transactionType: string;
 
+  @column({ columnName: 'is_receivable' })
+  declare isReceivable: boolean;
 
   @belongsTo(() => AccountPlan, { foreignKey: 'accountPlanFinancialId' })
   declare accountPlanFinancial: BelongsTo<typeof AccountPlan>;
+
+  @column({columnName: 'is_parcial'})
+  declare isParcial: boolean;
 
   @column({ columnName: 'account_plan_financial_association_id' })
   declare accountPlanFinancialAssociationId: number;
@@ -105,8 +109,8 @@ export default class InternalRequest extends LifecycleAbstractModel {
   declare items: HasMany<typeof InternalRequestItem>;
 
   // New fields
-  @column()
-  declare paid: boolean
+  @column({ columnName: 'paidReq' })
+  declare paidReq: boolean
 
   @column()
   declare conformance: 'PENDING_CONFORMANCE' | 'WITHOUT_CONFORMANCE' | 'CONFORMED'
