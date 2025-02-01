@@ -137,16 +137,15 @@ export default class AccountingJournalService {
                 const currentBalance = await this.getAccountPlanBalance(accountPlan.id);
                 const newBalance = currentBalance - budgetItem.debit;
 
-
                 await InternalRequest.query()
-                    .useTransaction(trx)
-                    .where('request_number', data.internalRequestNumber)
-                    .update({ paidReq: true});
-
-                await InternalRequest.query()
-                    .useTransaction(trx)
-                    .where('request_number', data.internalRequestNumber)
-                    .update({ is_parcial: data.is_parcial});
+                .useTransaction(trx)
+                .where('request_number', data.internalRequestNumber)
+                .update({
+                    paidReq: true,
+                    is_parcial: data.is_parcial,
+                    payment_type: data.payment_type,
+                    remaining_balance: data.remaining_balance
+                });
 
                 await AccountPlanEntry.query()
                     .useTransaction(trx)
