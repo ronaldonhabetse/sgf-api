@@ -408,9 +408,12 @@ export default class AccountPlanEntryService {
                     const saldoOrigemAposReforco = originEntryfinalAllocation - (originEntryfinalAllocation * 0.05);
                     const resultOrigemAvaliableAllocation = saldoOrigemAposReforco - saldoOrigemExistente;
 
+                    const availableAllocationT = valueToTransfer * 0.05;
+                    const availableAllocationVl = valueToTransfer - availableAllocationT;
                     const availableAllocationOrigemNumber = Number(originEntry.availableAllocation);
-                    originEntry.availableAllocation = availableAllocationOrigemNumber - valueToTransfer;  // Subtrai o valor da origem
+                    originEntry.availableAllocation = availableAllocationOrigemNumber - availableAllocationVl;  // Subtrai o valor da origem
 
+                    console.log("passou daqui");
                     // Verifica se a conta origem tem saldo suficiente
                     if (originEntryfinalAllocation < 0) {
                         throw Error("Não pode efectuar a redistribuição para a conta " + data.originAccountPlanNumber + ", o valor atual é " + originEntry.finalAllocation);
@@ -430,6 +433,9 @@ export default class AccountPlanEntryService {
                     const availableAllocationDestinoNumber = Number(targetEntry.availableAllocation);
                     targetEntry.availableAllocation = availableAllocationDestinoNumber + resultDestinoAvaliableAllocation;  // Aumenta o valor da conta destino
 
+
+
+                    
                     // if (targetEntryfinalAllocation < 0) {
                     //     throw Error("Não pode efectuar a redistribuição do reforço para a conta " + data.originAccountPlanNumber + ", o valor da conta destino "
                     //         + destination.targetAccountPlanNumber + " é insuficiente para anular " + valueToTransfer
