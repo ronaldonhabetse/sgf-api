@@ -115,4 +115,10 @@ export default class InternalRequest extends LifecycleAbstractModel {
   @column()
   declare conformance: 'PENDING_CONFORMANCE' | 'WITHOUT_CONFORMANCE' | 'CONFORMED'
 
+  @column({ columnName: 'payment_type' })
+  declare paymentType: 'PARTIAL' | 'UNIQUE' | null;
+
+  @column({ columnName: 'remaining_balance' })
+  declare remainingBalance: number;
+
 }
