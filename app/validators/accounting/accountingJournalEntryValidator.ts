@@ -24,6 +24,7 @@ export default class AccountingJournalEntryValidator {
         updatedBy: vine.number().optional().nullable(),
         createdAt: vine.date().optional(),
         updatedAt: vine.date().optional().nullable(),
+
     });
 
     private static schemaFieldsAccountingJournalItemsTableDataBudject = vine.object({
@@ -64,7 +65,11 @@ export default class AccountingJournalEntryValidator {
         updatedBy: vine.number().optional().nullable(),
         createdAt: vine.date().optional(),
         updatedAt: vine.date().optional().nullable(),
-        is_parcial: vine.boolean().optional()
+        is_parcial: vine.boolean().optional(),
+        payment_type: vine.string(),
+        remaining_balance: vine.number()
+
+
 
     })
 

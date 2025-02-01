@@ -464,7 +464,10 @@ export default class InternalRequestService {
             'account_plan_financial_id',
             'account_plan_financial_association_id',
             'transaction_type',
-            'document'
+            'document',
+            'documentNumber',
+            'payment_type',
+            'remaining_balance'
           ])
           .preload('accountPlanFinancial') // Carrega a relação
           .preload('accountPlanFinancialAssociation')
