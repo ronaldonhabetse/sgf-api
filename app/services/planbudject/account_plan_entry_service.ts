@@ -541,9 +541,12 @@ export default class AccountPlanEntryService {
                     const resultOrigemAvaliableAllocation = saldoOrigemAposReforco - saldoOrigemExistente;
 
                     const availableAllocationT = valueToTransfer * 0.05;
+                    console.log("availableAllocationT",  availableAllocationT)
                     const availableAllocationVl = valueToTransfer - availableAllocationT;
+                    console.log("availableAllocationVl", availableAllocationVl)
                     const availableAllocationOrigemNumber = Number(originEntry.availableAllocation);
                     originEntry.availableAllocation = availableAllocationOrigemNumber - availableAllocationVl;  // Subtrai o valor da origem
+                    console.log("originEntry.availableAllocation", availableAllocationOrigemNumber - availableAllocationVl)
 
                     console.log("passou daqui");
                     // Verifica se a conta origem tem saldo suficiente
