@@ -159,6 +159,23 @@ public async conformInitialAllocation({ request, response }: HttpContext) {
     }
   }
 
+
+  public async annullmentRequest({ request, response }: HttpContext) {
+
+    const data = await request.validateUsing(AccountPlanEntryValidator.validateFieldsReinforceOrAnnul());
+
+    try {
+      return response.created(await this.accountPlanBudjectService.annullmentRequest(data));
+    } catch (error) {
+      console.log(error);
+      return response.status(500).json({
+        message: 'Ocorreu um erro ao executar o reforço do plano e orçamento na conta ' + data.accountPlanNumber,
+        error: error.message,
+      });
+    }
+  }
+
+
   public async findAllAccountPlanYear({ response }: HttpContext) {
     return response.ok(await this.accountPlanBudjectService.findAllAccountPlanYear());
   }

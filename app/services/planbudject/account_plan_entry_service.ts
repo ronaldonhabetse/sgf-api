@@ -8,6 +8,7 @@ import AccountPlanEntryValidator from "../../validators/planbudject/accountPlanE
 import { AccountPlanEntryDTO as AccountPlanEntryDTO } from "./utils/dtos.js";
 import { TransactionClientContract } from "@adonisjs/lucid/types/database";
 import { DateTime } from "luxon";
+import InternalRequest from "#models/request/internal_request";
 
 export default class AccountPlanEntryService {
 
@@ -218,6 +219,10 @@ export default class AccountPlanEntryService {
         return this.reinforceOrAnnulmentAccountPlanEntry(data, true, false);
     }
 
+    public async annullmentRequestEntry(data: { accountPlanNumber: string, value: number, operationDate: Date, requestNumber: string }) {
+        return this.annullmentRequestEntryPaid(data, true, false);
+    }
+
     public async annulAccountPlanEntry(data: { accountPlanNumber: string, value: number, operationDate: Date }) {
         return this.reinforceOrAnnulmentAccountPlanEntry(data, false, false);
     }
@@ -343,6 +348,133 @@ export default class AccountPlanEntryService {
             throw error;
         }
     }
+
+
+    private async annullmentRequestEntryPaid(data: { accountPlanNumber: string, value: number, operationDate: Date,  requestNumber: string }, isReinforce: boolean, isInitialAlocation: boolean) {
+
+        const currentDate = new Date();
+        // const operationDate = DateTime.local(data.operationDate.getFullYear(), data.operationDate.getMonth(), data.operationDate.getDate());
+        const parsedDate = new Date(data.operationDate); // Converte string para Date
+        if (isNaN(parsedDate.getTime())) {
+            throw new Error("Data inválida fornecida para operationDate: " + data.operationDate);
+        }
+        
+        const operationDate = DateTime.local(
+            parsedDate.getFullYear(),
+            parsedDate.getMonth() + 1, // Ajusta o mês
+            parsedDate.getDate()
+        );
+        console.log("Data Local", operationDate)
+        const trx = await db.transaction()  // Start transaction
+        try {
+
+            const currentPlanYear = await AccountPlanYear.findByOrFail('year', currentDate.getFullYear());
+
+            let entry = await this.findAccountPlanEntriesByYearAndNumber(currentDate.getFullYear(), data.accountPlanNumber);
+
+            if (!entry) {
+                throw Error("Plano de conta não encontrado no sistema com a conta " + data.accountPlanNumber);
+            }
+
+            let entryEntryType;
+            let entryEntryOperator;
+            let entryfinalAllocation;
+            let availableAllocation;
+
+            if (isReinforce) {
+                entryEntryType = isInitialAlocation ? EntryEntryType.INITIAL_ALLOCATION : EntryEntryType.REINFORCEMENT;
+                entryEntryOperator = OperatorType.CREDTI;
+                entryfinalAllocation = entry.finalAllocation + data.value;
+
+                const saldoExistente = Number(entry.finalAllocation) - Number(entry.finalAllocation * 0.05)
+                const saldoAposReforco = entryfinalAllocation - (entryfinalAllocation * 0.05)
+                const resultAddAvaliaveAllocation = saldoAposReforco - saldoExistente;
+
+                const percent = entryfinalAllocation * 0.05;
+                const availableAllocationNumber = Number(entry.availableAllocation);
+                availableAllocation = availableAllocationNumber + resultAddAvaliaveAllocation
+
+
+            } else {
+                // Anulação
+                entryEntryType = EntryEntryType.ANNULMENT;
+                entryEntryOperator = OperatorType.DEBIT;
+                entryfinalAllocation = entry.finalAllocation - data.value;
+
+                // Cálculo do saldo existente e novo saldo após a anulação
+                const saldoExistente = Number(entry.finalAllocation) - Number(entry.finalAllocation * 0.05);
+                const saldoAposAnulacao = entryfinalAllocation - (entryfinalAllocation * 0.05);
+                const resultReduceAvailableAllocation = saldoExistente - saldoAposAnulacao;
+
+                const availableAllocationNumber = Number(entry.availableAllocation);
+                availableAllocation = availableAllocationNumber - resultReduceAvailableAllocation;
+
+                console.log("entryfinalAllocation antes do cálculo:", entryfinalAllocation);
+                console.log("saldoExistente", saldoExistente);
+                console.log("saldoAposAnulacao:", saldoAposAnulacao);
+                console.log("resultAddAvaliaveAllocation", resultReduceAvailableAllocation);
+                console.log("availableAllocationNumber:", availableAllocationNumber);
+                console.log("availableAllocation:", availableAllocation);
+
+                if (entryfinalAllocation < 0) {
+                    throw Error(" Não pode efectuar a anulação, o valor da conta "
+                        + data.accountPlanNumber + " é insuficiente para anular " + data.value
+                        + ". O valor actual é " + entry.finalAllocation)
+                }
+            }
+
+            await new AccountPlanEntryEntry()
+                .fill(
+                    {
+                        type: entryEntryType,
+                        operator: entryEntryOperator,
+                        postingMonth: currentDate.getMonth(),
+                        operationDate: operationDate,
+                        allocation: data.value,
+                        lastFinalAllocation: entry.finalAllocation,
+                        entryId: entry.id,
+                        accountPlanYearId: currentPlanYear.id,
+                    }).useTransaction(trx).save();
+
+                    if (!data.requestNumber) {
+                        throw new Error('requestNumber não pode ser vazio');
+                    }
+
+                    const query = InternalRequest
+                    .query()
+                    .where('requestNumber', data.requestNumber) 
+                    .update({
+                        isAnnulled: true
+                    });
+
+                    // Obter a consulta gerada com knexQuery()
+            const sql = query.knexQuery.toString();
+            console.log("Consulta gerada para execução:", sql);
+
+            // Executar a consulta
+            const updatedEntries = await query;
+
+            console.log("Número de entradas atualizadas:", updatedEntries);
+
+            entry.finalAllocation = entryfinalAllocation
+            entry.availableAllocation = availableAllocation
+
+            console.log("dados", availableAllocation, entryfinalAllocation)
+            const updatedEntry = await entry.useTransaction(trx)
+                .save();
+
+            await this.updateParentsAccountPlanEntriesByChild(updatedEntry, data.value, isReinforce, trx);
+
+            await trx.commit();
+            return updatedEntry;
+        } catch (error) {
+            await trx.rollback();
+            throw error;
+        }
+    }
+
+
+    
 
     public async redistributeReinforeOrAnnulmentAccountPlanEntry(data: {
         originAccountPlanNumber: string,

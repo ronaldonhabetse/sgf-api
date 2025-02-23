@@ -41,5 +41,6 @@ export interface AccountPlanEntryDTO extends DomainDTO {
   accountPlanId: number | undefined,
   parentId: number | undefined,
   parentAccountPlanNumber: string,
-  operationDate: Date
+  operationDate: Date,
+  requestNumber: number
 }

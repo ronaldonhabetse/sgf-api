@@ -72,4 +72,5 @@ export default class AccountPlanEntryEntry extends CreatableAbstractModel {
     foreignKey: 'target_entrie_entry_id', // Chave estrangeira correta
   })
   public targetEntrieEntry: HasOne<typeof AccountPlanEntryEntry>;
+
 }

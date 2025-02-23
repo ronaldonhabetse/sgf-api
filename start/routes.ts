@@ -81,6 +81,7 @@ router.group(() => {
     router.post('redistribuitioReinforcimentAccountPlanEntry', [AccountPlanBudjectsController, 'redistribuitioReinforcimentAccountPlanEntry']);
     router.post('redistributeAnnulmentAccountPlanEntry', [AccountPlanBudjectsController, 'redistributeAnnulmentAccountPlanEntry']);
     router.post('associateFinancialAccountWithBujectAccounts', [AccountPlanBudjectsController, 'associateFinancialAccountWithBujectAccounts']);
+    router.post('annullmentRequest', [AccountPlanBudjectsController, 'annullmentRequest']);
 
   }).prefix("planbudject");
 

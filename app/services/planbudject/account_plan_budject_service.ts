@@ -48,6 +48,13 @@ import { EntryEntryType } from "#models/utility/Enums";
       return this.accountPlanEntryService.reinforceAccountPlanEntry(data);
     }
 
+    public async annullmentRequest(data: { accountPlanNumber: string, value: number, operationDate: Date,  requestNumber: string }) {
+      return this.accountPlanEntryService.annullmentRequestEntry(data);
+    }
+
+
+    
+
     public async annulAccountPlanEntry(data: { accountPlanNumber: string, value: number, operationDate: Date }) {
       return this.accountPlanEntryService.annulAccountPlanEntry(data);
     }

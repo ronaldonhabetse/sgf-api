@@ -121,4 +121,7 @@ export default class InternalRequest extends LifecycleAbstractModel {
   @column({ columnName: 'remaining_balance' })
   declare remainingBalance: number;
 
+  @column({columnName: 'isAnnulled'})
+  declare isAnnulled: boolean;
+
 }
