@@ -24,7 +24,7 @@ export default class AccountPlanEntryValidator {
         accountPlanNumber: vine.string(),
         value: vine.number(),
         operationDate: vine.date(),
-        requestNumber: vine.string()
+        requestNumber: vine.string().optional()
     });
 
     private static schemaFieldsRedistributeReinforcementOrAnnulment = vine.object({
@@ -59,7 +59,7 @@ export default class AccountPlanEntryValidator {
         createdAt: vine.date().optional(),
         updatedAt: vine.date().optional().nullable(),
         isAnnulled: vine.boolean().optional(),
-        requestNumber: vine.string()
+        requestNumber: vine.string().optional()
     })
 
     private static messagesLabels = {

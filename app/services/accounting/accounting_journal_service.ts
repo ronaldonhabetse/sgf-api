@@ -37,7 +37,9 @@ export default class AccountingJournalService {
     }
 
     public async bankInAccountingJournal(data: AccountingJounalEntryDTO) {
+
         await AccountingJournalEntryValidator.validateOnWithoutInternalRequest(data, AccountingJournal.BANK_IN);
+
         return await this.criateFinancialAccountingJournalWithoutinternalRequest(data, EntryEntryType.ENTRY_BANK_IN);
     }
 
@@ -53,7 +55,6 @@ export default class AccountingJournalService {
 
     public async criateFinancialAccountingJournalWithoutinternalRequest(data: AccountingJounalEntryDTO, entryEntryType: EntryEntryType) {
         const trx = await db.transaction();  // Start transaction
-
         try {
             const currentDate = new Date();
             const operationDate = DateTime.local(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
@@ -74,37 +75,39 @@ export default class AccountingJournalService {
                     // journalDocumentNumber: journalDocNumber,  // Adicionando o journalDocumentNumber
                 }).useTransaction(trx).save();
 
-            for (const itemData of data.items) {  // Use for...of to await async operations
-                try {
-                    const financial = await AccountPlan.findByOrFail('number', itemData.accountPlanNumber);
 
-                    await new AccountingJournalEntryItems()
-                        .fill({
-                            operator: itemData.operator,
-                            value: itemData.value,
-                            description: itemData.description,
-                            accountPlanNumber: itemData.accountPlanNumber,
-                            accountPlanId: financial.id,
-                            accountPlanYearId: currentPlanYear.id,
-                            entryId: createdAccountingEntry.id,
-                        }).useTransaction(trx).save();
 
-                    // Efectua os lançamentos e o cálculo dos saldos contabilísticos 
-                    // await this.accountPlanFinancialEntryService.entryCrediteOrDebit(
-                    //     {
-                    //         accountPlanNumber: itemData.accountPlanNumber,
-                    //         value: itemData.value,
-                    //         entryEntryType: entryEntryType,
-                    //         operator: itemData.operator,
-                    //         operationDate: currentDate
-                    //     },
-                    //     trx
-                    // );
-                } catch (error) {
-                    await trx.rollback();
-                    throw error;
+                for (const itemData of data.items) {  
+                    try {
+                        // Verifica se o plano de contas existe
+                        const financial = await AccountPlan.findBy('number', itemData.accountPlanNumber);
+                        
+                        if (!financial) {
+                            throw new Error(`Plano de Contas com número ${itemData.accountPlanNumber} não encontrado.`);
+                        }
+                
+                        // Criar entrada contábil
+                        await new AccountingJournalEntryItems()
+                            .fill({
+                                operator: itemData.operator,
+                                value: itemData.value,
+                                description: itemData.description,
+                                accountPlanNumber: itemData.accountPlanNumber,
+                                accountPlanId: financial.id,
+                                accountPlanYearId: currentPlanYear.id,
+                                entryId: createdAccountingEntry.id,
+                            })
+                            .useTransaction(trx)
+                            .save();
+                
+                    } catch (error) {
+                        console.log("Erro ao processar item:", itemData, error.message);
+                        await trx.rollback();
+                        throw error;
+                    }
                 }
-            }
+                
+            console.log("879187298")
 
             await trx.commit();
             return createdAccountingEntry;

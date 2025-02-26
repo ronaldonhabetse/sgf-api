@@ -54,7 +54,7 @@ export default class AccountingJournalEntryValidator {
         journalDocumentNumber: vine.string().optional(),  // Novo campo
         paid: vine.boolean(),  // Novo campo
         receivable: vine.boolean(),  // Novo campo
-        transactionType: vine.string(),
+        transactionType: vine.string().optional(),
         items: vine.array(
             AccountingJournalEntryValidator.schemaFieldsAccountingJournalItems
         ),
@@ -107,11 +107,12 @@ export default class AccountingJournalEntryValidator {
 
     private static async validadeExistsJournalAndDocument(data: { accountingDocumentNumber: string, accountingJournalNumber: string, journalDocumentNumber: string }) {
 
+
+        console.log("existDocument", data);
+
         const existDocument = await AccountingDocument.query()
             .where('documentNumber', data.accountingDocumentNumber)
             .first();
-
-        console.log("", data.accountingDocumentNumber)
 
         if (!existDocument) {
             throw new Error(this.messagesLabels['accountingDocumentNumber.database.notexists'].replace('value', data.accountingDocumentNumber));
@@ -127,6 +128,7 @@ export default class AccountingJournalEntryValidator {
         }
 
         const configuredDocument = existJournal.documents.filter(document => document.documentNumber == existDocument.documentNumber);
+        console.log("configuredDocument", configuredDocument)
 
         if (!configuredDocument) {
             throw new Error(this.messagesLabels['accountingDocumentNumber.notvalid'].replace('value', data.accountingDocumentNumber));
@@ -137,7 +139,7 @@ export default class AccountingJournalEntryValidator {
                 // A propriedade journalDocumentNumber não existe em data
                 console.log("O campo journalDocumentNumber não foi fornecido.");
             }
-            
+
     }
 
     public static async validateOnWithoutInternalRequest(data: AccountingJounalEntryDTO, type: string) {
@@ -159,6 +161,8 @@ export default class AccountingJournalEntryValidator {
                 AccountingJournalEntryValidator.validateItemsWithoutInternalRequest(data.items, AccountingJournal.OPENING);
                 break;
 
+                console.log("Chegou22");
+
             case AccountingJournal.BILLS_TO_RECEIVE:
                 if (AccountingJournal.BILLS_TO_RECEIVE !== data.accountingJournalNumber) {
                     throw new Error(
@@ -169,6 +173,9 @@ export default class AccountingJournalEntryValidator {
                 AccountingJournalEntryValidator.validateItemsWithoutInternalRequest(data.items, AccountingJournal.BILLS_TO_RECEIVE);
                 break;
 
+                console.log("Chegou223");
+
+
             case AccountingJournal.BANK_IN:
                 if (AccountingJournal.BANK_IN !== data.accountingJournalNumber) {
                     throw new Error(
@@ -178,6 +185,8 @@ export default class AccountingJournalEntryValidator {
                 }
                 AccountingJournalEntryValidator.validateItemsWithoutInternalRequest(data.items, AccountingJournal.BANK_IN);
                 break;  
+
+                console.log("Chegou224");
 
             default:
                 throw new Error(
