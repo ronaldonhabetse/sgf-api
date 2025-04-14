@@ -60,3 +60,8 @@ export interface AccountingJounalEntryDTO extends DomainDTO {
   payment_type: string,
   remaining_balance: number
 }
+
+export enum operatorType {
+  DEBIT = 'DEBIT',
+  CREDIT = 'CREDIT',
+}

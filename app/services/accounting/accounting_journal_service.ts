@@ -1,7 +1,7 @@
 import AccountPlan from "../../models/planbudject/account_plan.js";
 import AccountPlanYear from "../../models/planbudject/account_plan_year.js";
 import { DateTime } from "luxon";
-import { AccountingJounalEntryDTO } from "./utils/dtos.js";
+import { AccountingJounalEntryDTO, operatorType } from "./utils/dtos.js";
 import AccountingJournalEntryValidator from "../../validators/accounting/accountingJournalEntryValidator.js";
 import AccountingJournalEntry from "../../models/accounting/accounting_journal_entry.js";
 import AccountingJournal from "../../models/accounting/accounting_journal.js";
@@ -9,7 +9,7 @@ import AccountingDocument from "../../models/accounting/accounting_document.js";
 import AccountingJournalEntryItems from "../../models/accounting/accounting_journal_entry_items.js";
 import { inject } from "@adonisjs/core";
 import AccountPlanFinancialEntryService from "./account_plan_financial_entry_service.js";
-import { EntryEntryType } from "../../models/utility/Enums.js";
+import { EntryEntryType, OperatorType } from "../../models/utility/Enums.js";
 import db from "@adonisjs/lucid/services/db";
 import InternalRequest from "#models/request/internal_request";
 import AccountPlanEntry from "#models/planbudject/account_plan_entry";
@@ -77,36 +77,36 @@ export default class AccountingJournalService {
 
 
 
-                for (const itemData of data.items) {  
-                    try {
-                        // Verifica se o plano de contas existe
-                        const financial = await AccountPlan.findBy('number', itemData.accountPlanNumber);
-                        
-                        if (!financial) {
-                            throw new Error(`Plano de Contas com número ${itemData.accountPlanNumber} não encontrado.`);
-                        }
-                
-                        // Criar entrada contábil
-                        await new AccountingJournalEntryItems()
-                            .fill({
-                                operator: itemData.operator,
-                                value: itemData.value,
-                                description: itemData.description,
-                                accountPlanNumber: itemData.accountPlanNumber,
-                                accountPlanId: financial.id,
-                                accountPlanYearId: currentPlanYear.id,
-                                entryId: createdAccountingEntry.id,
-                            })
-                            .useTransaction(trx)
-                            .save();
-                
-                    } catch (error) {
-                        console.log("Erro ao processar item:", itemData, error.message);
-                        await trx.rollback();
-                        throw error;
+            for (const itemData of data.items) {
+                try {
+                    // Verifica se o plano de contas existe
+                    const financial = await AccountPlan.findBy('number', itemData.accountPlanNumber);
+
+                    if (!financial) {
+                        throw new Error(`Plano de Contas com número ${itemData.accountPlanNumber} não encontrado.`);
                     }
+
+                    // Criar entrada contábil
+                    await new AccountingJournalEntryItems()
+                        .fill({
+                            operator: itemData.operator,
+                            value: itemData.value,
+                            description: itemData.description,
+                            accountPlanNumber: itemData.accountPlanNumber,
+                            accountPlanId: financial.id,
+                            accountPlanYearId: currentPlanYear.id,
+                            entryId: createdAccountingEntry.id,
+                        })
+                        .useTransaction(trx)
+                        .save();
+
+                } catch (error) {
+                    console.log("Erro ao processar item:", itemData, error.message);
+                    await trx.rollback();
+                    throw error;
                 }
-                
+            }
+
             console.log("879187298")
 
             await trx.commit();
@@ -141,14 +141,14 @@ export default class AccountingJournalService {
                 const newBalance = currentBalance - budgetItem.debit;
 
                 await InternalRequest.query()
-                .useTransaction(trx)
-                .where('request_number', data.internalRequestNumber)
-                .update({
-                    paidReq: true,
-                    is_parcial: data.is_parcial,
-                    payment_type: data.payment_type,
-                    remaining_balance: data.remaining_balance
-                });
+                    .useTransaction(trx)
+                    .where('request_number', data.internalRequestNumber)
+                    .update({
+                        paidReq: true,
+                        is_parcial: data.is_parcial,
+                        payment_type: data.payment_type,
+                        remaining_balance: data.remaining_balance
+                    });
 
                 await AccountPlanEntry.query()
                     .useTransaction(trx)
@@ -174,7 +174,7 @@ export default class AccountingJournalService {
                     .update({ available_allocation: newBalance });
             }
 
-            
+
 
             await trx.commit(); // Confirma a transação
         } catch (error) {
@@ -293,11 +293,11 @@ export default class AccountingJournalService {
                 .save();
 
             if (data.receivable === true) {
-                    await trx
-                        .query()
-                        .from('internal_requests')
-                        .where('request_number', internalRequest)
-                        .update({ is_receivable: true });
+                await trx
+                    .query()
+                    .from('internal_requests')
+                    .where('request_number', internalRequest)
+                    .update({ is_receivable: true });
             }
             // Verifica se `data.paid` é igual a 1 antes de atualizar o `internalRequest`
             if (data.paid === true) {
@@ -307,13 +307,31 @@ export default class AccountingJournalService {
                     .where('request_number', internalRequest)
                     .update({ paid: false });
 
-                    console.log("Pagou aqui")
+                console.log("Pagou aqui")
             }
 
             // Processando os itens associados
             for (const itemData of data.items) {
                 try {
+                    // Buscando o plano de contas e o saldo final
                     const accountPlan = await AccountPlan.findByOrFail('number', itemData.accountPlanNumber);
+
+                    const accountPlanEntry = await AccountPlanEntry.findByOrFail('account_plan_id', accountPlan.id);
+
+                    // Pegando o saldo final anterior
+                    const lastBalance = accountPlanEntry.finalAllocation || 0; // Se o saldo não existir, assume 0
+
+                    // Calculando o novo saldo baseado no operador (+ ou -)
+                    let balance = 0;
+                    if (itemData.operator === OperatorType.CREDTI) {
+                        balance = lastBalance + Number(itemData.value); // Adicionando o valor
+                    } else if (itemData.operator === OperatorType.DEBIT) {
+                        balance = lastBalance - Number(itemData.value); // Subtraindo o valor
+                    } else {
+                        throw new Error('Operador inválido. Esperado "+" ou "-".');
+                    }
+
+                    // Criando o lançamento contábil do item
                     await new AccountingJournalEntryItems()
                         .fill({
                             operator: itemData.operator,
@@ -323,9 +341,20 @@ export default class AccountingJournalService {
                             accountPlanId: accountPlan.id,
                             accountPlanYearId: currentPlanYear.id,
                             entryId: createdAccountingEntry.id,
+                            balance: balance, // Atribuindo o saldo calculado para o item
+                            documentDescription:document.description
                         })
                         .useTransaction(trx)
                         .save();
+
+                    console.log("salvou.....")
+
+                    // Atualizando o saldo final na tabela do plano de contas (se necessário)
+                    await db
+                        .from('account_plan_entries')
+                        .useTransaction(trx)
+                        .where('account_plan_number', itemData.accountPlanNumber)
+                        .update({ final_allocation: balance });
 
                     // Efectua os lançamentos e o cálculo dos saldos contabilísticos
                     await this.accountPlanFinancialEntryService.entryCrediteOrDebit(

@@ -94,7 +94,7 @@ router.group(() => {
     router.post('createInternalRequest', [InternalRequestController, 'createInternalRequest']);
     router.post('updateInternalRequestStatus', [InternalRequestController, 'updateInternalRequestStatus']);
 
-  }).prefix("internalrequest");
+  }).prefix("internalrequest"); 
 
 
   router.group(() => {

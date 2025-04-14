@@ -22,6 +22,9 @@ export default class AccountingJournalEntryItems extends LifecycleAbstractModel 
   @column()
   declare description: string
 
+  @column({ columnName: 'documentDescription' })
+  declare documentDescription: string
+
   @column()
   declare accountPlanNumber: string
 
@@ -39,6 +42,9 @@ export default class AccountingJournalEntryItems extends LifecycleAbstractModel 
 
   @column()
   declare entryId: number
+
+  @column()
+  declare balance: number
 
   @belongsTo(() => AccountingJournalEntry, {
     foreignKey: 'entryId', // Mapeia o campo correto
