@@ -13,6 +13,7 @@ import { EntryEntryType, OperatorType } from "../../models/utility/Enums.js";
 import db from "@adonisjs/lucid/services/db";
 import InternalRequest from "#models/request/internal_request";
 import AccountPlanEntry from "#models/planbudject/account_plan_entry";
+import { FetchFilters } from "./utils/FetchFilters.js";
 
 @inject()
 export default class AccountingJournalService {
@@ -342,7 +343,7 @@ export default class AccountingJournalService {
                             accountPlanYearId: currentPlanYear.id,
                             entryId: createdAccountingEntry.id,
                             balance: balance, // Atribuindo o saldo calculado para o item
-                            documentDescription:document.description
+                            documentDescription: document.description
                         })
                         .useTransaction(trx)
                         .save();
@@ -403,6 +404,50 @@ export default class AccountingJournalService {
             })
             .exec();
     }
+
+
+    public async fetchAllAccountingJournalEntryItemsByFilters(filters: FetchFilters) {
+        console.log("filtros", filters);
+    
+        const query = AccountingJournalEntryItems.query()
+            .preload('accountPlanYear')
+            .preload('accountPlan')
+            .preload('entry', (entryQuery) => {
+                entryQuery
+                    .preload('accountingJournal')
+                    .preload('accountingDocument')
+                    .preload('internalRequest');
+            });
+    
+        if (filters.accountPlanId) {
+            query.where('account_plan_id', filters.accountPlanId);
+        }
+    
+        if (filters.startDate) {
+            // Garante que a data de início tenha o componente de hora (00:00:00)
+            const startDateWithTime = new Date(filters.startDate);
+            startDateWithTime.setHours(0, 0, 0, 0); // Ajusta para meia-noite
+            query.whereHas('entry', (entryQuery) => {
+                entryQuery.where('operation_date', '>=', startDateWithTime.toISOString());
+            });
+        }
+    
+        if (filters.endDate) {
+            // Garante que a data de fim tenha o componente de hora (23:59:59)
+            const endDateWithTime = new Date(filters.endDate);
+            endDateWithTime.setHours(23, 59, 59, 999); // Ajusta para 23:59:59
+            query.whereHas('entry', (entryQuery) => {
+                entryQuery.where('operation_date', '<=', endDateWithTime.toISOString());
+            });
+        }
+    
+        // Imprime a SQL gerada
+        console.log("Consulta SQL gerada:", query.toSQL());
+    
+        return await query.exec();
+    }
+    
+
 
     public async fetchAllAccountingJournal() {
         return await AccountingJournal.query()

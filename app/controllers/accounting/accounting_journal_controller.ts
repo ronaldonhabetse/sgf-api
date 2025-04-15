@@ -99,7 +99,22 @@ export default class AccountingJournalController {
   async fetchAllAccountingJournalEntryItems({ response }: HttpContext) {
     const items = await this.accountingJournalService.fetchAllAccountingJournalEntryItems();
     return response.ok(items); // Retorna os itens carregados com as relações
-}
+  }
+
+  async fetchAllAccountingJournalEntryItemsByFilters({ request, response }: HttpContext) {
+
+    const { startDate, endDate, accountPlanId } = request.qs();
+
+
+    const items = await this.accountingJournalService.fetchAllAccountingJournalEntryItemsByFilters({
+      startDate,
+      endDate,
+      accountPlanId
+    });
+
+    return response.ok(items);
+  }
+
 
 
   async findAllAccountingJournalEntry({ response }: HttpContext) {

@@ -122,6 +122,7 @@ router.group(() => {
 
     router.get('fetchAllAccountingJournalEntryItems', [AccountingJournalController, 'fetchAllAccountingJournalEntryItems']);
 
+    router.get('fetchAllAccountingJournalEntryItemsByFilters', [AccountingJournalController, 'fetchAllAccountingJournalEntryItemsByFilters']);
     
     router.post('openAccountingJournal', [AccountingJournalController, 'openAccountingJournal']);
     router.post('bankInAccountingJournal', [AccountingJournalController, 'bankInAccountingJournal']);
