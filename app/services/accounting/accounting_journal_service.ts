@@ -408,7 +408,7 @@ export default class AccountingJournalService {
 
     public async fetchAllAccountingJournalEntryItemsByFilters(filters: FetchFilters) {
         console.log("filtros", filters);
-    
+
         const query = AccountingJournalEntryItems.query()
             .preload('accountPlanYear')
             .preload('accountPlan')
@@ -418,11 +418,11 @@ export default class AccountingJournalService {
                     .preload('accountingDocument')
                     .preload('internalRequest');
             });
-    
+
         if (filters.accountPlanId) {
             query.where('account_plan_id', filters.accountPlanId);
         }
-    
+
         if (filters.startDate) {
             // Garante que a data de início tenha o componente de hora (00:00:00)
             const startDateWithTime = new Date(filters.startDate);
@@ -431,7 +431,7 @@ export default class AccountingJournalService {
                 entryQuery.where('operation_date', '>=', startDateWithTime.toISOString());
             });
         }
-    
+
         if (filters.endDate) {
             // Garante que a data de fim tenha o componente de hora (23:59:59)
             const endDateWithTime = new Date(filters.endDate);
@@ -440,13 +440,120 @@ export default class AccountingJournalService {
                 entryQuery.where('operation_date', '<=', endDateWithTime.toISOString());
             });
         }
-    
+
         // Imprime a SQL gerada
         console.log("Consulta SQL gerada:", query.toSQL());
-    
+
         return await query.exec();
     }
+
+
+
+
+
+    public async fetchAllBalanceteByFiltersSearch(filters: FetchFilters) {
+        const { startDate, endDate, accountPlanId } = filters;
+        console.log("🕵️‍♂️ Filtros recebidos:", filters);
     
+        const now = DateTime.now();  // Data atual para cálculo dos meses
+        const start = startDate ? DateTime.fromISO(startDate) : now.startOf('month'); // Período atual ou mês atual
+        const end = endDate ? DateTime.fromISO(endDate) : now.endOf('month'); // Fim do período, ou mês atual
+    
+        // Calculando o mês anterior (para PA)
+        const previousMonth = start.minus({ months: 1 }).startOf('month'); // Mês anterior ao período
+        const previousMonthEnd = previousMonth.endOf('month');  // Fim do mês anterior
+    
+        const query = AccountingJournalEntryItems.query()
+            .preload('accountPlan')
+            .preload('entry');
+    
+        if (accountPlanId) {
+            query.where('account_plan_id', accountPlanId);
+        }
+    
+        const items = await query.exec();
+
+        console.log("items", items)
+    
+        const groupedByAccount = new Map<number, any>();
+    
+        items.forEach((item) => {
+            const account = item.accountPlan;
+            const date = item.entry?.operationDate;
+        
+            if (!groupedByAccount.has(account.id)) {
+                groupedByAccount.set(account.id, {
+                    conta: account.number,
+                    descricao: account.description,
+                    debitoPA: 0,
+                    creditoPA: 0,
+                    saldoPA: 0,
+                    debitoP: 0,
+                    creditoP: 0,
+                    saldoP: 0,
+                    debitoAC: 0,
+                    creditoAC: 0,
+                    saldoAC: 0,
+                    saldoAtual: 0, // usado apenas internamente
+                    items: [],
+                });
+            }
+        
+            const acc = groupedByAccount.get(account.id);
+            const valor = Number(item.value);
+            const isDebit = item.operator === OperatorType.DEBIT;
+        
+            // Regras de período
+            const isBeforePeriod = date >= previousMonth && date <= previousMonthEnd;
+            const isInPeriod = date >= start && date <= end;
+            const isAccumulated = date <= end;
+        
+            // Atualiza os totais
+            if (isBeforePeriod) {
+                isDebit ? acc.debitoPA += valor : acc.creditoPA += valor;
+            }
+        
+            if (isInPeriod) {
+                isDebit ? acc.debitoP += valor : acc.creditoP += valor;
+            }
+        
+            if (isAccumulated) {
+                isDebit ? acc.debitoAC += valor : acc.creditoAC += valor;
+            }
+        
+            // Atualiza saldo atual da conta
+            acc.saldoAtual += isDebit ? valor : -valor;
+        
+            // Adiciona o item com saldo atual
+            acc.items.push({
+                id: item.id,
+                date,
+                value: valor,
+                operator: item.operator,
+                description: item.description,
+                documentDescription: item.documentDescription,
+                saldo: acc.saldoAtual,
+            });
+        });
+        
+    
+        // Calculando os saldos finais
+        for (const acc of groupedByAccount.values()) {
+            acc.saldoPA = acc.debitoPA - acc.creditoPA;
+            acc.saldoP = acc.debitoP - acc.creditoP;
+            acc.saldoAC = acc.debitoAC - acc.creditoAC;
+        }
+    
+        const resultado = Array.from(groupedByAccount.values());
+    
+        console.log('📊 Resultado final do balancete agrupado:', resultado);
+    
+        return resultado;
+    }
+    
+    
+
+
 
     public async fetchAllAccountingJournal() {
         return await AccountingJournal.query()

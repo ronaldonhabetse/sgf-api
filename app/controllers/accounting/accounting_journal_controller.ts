@@ -116,6 +116,22 @@ export default class AccountingJournalController {
   }
 
 
+  async fetchAllBalanceteByFilters({ request, response }: HttpContext) {
+
+    const { startDate, endDate, accountPlanId } = request.qs();
+    console.log("Meus Filtros",startDate, endDate, accountPlanId );
+
+    const items = await this.accountingJournalService.fetchAllBalanceteByFiltersSearch({
+      startDate,
+      endDate,
+      accountPlanId
+    });
+
+    return response.ok(items);
+  }
+  
+
+
 
   async findAllAccountingJournalEntry({ response }: HttpContext) {
     return response.ok(await this.accountingJournalService.fetchAllAccountingJournalEntry());
