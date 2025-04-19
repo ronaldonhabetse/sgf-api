@@ -448,7 +448,6 @@ export default class AccountingJournalService {
     }
     
 
-
     public async fetchAllAccountingJournal() {
         return await AccountingJournal.query()
             .preload('documents')
