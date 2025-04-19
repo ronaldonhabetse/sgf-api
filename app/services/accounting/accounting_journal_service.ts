@@ -551,9 +551,87 @@ export default class AccountingJournalService {
         return resultado;
     }
     
+
     
-
-
+    public async fetchGeneralFolioAccountByFilterData(filters: FetchFilters) {
+        const { startDate, endDate } = filters;
+        console.log("🕵️‍♂️ Filtros recebidos:", filters);
+    
+        const now = DateTime.now();
+        const start = startDate ? DateTime.fromISO(startDate) : now.startOf('month');
+        const end = endDate ? DateTime.fromISO(endDate) : now.endOf('month');
+    
+        const previousMonth = start.minus({ months: 1 }).startOf('month');
+        const previousMonthEnd = previousMonth.endOf('month');
+    
+        const items = await AccountingJournalEntryItems.query()
+            .preload('accountPlan', (query) => {
+                query.where('final_allocation_type', 'General_Folio');
+            })
+            .preload('entry', (entryQuery) => {
+                entryQuery.select(['id', 'operation_date']);
+            })
+            .exec();
+    
+        const recebimentos: any[] = [];
+        const pagamentos: any[] = [];
+    
+        let saldoAnterior = 0;
+        let recebTotal = 0;
+        let pagTotal = 0;
+    
+        for (const item of items) {
+            // Verifica se o accountPlan foi carregado e se ainda se encaixa no filtro (por segurança)
+            if (!item.accountPlan || item.accountPlan.final_allocation_type !== 'General_Folio') continue;
+    
+            const operationDateISO = item.entry?.operationDate;
+            if (!operationDateISO) continue;
+    
+            const date = DateTime.fromISO(operationDateISO.toString());
+            const valor = Number(item.value);
+            const isDebit = item.operator === OperatorType.DEBIT;
+    
+            const isBeforePeriod = date >= previousMonth && date <= previousMonthEnd;
+            const isInPeriod = date >= start && date <= end;
+    
+            if (isBeforePeriod) {
+                saldoAnterior += isDebit ? valor : -valor;
+            }
+    
+            if (isInPeriod) {
+                const movimento = {
+                    operationDate: date.toFormat('yyyy-MM-dd'),
+                    value: valor,
+                    description: item.description,
+                    documentDescription: item.documentDescription,
+                    accountPlan: item.accountPlan,
+                    operator: item.operator
+                };
+    
+                if (isDebit) {
+                    recebTotal += valor;
+                    recebimentos.push(movimento);
+                } else {
+                    pagTotal += valor;
+                    pagamentos.push(movimento);
+                }
+            }
+        }
+    
+        const saldoFinal = saldoAnterior + recebTotal - pagTotal;
+    
+        return {
+            recebimentos,
+            pagamentos,
+            saldoAnterior,
+            saldoFinal,
+            totalRecebimentos: recebTotal,
+            totalPagamentos: pagTotal
+        };
+    }
+    
+    
+    
 
     public async fetchAllAccountingJournal() {
         return await AccountingJournal.query()
