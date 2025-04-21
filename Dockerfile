@@ -1,5 +1,21 @@
 #----------------------------------
-# Stage: Production
+# Etapa 1: build (com dependências completas)
+#----------------------------------
+FROM node:18.20.4-alpine as build
+
+WORKDIR /app
+
+# Copia arquivos de dependência e instala tudo (incluindo devDependencies)
+COPY package*.json ./
+RUN npm install
+
+# Copia o restante do código e gera a build
+COPY . .
+RUN npm run build
+
+
+#----------------------------------
+# Etapa 2: produção (apenas dependências necessárias)
 #----------------------------------
 FROM node:18.20.4-alpine
 
@@ -9,23 +25,14 @@ ENV DB_HOST=mysql-container-1 DB_PORT=3306 DB_USER=sgfuser DB_PASSWORD=sgf123 DB
 
 WORKDIR /usr/src/app
 
-# Copia os arquivos de dependências
-COPY package*.json ./
-
-# Instala dependências de produção
-RUN npm install --production
-
-# Copia o restante do código
-COPY . .
-
-# Compila o projeto TypeScript para build/
-RUN node ace build
+# Copia somente o que precisa da etapa de build
+COPY --from=build /app/package*.json ./
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/build ./build
 
 # Instala ferramentas úteis
-RUN apk --no-cache add curl jq  
+RUN apk --no-cache add curl jq
 
-# Expõe a porta do Adonis
 EXPOSE 3333
 
-# Inicia a aplicação
 CMD ["node", "build/server.js"]
