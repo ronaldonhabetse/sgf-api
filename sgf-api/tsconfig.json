@@ -1,7 +1,15 @@
 {
   "extends": "@adonisjs/tsconfig/tsconfig.app.json",
   "compilerOptions": {
-    "rootDir": "./",
-    "outDir": "./build"
-  }
+    "rootDir": "./src",         // Supondo que seus arquivos TypeScript estejam em 'src'
+    "outDir": "./build",        // Diretório onde os arquivos compilados serão gerados
+    "moduleResolution": "node",
+    "target": "ES6",            // Ou o target que você preferir
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/**/*.ts"               // Inclui todos os arquivos .ts dentro do diretório 'src'
+  ]
 }

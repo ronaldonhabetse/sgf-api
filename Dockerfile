@@ -35,4 +35,4 @@ RUN apk --no-cache add curl jq
 
 EXPOSE 3333
 
-CMD ["node", "build/server.js"]
+CMD ["node", "build/sgf-api/bin/server.js"]
