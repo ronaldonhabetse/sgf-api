@@ -120,8 +120,8 @@ curl --location 'http://localhost:3333/sgf-api/planbudject/annulAccountPlanBudje
  curl --location 'http://localhost:3333/sgf-api/planbudject/redistribuitioReinforcimentAccountPlanBudjectEntry' \
 --header 'Content-Type: application/json' \
 --data ' {
-        "originAccountPlanNumber": "1.0.0.0.00",
-        "targetAccountPlanNumber": "1.0.0.0.00",
+        "originAccountPlanNumber": "1.2.2.0.003",
+        "targetAccountPlanNumber": "1.6.1.0.002",
         "value": 100
     }'
 

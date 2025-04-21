@@ -17,11 +17,10 @@ export default class AccountPlansController {
     const data = await request.validateUsing(AccountPlanValidator.validateFields())
 
     try {
-      const newLocal = await this.accountPlanService.create(data);
-      return response.created(newLocal);
+      return response.created(await this.accountPlanService.create(data));
     } catch (error) {
       return response.status(500).json({
-        message: 'Ocorrer erro ao criar o plano de contas',
+        message: 'Ocorreu um erro ao criar o plano de contas',
         error: error.message,
       });
     }
@@ -43,18 +42,17 @@ export default class AccountPlansController {
   async removeAccountPlan({ request, response }: HttpContext) {
     const data = await request.validateUsing(AccountPlanValidator.validateFields())
     try {
-        const result = await this.accountPlanService.remove(data);
+      const result = await this.accountPlanService.remove(data);
 
-        // Retorna o resultado sem chamar o método serialize()
-        return response.status(result.status).json(result);
+      // Retorna o resultado sem chamar o método serialize()
+      return response.status(200).json(result);
     } catch (error) {
-        return response.status(500).json({
-            message: 'Ocorreu erro ao remover o plano de contas',
-            error: error.message,
-        });
+      return response.status(500).json({
+        message: 'Ocorreu erro ao remover o plano de contas',
+        error: error.message,
+      });
     }
-}
-
+  }
 
   async findAllAccountPlan({ response }: HttpContext) {
     return response.ok(await this.accountPlanService.findAll());

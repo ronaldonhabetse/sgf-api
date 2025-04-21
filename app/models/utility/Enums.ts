@@ -46,24 +46,38 @@ export enum AccoutPlanClassType {
 }
 
 /*
-*Tipo de entrada no plano de contas: Inicial, reforco, anulacao, redistribuicao
+*Tipo de lancamento no plano de contas: Inicial, reforco, anulacao, redistribuicao
 */
 export enum EntryEntryType {
   INITIAL = 'initial',
   INITIAL_ALLOCATION = 'initial_allocation',
   REINFORCEMENT = 'reinforcement',
   ANNULMENT = 'annulment',
-  REDISTRIBUTION_REINFORCEMENT = 'redistribuition_reinforcement',
-  REDISTRIBUTION_ANNULMENT = 'redistribuition_annulment',
+  REDISTRIBUITION_REINFORCEMENT = 'redistribuition_reinforcement',
+  REDISTRIBUITION_ANNULMENT = 'redistribuition_annulment',
+
+  //Operacoes de lancamentos
+  ENTRY_OPENING = 'entry_opening',
+  ENTRY_BILLS_TO_RECEIVER = 'entry_bills_to_receiver',
+  ENTRY_BILLS_TO_PAY = 'entry_bills_to_pay',
+  ENTRY_BANK_IN = 'entry_bank_in',
+  ENTRY_BANK_OUT = 'entry_bank_out',
+  ENTRY_REGULARIZATION = 'entry_regularization',
+  REDISTRIBUTION_REINFORCEMENT = "REDISTRIBUTION_REINFORCEMENT",
 }
 
-/*
-*Tipo de objecto contabilistico
-*/
-export enum ObjectType {
-  BANK = '01', //Codico do banco + SEPARADOR + NIB + ANGENCIA+ENDERECO
-  BOX = '02',  //NUIT EMPRESA + SEPARADOR + SEQUENCIA_CAIXA
-  CLIENT = '02',
-  PROVIDER = '02',
-  OTHERS = '02',
+export enum FinancialEntryEntryType {
+  //Operacoes de lancamentos
+  ENTRY_OPENING = 'opening',
+  ENTRY_RECEIVER = 'receiver',
+  ENTRY_ENTRIES = 'in',
+  ENTRY_OUT = 'out',
+  ENTRY_REGULARIZATION = 'regularization',
+}
+
+//Representa a quantificao de um item, ou seja grandeza para medir a quantidade
+export enum QuantificationType {
+  KG = 'KG',
+  L = 'L',
+  BOX = 'CAIXA',
 }

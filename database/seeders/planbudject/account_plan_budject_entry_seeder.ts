@@ -1,15 +1,15 @@
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
-import AccountPlanBudjectEntry from '../../../app/models/planbudject/account_plan_budject_entry.js'
+import AccountPlanEntry from '../../../app/models/planbudject/account_plan_balance.js'
 import AccountPlan from '../../../app/models/planbudject/account_plan.js'
-import AccountPlanBudject from '../../../app/models/planbudject/account_plan_budject.js'
+import AccountPlanYear from '../../../app/models/planbudject/account_plan_year.js'
 
 export default class extends BaseSeeder {
   async run() {
 
     const currentYear = new Date().getFullYear()
-    const currentAccountPlanBudject = await AccountPlanBudject.findBy('year', currentYear);
+    const currentAccountPlanBudject = await AccountPlanYear.findBy('year', currentYear);
   
-    await AccountPlanBudjectEntry.createMany([
+    await AccountPlanEntry.createMany([
       {
         startPostingMonth: 1,
         endPostingMonth: 12,
