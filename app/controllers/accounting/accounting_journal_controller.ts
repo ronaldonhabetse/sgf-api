@@ -15,7 +15,9 @@ export default class AccountingJournalController {
 
   async openAccountingJournal({ request, response }: HttpContext) {
     const data = await request.validateUsing(AccountingJournalEntryValidator.validateFields())
-
+    if (!data.journalDocumentNumber) {
+      data.journalDocumentNumber = '';  // ou outro valor padrão
+    }
     try {
       return response.created(await this.accountingJournalService.openAccountingJournal(data));
     } catch (error) {

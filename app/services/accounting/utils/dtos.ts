@@ -43,13 +43,13 @@ export interface AccountingJounalItemOrcamentoDTO extends DomainDTO {
 export interface AccountingJounalEntryDTO extends DomainDTO {
   operationDate: Date,
   accountPlanYearId: number | undefined,
-  accountingJournalNumber: string,
+  accountingJournalNumber: string | undefined,  // Alterar para permitir undefined
   accountingJournalId: number | undefined,
-  accountingDocumentNumber: string,
+  accountingDocumentNumber: string | undefined,
   accountingDocumentId: number | undefined,
   internalRequestNumber: string | undefined,
   internalRequestId: number | undefined,
-  journalDocumentNumber: string,
+  journalDocumentNumber: string | undefined,
   paid: boolean,
   conformance: 'PENDING_CONFORMANCE' | 'WITHOUT_CONFORMANCE' | 'CONFORMED',
   items: AccountingJounalItemDTO[],
@@ -58,7 +58,7 @@ export interface AccountingJounalEntryDTO extends DomainDTO {
   tableDataBudject: AccountingJounalItemOrcamentoDTO[],
   is_parcial: boolean,
   payment_type: string,
-  remaining_balance: number
+  remaining_balance: number,
 }
 
 export enum operatorType {

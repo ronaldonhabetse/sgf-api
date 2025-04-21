@@ -51,7 +51,7 @@ export default class AccountingJournalEntryValidator {
         accountingDocumentId: vine.number().optional(),
         internalRequestNumber: vine.string().optional(),
         internalRequestId: vine.number().optional(),
-        journalDocumentNumber: vine.string().optional(),  // Novo campo
+        journalDocumentNumber: vine.string().optional(),  // Permite que seja opcional
         paid: vine.boolean(),  // Novo campo
         receivable: vine.boolean(),  // Novo campo
         transactionType: vine.string().optional(),
@@ -67,7 +67,8 @@ export default class AccountingJournalEntryValidator {
         updatedAt: vine.date().optional().nullable(),
         is_parcial: vine.boolean().optional(),
         payment_type: vine.string().optional(),
-        remaining_balance: vine.number().optional()
+        remaining_balance: vine.number().optional(),
+        conformance: vine.enum(['PENDING_CONFORMANCE', 'WITHOUT_CONFORMANCE', 'CONFORMED'])  // Verificação explícita para os valores válidos
 
 
 
