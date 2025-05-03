@@ -17,6 +17,7 @@ import AccountingJournalController from '../app/controllers/accounting/accountin
 import DiariesController from '#controllers/diaries/diariesController';
 import DocumentController from '#controllers/document/documentController';
 import UsersController from '#controllers/security/users_controller';
+import MenuController from '#controllers/security/menu_controller';
 
 
 router.group(() => {
@@ -143,10 +144,15 @@ router.group(() => {
   })
 
   router.group(() => {
-    router.post('createUser', [UsersController, 'createUser']); // Rota para criar utilizador
-    router.post('updateUser', [UsersController, 'updateUser']); // Rota para atualizar utilizador
-    router.get('getUser', [UsersController, 'getUser']); // Rota para pegar dados do usuário logado
-
+    router.post('createUser', [UsersController, 'createUser']);
+    router.post('updateUser', [UsersController, 'updateUser']);
+    router.get('getUser', [UsersController, 'getUser']);
   }).prefix("user");
+
+
+  // Rota para buscar menus filtrados por permissões do usuário
+  router.get('menus', [MenuController, 'getMenus']);
+  // Rota para buscar todos os menus (sem filtragem)
+  router.get('menus/all', [MenuController, 'getAllMenus']);
 
 }).prefix("sgf-api");

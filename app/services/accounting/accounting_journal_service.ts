@@ -385,12 +385,15 @@ export default class AccountingJournalService {
 
     public async fetchAllAccountingJournalEntry() {
         return await AccountingJournalEntry.query()
-            .preload('internalRequest')
-            .preload('accountPlanYear')
-            .preload('accountingDocument')
-            .preload('accountingJournal')
-            .preload('entriesEntry')
-    }
+          .preload('internalRequest')
+          .preload('accountPlanYear')
+          .preload('accountingDocument')
+          .preload('accountingJournal')
+          .preload('entriesEntry', (entryQuery) => {
+            entryQuery.preload('entry') // <-- Isso se entryId for uma relação
+          });
+      }
+      
 
     public async fetchAllAccountingJournalEntryItems() {
         return await AccountingJournalEntryItems.query()

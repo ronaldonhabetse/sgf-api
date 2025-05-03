@@ -56,26 +56,33 @@ export default class UserService {
         }
       }
     // Função para criar um usuário
-    public async createUser(userDTO: UserDTO) {
+    public async createUser(userDTO: UserDTO, permissions: number[]) {
+      try {
+        // Criação do usuário (sem campo "permissions")
         const newUser = await User.create({
-            fullName: userDTO.name,
-            email: userDTO.email,
-            password: userDTO.password,
-            organicId: userDTO.organicId,
-            accessProfileId: userDTO.profile,
-            state: userDTO.state, // Agora deve corresponder ao enum LifeclicleState
-            isActive: userDTO.isActive,
-            isTech: userDTO.isTech,
-            isAdmin: userDTO.isAdmin,
-            isSuperAdmin: userDTO.isSuperAdmin,
-            permissions: JSON.stringify(userDTO.permissions),
+          fullName: userDTO.name,
+          email: userDTO.email,
+          password: userDTO.password,
+          organicId: userDTO.organicId,
+          accessProfileId: userDTO.profile,
+          state: userDTO.state,
+          isActive: userDTO.isActive,
+          isTech: userDTO.isTech,
+          isAdmin: userDTO.isAdmin,
+          isSuperAdmin: userDTO.isSuperAdmin,
         });
-
+    
+        // Associando os menus (permissões) na tabela pivot
+        if (permissions && permissions.length > 0) {
+          await newUser.related('menus').attach(permissions);
+        }
+    
         console.log("User created:", newUser);
-        return newUser.serialize(); // Retorna o usuário criado serializado
+        return newUser.serialize();
+      } catch (error) {
+        console.error("Erro ao criar o usuário:", error);
+        throw new Error('Erro ao criar o usuário.');
+      }
     }
-
-    //  public async findBy(userFilter: UserFilters) {
-    // return await User.findBy(userFilter);
-    //}
-}
+    
+  }    

@@ -51,22 +51,40 @@ export default class UsersController {
    * Criação de um novo usuário
    */
   async createUser({ request, response }: HttpContext) {
-    const data = await request.validateUsing(UserValidator.validateFields()); // Validando os dados do usuário com o validador
-
-    console.log("dadis obtidos", data)
     try {
-      const user = await this.userService.createUser(data); // Chama o serviço para criar o usuário
+      const data = await request.validateUsing(UserValidator.validateFields());
+      const permissions = request.body().permissions || [];
+  
+      console.log("Dados validados:", data);
+      console.log("Permissões recebidas:", permissions);
+  
+      const user = await this.userService.createUser(data, permissions);
+  
       return response.created({
         message: 'Usuário criado com sucesso.',
         data: user,
       });
     } catch (error) {
+      console.error("Erro ao criar o usuário:", error);
+  
+      // Verifica se o erro é de duplicação de email
+      if (error.code === 'ER_DUP_ENTRY') {
+        return response.status(400).json({
+          message: 'Este e-mail já está em uso.',
+          error: error.message,
+        });
+      }
+  
+      // Para outros erros, retorna uma mensagem genérica
       return response.status(500).json({
         message: 'Erro ao criar o usuário.',
         error: error.message,
       });
     }
   }
+  
+  
+
 
   /**
    * Atualização dos dados de um usuário

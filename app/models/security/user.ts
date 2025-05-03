@@ -1,12 +1,13 @@
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
-import { column, beforeSave, belongsTo } from '@adonisjs/lucid/orm'
+import { column, beforeSave, belongsTo, manyToMany } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { AccessToken, DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import AccessProfile from './accessprofile.js'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import type { BelongsTo, ManyToMany } from '@adonisjs/lucid/types/relations'
 import Organic from './organic.js'
 import LifecycleAbstractModel from '../utility/LifeclycleAbstractModel.js'
+import Menu from './menu.js'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -15,9 +16,8 @@ const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
 
 /*
 * Model que representa um 'Utilizador'
-* Gautchi R. Chambe (chambegautchi@gmail.com)
 */
-export default class User extends compose(LifecycleAbstractModel, AuthFinder) {
+export default class user extends compose(LifecycleAbstractModel, AuthFinder) {
 
   currentAccessToken?: AccessToken;
 
@@ -61,15 +61,18 @@ export default class User extends compose(LifecycleAbstractModel, AuthFinder) {
   declare accessProfile: BelongsTo<typeof AccessProfile>
 
   @beforeSave()
-  static async hashPassword(user: User) {
+  static async hashPassword(user: user) {
     if (user.$dirty.password) {
-      /* O codco abaixo esta comentado por que ate este ponto o resultado é a password encriptada como Hash*/
-      //console.log('user1 create .password_plan', user.password);
-      //console.log('user1 create verified password_plan', await hash.verify(user.password, "sebadora123"))
+      // Se necessário, descomente a linha abaixo para realizar a criptografia da senha
       // user.password = await hash.make(user.password)
-      // console.log('user1 create verified hash', await hash.verify(user.password, "sebadora123"))
     }
   }
 
-  static accessTokens = DbAccessTokensProvider.forModel(User)
+  static accessTokens = DbAccessTokensProvider.forModel(user)
+
+  // Relacionamento many-to-many com Menu
+  @manyToMany(() => Menu, {
+    pivotTable: 'menu_user', // nome da tabela pivot
+  })
+  declare menus: ManyToMany<typeof Menu>
 }
