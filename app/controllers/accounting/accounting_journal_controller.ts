@@ -138,7 +138,7 @@ export default class AccountingJournalController {
   }
 
   async fetchAllAccountingJournal({ response }: HttpContext) {
-    return response.ok(await this.accountingJournalService.fetchAllAccountingJournal());
+    return response.ok(await this.accountingJournalService.fetchAllAccountingJournals());
   }
 
   async fetchAllAccountingJournalByJournalNumber({ request, response }: HttpContext) {

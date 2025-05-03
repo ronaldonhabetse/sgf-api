@@ -558,11 +558,12 @@ export default class AccountingJournalService {
 
 
 
-    public async fetchAllAccountingJournal() {
-        return await AccountingJournal.query()
-            .preload('documents')
-            .first();
-    }
+    public async fetchAllAccountingJournals() {
+        return await AccountingJournal.query().preload('documents');
+
+      }
+      
+      
 
     public async fetchAllAccountingJournalByJournalNumber(journalNumber: string) {
         return await AccountingJournal.query().where('journalNumber', journalNumber)
